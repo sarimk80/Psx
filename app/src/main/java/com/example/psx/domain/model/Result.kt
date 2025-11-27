@@ -5,3 +5,4 @@ sealed class StockResult<out T>{
     data class Error(val message: String) : StockResult<Nothing>()
     object Loading : StockResult<Nothing>()
 }
+

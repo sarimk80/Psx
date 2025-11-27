@@ -1,6 +1,8 @@
 package com.example.psx.views
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,14 +58,16 @@ import com.example.psx.domain.model.TopStocks
 
 
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.input.pointer.pointerInput
 
-import androidx.compose.runtime.*
 import com.example.psx.ui.theme.FinancialColors
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HotStocks() {
+fun HotStocks(
+    onTickerClick: (String, String) -> Unit = { _, _ -> }
+) {
     val viewModel: HomeViewModel = hiltViewModel()
     val uiState by viewModel.uiState
 
@@ -90,7 +94,7 @@ fun HotStocks() {
             when {
                 uiState.isLoading -> LoadingState()
                 uiState.error != null -> ErrorState(error = uiState.error!!, onRetry = { viewModel.getGainersAndLosers() })
-                uiState.stocks != null -> MarketMoversContent(uiState.stocks!!)
+                uiState.stocks != null -> MarketMoversContent(uiState.stocks!!, onTickerClick = onTickerClick)
                 else -> LoadingState()
             }
         }
@@ -98,7 +102,7 @@ fun HotStocks() {
 }
 
 @Composable
-fun MarketMoversContent(root: Root) {
+fun MarketMoversContent(root: Root,onTickerClick: (String, String) -> Unit ) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("Top Gainers", "Top Losers")
 
@@ -136,12 +140,14 @@ fun MarketMoversContent(root: Root) {
             0 -> StockList(
                 stocks = root.data.topGainers,
                 isGainer = true,
-                title = "Top Gainers"
+                title = "Top Gainers",
+                onTickerClick = onTickerClick
             )
             1 -> StockList(
                 stocks = root.data.topLosers,
                 isGainer = false,
-                title = "Top Losers"
+                title = "Top Losers",
+                onTickerClick = onTickerClick
             )
         }
     }
@@ -176,7 +182,8 @@ fun MarketStatItem(
 fun StockList(
     stocks: List<TopStocks>,
     isGainer: Boolean,
-    title: String
+    title: String,
+    onTickerClick: (String, String) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -197,6 +204,7 @@ fun StockList(
                 stock = stock,
                 isGainer = isGainer,
                 rank = index + 1,
+                onTickerClick = onTickerClick,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
             )
         }
@@ -208,6 +216,7 @@ fun StockItem(
     stock: TopStocks,
     isGainer: Boolean,
     rank: Int,
+    onTickerClick: (String, String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val priceColor = if (isGainer) FinancialColors.PositiveGreen else FinancialColors.NegativeRed
@@ -218,7 +227,9 @@ fun StockItem(
     }
 
     Card(
-        modifier = modifier,
+        modifier = modifier.clickable {
+            onTickerClick("REG",stock.symbol)
+        },
         elevation = CardDefaults.cardElevation(2.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,

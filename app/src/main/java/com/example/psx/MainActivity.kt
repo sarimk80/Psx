@@ -1,5 +1,6 @@
 package com.example.psx
 
+import TickerDetailView
 import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -33,12 +34,15 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHost
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import com.example.psx.ui.theme.PsxTheme
 import com.example.psx.views.Home
 import com.example.psx.views.HotStocks
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.psx.views.SearchView
 import com.example.psx.views.SectorView
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.HiltAndroidApp
@@ -59,7 +63,15 @@ enum class Destination(
     HotStocks("hot stocks","HotStocks",Icons.AutoMirrored.Filled.TrendingUp,"Hot stocks"),
     Sectors("sector","Sectors",Icons.Default.PieChart,"Sectors"),
     Portfolio("portfolio","Portfolio",Icons.Default.AccountBalanceWallet,"Portfolio"),
-    Search("Search","Search",Icons.Default.Search,"Search")
+    Search("Search","Search",Icons.Default.Search,"Search");
+
+    companion object {
+        const val TICKER_DETAIL_ROUTE = "ticker_detail/{type}/{symbol}"
+
+        fun getTickerDetailRoute(type: String, symbol: String): String {
+            return "ticker_detail/$type/$symbol"
+        }
+    }
 }
 
 
@@ -73,20 +85,68 @@ fun AppNavHost(
         navController,
         startDestination = startDestination.route
     ){
-        Destination.entries.forEach { destination ->
-
-        composable(destination.route){
-            when(destination){
-                Destination.Home -> Home()
-                Destination.HotStocks -> HotStocks()
-                Destination.Sectors -> SectorView()
-                Destination.Portfolio -> HotStocks()
-                Destination.Search -> Home()
-
-            }
+        composable(Destination.Home.route){
+            Home()
+        }
+        composable(Destination.HotStocks.route){
+            HotStocks(
+                onTickerClick = {type,symbol ->
+                    navController.navigate("ticker_detail/$type/$symbol")
+                }
+            )
+        }
+        composable(Destination.Sectors.route){
+            SectorView()
+        }
+        composable(Destination.Portfolio.route){
+            Home()
+        }
+        composable(Destination.Search.route){
+            SearchView(
+                onTickerClick = {type,symbol ->
+                    navController.navigate("ticker_detail/$type/$symbol")
+                }
+            )
         }
 
+        composable(
+            route = "ticker_detail/{type}/{symbol}",
+            arguments = listOf(
+                navArgument("type") {
+                    type = NavType.StringType
+                    defaultValue = "REG" // Default market type
+                },
+                navArgument("symbol") {
+                    type = NavType.StringType
+                }
+            )
+        ){ backStackEntry ->
+            val type = backStackEntry.arguments?.getString("type") ?: "REG"
+            val symbol = backStackEntry.arguments?.getString("symbol") ?: ""
+
+            TickerDetailView(
+                type = type,
+                symbol = symbol,
+                onBack = { navController.popBackStack() }
+            )
+
         }
+
+
+//        Destination.entries.forEach { destination ->
+//
+//        composable(destination.route){
+//            when(destination){
+//                Destination.Home -> Home()
+//                Destination.HotStocks -> HotStocks()
+//                Destination.Sectors -> SectorView()
+//                Destination.Portfolio -> HotStocks()
+//                Destination.Search -> Home()
+//
+//            }
+//        }
+//
+//        }
     }
 }
 
