@@ -3,6 +3,8 @@ package com.example.psx.domain.repo
 import com.example.psx.domain.model.Companies
 import com.example.psx.domain.model.Dividend
 import com.example.psx.domain.model.Fundamentals
+import com.example.psx.domain.model.KLineModel
+import com.example.psx.domain.model.MarketDividend
 import com.example.psx.domain.model.Root
 import com.example.psx.domain.model.Sector
 import com.example.psx.domain.model.StockResult
@@ -21,6 +23,9 @@ interface StockRepo {
 
     suspend fun getCompanyDividend(symbol: String):StockResult<Dividend>
 
-    ///api/symbols
     suspend fun getSymbolList():StockResult<SymbolsModel>
+
+    suspend fun getMarketDividend():StockResult<List<MarketDividend>>
+
+    suspend fun getKLineModel(symbol: String,timeFrame:String):StockResult<KLineModel>
 }

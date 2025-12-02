@@ -3,7 +3,8 @@ package com.example.psx.domain.usecase
 import com.example.psx.domain.model.Companies
 import com.example.psx.domain.model.Dividend
 import com.example.psx.domain.model.Fundamentals
-import com.example.psx.domain.model.Root
+import com.example.psx.domain.model.KLineModel
+import com.example.psx.domain.model.MarketDividend
 import com.example.psx.domain.model.StockResult
 import com.example.psx.domain.model.SymbolsModel
 import com.example.psx.domain.model.Ticker
@@ -51,6 +52,24 @@ class SymbolListUseCase@Inject constructor(
 ) {
     suspend operator fun invoke(): StockResult<SymbolsModel> {
         return  repo.getSymbolList()
+    }
+
+}
+
+class MarketDividendUseCase@Inject constructor(
+    private  val repo: StockRepo
+) {
+    suspend operator fun invoke(): StockResult<List<MarketDividend>> {
+        return  repo.getMarketDividend()
+    }
+
+}
+
+class KLineModelUseCase@Inject constructor(
+    private  val repo: StockRepo
+) {
+    suspend operator fun invoke(symbol: String,timeFrame:String): StockResult<KLineModel> {
+        return  repo.getKLineModel(symbol,timeFrame)
     }
 
 }

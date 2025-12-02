@@ -50,10 +50,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.compose.financialGreen
+import com.example.compose.financialRed
 import com.example.psx.domain.model.Datum
 import com.example.psx.domain.model.Sector
 import com.example.psx.presentation.viewModel.SectorViewModel
-import com.example.psx.ui.theme.FinancialColors
 
 @Composable
 fun SectorView() {
@@ -107,20 +108,17 @@ fun SectorTopAppBar(onRefresh: () -> Unit) {
                         text = "Market Sectors",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimary
                     )
                     Text(
                         text = "Sector-wise performance",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
                     )
                 }
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.onPrimary,
-            actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface
         ),
         actions = {
             IconButton(onClick = onRefresh) {
@@ -208,7 +206,7 @@ fun SectorMarketSummary(sectorData: Map<String, Datum>) {
                 SectorMetricItem(
                     title = "Overall Performance",
                     value = "${avgPerformance.format(2)}%",
-                    color = if (avgPerformance >= 0) FinancialColors.PositiveGreen else FinancialColors.NegativeRed,
+                    color = if (avgPerformance >= 0) financialGreen else financialRed,
                     icon = if (avgPerformance >= 0) Icons.Default.TrendingUp else Icons.Default.TrendingDown
                 )
 
@@ -230,13 +228,13 @@ fun SectorMarketSummary(sectorData: Map<String, Datum>) {
                 SectorStatItem(
                     title = "Gainers",
                     value = totalGainers.toString(),
-                    color = FinancialColors.PositiveGreen
+                    color = financialGreen
                 )
 
                 SectorStatItem(
                     title = "Losers",
                     value = totalLosers.toString(),
-                    color = FinancialColors.NegativeRed
+                    color = financialRed
                 )
 
                 SectorStatItem(
@@ -256,11 +254,11 @@ fun SectorItem(
     modifier: Modifier = Modifier
 ) {
     val isPositive = data.avgChangePercent >= 0
-    val performanceColor = if (isPositive) FinancialColors.PositiveGreen else FinancialColors.NegativeRed
+    val performanceColor = if (isPositive) financialGreen else financialRed
     val containerColor = if (isPositive) {
-        FinancialColors.PositiveGreen.copy(alpha = 0.1f)
+        financialGreen.copy(alpha = 0.1f)
     } else {
-        FinancialColors.NegativeRed.copy(alpha = 0.1f)
+        financialRed.copy(alpha = 0.1f)
     }
 
     Card(
@@ -307,12 +305,12 @@ fun SectorItem(
                     SectorMiniStat(
                         title = "Gainers",
                         value = data.gainers.toString(),
-                        color = FinancialColors.PositiveGreen
+                        color = financialGreen
                     )
                     SectorMiniStat(
                         title = "Losers",
                         value = data.losers.toString(),
-                        color = FinancialColors.NegativeRed
+                        color = financialRed
                     )
                 }
             }
@@ -477,7 +475,7 @@ fun SectorErrorState(error: String, onRetry: () -> Unit) {
             Icon(
                 imageVector = Icons.Default.ErrorOutline,
                 contentDescription = "Error",
-                tint = FinancialColors.NegativeRed,
+                tint = financialRed,
                 modifier = Modifier.size(64.dp)
             )
             Text(

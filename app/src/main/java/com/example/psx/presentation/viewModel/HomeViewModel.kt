@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val gainersUseCase: GainersUseCase
+    private val gainersUseCase: GainersUseCase,
 ) : ViewModel(){
 
     private val _uiState = mutableStateOf(HomeUiState())

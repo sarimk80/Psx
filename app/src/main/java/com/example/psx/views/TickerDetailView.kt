@@ -48,7 +48,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.psx.domain.model.CompaniesData
-import com.example.psx.ui.theme.FinancialColors
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
@@ -57,6 +56,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.compose.financialGreen
+import com.example.compose.financialGrey
+import com.example.compose.financialRed
+import com.example.compose.financialWarning
 import com.example.psx.domain.model.DividendData
 import com.example.psx.domain.model.FundamentalData
 import com.example.psx.domain.model.KeyPerson
@@ -71,6 +74,7 @@ fun TickerDetailView(type: String, symbol: String, onBack: () -> Unit) {
 
     LaunchedEffect(key1 = symbol) {
         viewModel.getTickerAndCompanyDetail(type = type, symbol = symbol)
+        viewModel.getKlineData(symbol = symbol)
     }
 
     Scaffold(
@@ -139,7 +143,7 @@ fun TickerErrorState(error: String, onRetry: () -> Unit) {
             Icon(
                 imageVector = Icons.Default.ErrorOutline,
                 contentDescription = "Error",
-                tint = FinancialColors.NegativeRed,
+                tint = financialRed,
                 modifier = Modifier.size(64.dp)
             )
             Text(
@@ -226,6 +230,8 @@ fun CombinedTickerDetailContent(
         // Quick Stats Header - Always visible
         QuickStatsHeader(tickerData, fundamentalData)
 
+        ChartView()
+
         TabRow(
             selectedTabIndex = selectedTab,
             containerColor = MaterialTheme.colorScheme.surface,
@@ -258,9 +264,17 @@ fun CombinedTickerDetailContent(
 }
 
 @Composable
+fun ChartView(){
+
+
+
+
+}
+
+@Composable
 fun QuickStatsHeader(tickerData: TickerData, fundamentalData: FundamentalData) {
     val isPositive = tickerData.change >= 0
-    val priceColor = if (isPositive) FinancialColors.PositiveGreen else FinancialColors.NegativeRed
+    val priceColor = if (isPositive) financialGreen else financialRed
 
     Card(
         modifier = Modifier
@@ -282,7 +296,7 @@ fun QuickStatsHeader(tickerData: TickerData, fundamentalData: FundamentalData) {
             // Price and Change
             Column {
                 Text(
-                    text = "$${tickerData.price}",
+                    text = "${tickerData.price}",
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -349,8 +363,7 @@ fun OverviewTab(tickerData: TickerData, companyData: CompaniesData, fundamentalD
 fun CompanyOverviewCard(companyData: CompaniesData) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
+            .fillMaxWidth(),
         elevation = CardDefaults.cardElevation(4.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -388,8 +401,7 @@ private fun FinancialMetricRow(label: String, value: String) {
 fun BidAskCard(tickerData: TickerData) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
+            .fillMaxWidth(),
         elevation = CardDefaults.cardElevation(4.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -426,8 +438,8 @@ fun BidAskCard(tickerData: TickerData) {
 fun TradingStatsCard(tickerData: TickerData) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
+            .fillMaxWidth(),
+
         elevation = CardDefaults.cardElevation(4.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -442,7 +454,7 @@ fun TradingStatsCard(tickerData: TickerData) {
             )
             Spacer(modifier = Modifier.height(16.dp))
             TradingStatRow("Price", "${tickerData.price}")
-            TradingStatRow("Change", "${tickerData.change} (${tickerData.changePercent}%)")
+            TradingStatRow("Change", "${"%.2f".format(tickerData.change)} (${tickerData.changePercent}%)")
             TradingStatRow("Volume", "${tickerData.volume}")
             TradingStatRow("High/Low", "${tickerData.high} / ${tickerData.low}")
             TradingStatRow("Trades", "${tickerData.trades}")
@@ -634,8 +646,8 @@ fun HighLowSection(tickerData: TickerData) {
             // Day High
             MarketDataItem(
                 title = "Day High",
-                value = "$${tickerData.high}",
-                valueColor = FinancialColors.PositiveGreen,
+                value = "${tickerData.high}",
+                valueColor = financialGreen,
                 icon = Icons.Default.TrendingUp,
                 trend = "High"
             )
@@ -645,7 +657,7 @@ fun HighLowSection(tickerData: TickerData) {
             MarketDataItem(
                 title = "Range",
                 value = "%.2f".format(rangePercent),
-                valueColor = FinancialColors.NeutralGray,
+                valueColor = financialGrey,
                 icon = Icons.Default.ShowChart,
                 trend = "Volatility"
             )
@@ -653,8 +665,8 @@ fun HighLowSection(tickerData: TickerData) {
             // Day Low
             MarketDataItem(
                 title = "Day Low",
-                value = "$${tickerData.low}",
-                valueColor = FinancialColors.NegativeRed,
+                value = "${tickerData.low}",
+                valueColor = financialRed,
                 icon = Icons.Default.TrendingDown,
                 trend = "Low"
             )
@@ -666,77 +678,6 @@ fun HighLowSection(tickerData: TickerData) {
     }
 }
 
-//@Composable
-//fun RangeProgressBar(tickerData: TickerData) {
-//    val range = tickerData.high - tickerData.low
-//    val currentPosition = tickerData.price - tickerData.low
-//    val progress = if (range > 0) (currentPosition / range).coerceIn(0.0, 1.0) else 0.5f
-//
-//    Column {
-//        // Progress bar background
-//        Box(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .height(6.dp)
-//                .background(
-//                    color = MaterialTheme.colorScheme.surfaceVariant,
-//                    shape = RoundedCornerShape(3.dp)
-//                )
-//        ) {
-//            // Progress fill
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxWidth(progress)
-//                    .height(6.dp)
-//                    .background(
-//                        color = if (progress > 0.5) FinancialColors.PositiveGreen else FinancialColors.NegativeRed,
-//                        shape = RoundedCornerShape(3.dp)
-//                    )
-//            )
-//
-//            // Current price indicator
-//            Box(
-//                modifier = Modifier
-//                    .offset(x = Modifier.fillMaxWidth(progress).width - 4.dp)
-//                    .size(12.dp)
-//                    .background(
-//                        color = MaterialTheme.colorScheme.surface,
-//                        shape = CircleShape
-//                    )
-//                    .border(
-//                        width = 2.dp,
-//                        color = MaterialTheme.colorScheme.primary,
-//                        shape = CircleShape
-//                    )
-//            )
-//        }
-//
-//        Spacer(modifier = Modifier.height(4.dp))
-//
-//        // Range labels
-//        Row(
-//            modifier = Modifier.fillMaxWidth(),
-//            horizontalArrangement = Arrangement.SpaceBetween
-//        ) {
-//            Text(
-//                text = "$${tickerData.low.format(2)}",
-//                style = MaterialTheme.typography.caption,
-//                color = MaterialTheme.colorScheme.onSurfaceVariant
-//            )
-//            Text(
-//                text = "Current",
-//                style = MaterialTheme.typography.caption,
-//                color = MaterialTheme.colorScheme.primary,
-//                fontWeight = FontWeight.Medium
-//            )
-//            Text(
-//                text = "$${tickerData.high.format(2)}",
-//                style = MaterialTheme.typography.caption,
-//                color = MaterialTheme.colorScheme.onSurfaceVariant
-//            )
-//        }
-//    }
-//}
 
 @Composable
 fun VolumeTradesSection(tickerData: TickerData) {
@@ -772,7 +713,7 @@ fun VolumeTradesSection(tickerData: TickerData) {
             MarketDataItem(
                 title = "Avg. Trade",
                 value = formatLargeNumber((tickerData.volume / max(tickerData.trades, 1)).toLong()),
-                valueColor = FinancialColors.NeutralGray,
+                valueColor = financialGrey,
                 icon = Icons.Default.Calculate,
                 trend = "Size"
             )
@@ -805,16 +746,16 @@ fun AdditionalMarketData(tickerData: TickerData) {
             InfoChip(
                 label = tickerData.st,
                 backgroundColor = when (tickerData.st.uppercase()) {
-                    "OPEN" -> FinancialColors.PositiveGreen.copy(alpha = 0.1f)
-                    "CLOSED" -> FinancialColors.NegativeRed.copy(alpha = 0.1f)
-                    "HALTED" -> FinancialColors.Warning.copy(alpha = 0.1f)
-                    else -> FinancialColors.NeutralGray.copy(alpha = 0.1f)
+                    "OPEN" -> financialGreen.copy(alpha = 0.1f)
+                    "CLOSED" -> financialRed.copy(alpha = 0.1f)
+                    "HALTED" -> financialWarning.copy(alpha = 0.1f)
+                    else -> financialGrey.copy(alpha = 0.1f)
                 },
                 textColor = when (tickerData.st.uppercase()) {
-                    "OPEN" -> FinancialColors.PositiveGreen
-                    "CLOSED" -> FinancialColors.NegativeRed
-                    "HALTED" -> FinancialColors.Warning
-                    else -> FinancialColors.NeutralGray
+                    "OPEN" -> financialGreen
+                    "CLOSED" -> financialRed
+                    "HALTED" -> financialWarning
+                    else -> financialGrey
                 }
             )
         }
@@ -828,7 +769,7 @@ fun AdditionalMarketData(tickerData: TickerData) {
         ) {
             AdditionalMetricItem(
                 title = "Value Traded",
-                value = "$${formatLargeNumber(tickerData.value.toLong())}"
+                value = "${formatLargeNumber(tickerData.value.toLong())}"
             )
 
             AdditionalMetricItem(
@@ -1031,17 +972,17 @@ fun FundamentalOverviewCard(fundamentalData: FundamentalData) {
                 FundamentalMetricItem(
                     title = "P/E Ratio",
                     value = "%.6f".format(fundamentalData.peRatio),
-                    color = if (fundamentalData.peRatio < 25) FinancialColors.PositiveGreen else FinancialColors.NegativeRed
+                    color = if (fundamentalData.peRatio < 25) financialGreen else financialRed
                 )
                 FundamentalMetricItem(
                     title = "Div Yield",
                     value = "%.2f".format(fundamentalData.dividendYield) ,
-                    color = if (fundamentalData.dividendYield > 2) FinancialColors.PositiveGreen else FinancialColors.NeutralGray
+                    color = if (fundamentalData.dividendYield > 2) financialGreen else financialRed
                 )
                 FundamentalMetricItem(
                     title = "Year Change",
                     value = "%.2f".format(fundamentalData.yearChange) ,
-                    color = if (fundamentalData.yearChange >= 0) FinancialColors.PositiveGreen else FinancialColors.NegativeRed
+                    color = if (fundamentalData.yearChange >= 0) financialGreen else financialRed
                 )
             }
         }
@@ -1162,10 +1103,10 @@ fun DividendItem(dividend: DividendData) {
 
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = "$${dividend.amount}",
+                    text = "${dividend.amount}",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold,
-                    color = FinancialColors.PositiveGreen
+                    color = financialGreen
                 )
                 Text(
                     text = "Per Share",
@@ -1234,7 +1175,7 @@ fun PerformanceMetricRow(title: String, value: String, isPositive: Boolean) {
             text = value,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
-            color = if (isPositive) FinancialColors.PositiveGreen else FinancialColors.NegativeRed
+            color = if (isPositive) financialGreen else financialRed
         )
     }
 }

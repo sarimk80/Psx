@@ -10,8 +10,10 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 
@@ -19,11 +21,19 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
+    val client = OkHttpClient.Builder()
+        .connectTimeout(50, TimeUnit.SECONDS) // Set connection timeout to 30 seconds
+        .readTimeout(40, TimeUnit.SECONDS)    // Set read timeout to 20 seconds
+        .writeTimeout(40, TimeUnit.SECONDS)   // Set write timeout to 25 seconds
+        .callTimeout(60, TimeUnit.SECONDS)    // Set overall call timeout to 40 seconds
+        .build()
+
     @Provides
     @Singleton
     fun providerStockApi():StockApi{
         return Retrofit.Builder()
             .baseUrl("https://psxterminal.com/")
+            .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(StockApi::class.java)

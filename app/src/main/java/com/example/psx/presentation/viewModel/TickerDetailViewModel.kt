@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.psx.domain.model.Companies
 import com.example.psx.domain.model.Dividend
 import com.example.psx.domain.model.Fundamentals
+import com.example.psx.domain.model.KLineModel
+import com.example.psx.domain.model.MarketDividend
 import com.example.psx.domain.model.Root
 import com.example.psx.domain.model.StockResult
 import com.example.psx.domain.model.Ticker
@@ -14,6 +16,8 @@ import com.example.psx.domain.usecase.CompanyDividendUseCase
 import com.example.psx.domain.usecase.CompanyFundamentalUseCase
 import com.example.psx.domain.usecase.CompanyUseCase
 import com.example.psx.domain.usecase.GainersUseCase
+import com.example.psx.domain.usecase.KLineModelUseCase
+import com.example.psx.domain.usecase.MarketDividendUseCase
 import com.example.psx.domain.usecase.TickerUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -27,11 +31,17 @@ class TickerDetailViewModel@Inject constructor(
     private val getTickerDetail: TickerUseCase,
     private val getCompanyDetail:CompanyUseCase,
     private val getCompanyFundamental:CompanyFundamentalUseCase,
-    private val getCompanyDividend: CompanyDividendUseCase
+    private val getCompanyDividend: CompanyDividendUseCase,
+    private val marketDividendUseCase: MarketDividendUseCase,
+    private val getKLineModelUseCase: KLineModelUseCase
+
 ): ViewModel() {
 
     private val _uiState = mutableStateOf(TickerDetailUiState())
     val uiState: State<TickerDetailUiState> = _uiState
+
+    private val _uiKlineState = mutableStateOf(KLineUiState())
+    val uiKlineState: State<KLineUiState> = _uiKlineState
 
     fun getTickerAndCompanyDetail(type:String,symbol:String){
         viewModelScope.launch {
@@ -41,8 +51,10 @@ class TickerDetailViewModel@Inject constructor(
                 val companyDetail = async { getCompanyDetail(symbol) }
                 val companyFundamental = async { getCompanyFundamental(symbol) }
                 val companyDividend = async { getCompanyDividend(symbol) }
+                val kLine = async { getKLineModelUseCase(symbol,"1h") }
 
-                val (tickerResult,companyResult,fundamentalResult,dividendResult) = awaitAll(tickerDetail,companyDetail,companyFundamental,companyDividend)
+                val (tickerResult,companyResult,fundamentalResult,dividendResult,kLineResult) =
+                    awaitAll(tickerDetail,companyDetail,companyFundamental,companyDividend,kLine)
 
                 val ticker = when(tickerResult){
                     is StockResult.Success -> tickerResult.data
@@ -75,6 +87,8 @@ class TickerDetailViewModel@Inject constructor(
                         _uiState.value = _uiState.value.copy(error = dividendResult.message)
                     }
                 }
+
+
 
                 _uiState.value = _uiState.value.copy(
                     stocks = ticker as Ticker,
@@ -148,6 +162,70 @@ class TickerDetailViewModel@Inject constructor(
             }
         }
     }
+
+    fun getMarketDividend() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isDividendLoading = true, error = null)
+            when (val result = marketDividendUseCase()) {
+                is StockResult.Success -> {
+                    _uiState.value = _uiState.value.copy(
+                        marketDividend = result.data,
+                        isDividendLoading = false,
+                        error = null
+                    )
+                }
+                is StockResult.Error -> {
+                    _uiState.value = _uiState.value.copy(
+                        isDividendLoading = false,
+                        error = result.message
+                    )
+                }
+                is StockResult.Loading -> {
+                    _uiState.value = _uiState.value.copy(isDividendLoading = true)
+                }
+            }
+        }
+    }
+
+
+    fun getKlineData(symbol: String, interval: String = "1h") {
+        viewModelScope.launch {
+            _uiKlineState.value = _uiKlineState.value.copy(
+                isLoading = true,
+                error = null
+            )
+
+            try {
+                val result = getKLineModelUseCase(symbol, interval)
+
+                when (result) {
+                    is StockResult.Success -> {
+                        _uiKlineState.value = _uiKlineState.value.copy(
+                            kLine = result.data,
+                            isLoading = false,
+                            error = null
+                        )
+                    }
+                    is StockResult.Error -> {
+                        _uiKlineState.value = _uiKlineState.value.copy(
+                            isLoading = false,
+                            error = result.message ?: "Failed to load kline data"
+                        )
+                    }
+                    is StockResult.Loading -> {
+                        // Loading state already set
+                    }
+                }
+            } catch (e: Exception) {
+                _uiKlineState.value = _uiKlineState.value.copy(
+                    isLoading = false,
+                    error = "Network error: ${e.message}"
+                )
+            }
+        }
+    }
+
+
 }
 
 
@@ -157,6 +235,16 @@ data class TickerDetailUiState(
     val fundamentals: Fundamentals?=null,
     val listOfTicker:List<Ticker>? = null,
     val dividend: Dividend? = null,
-    val isLoading: Boolean = false,
-    val error: String? = null
+    val marketDividend:List<MarketDividend>? = null,
+    val isLoading: Boolean = true,
+    val error: String? = null,
+    val isDividendLoading:Boolean = true,
+)
+
+
+data class KLineUiState(
+    val isLoading:Boolean = true,
+    val error: String? = null,
+    val kLine:KLineModel? = null,
+
 )

@@ -1,0 +1,18 @@
+package com.example.psx.domain.repo
+
+import com.example.psx.domain.DAO.PortfolioModelDAO
+import com.example.psx.domain.model.PortfolioModel
+import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
+
+class PortfolioRepo @Inject constructor(
+    private val portfolioModelDAO: PortfolioModelDAO
+) {
+    val getAllSymbols: Flow<List<PortfolioModel>> = portfolioModelDAO.getAllData()
+
+    suspend fun insertSymbol(model:PortfolioModel) =
+        portfolioModelDAO.insertPortfolio(model)
+
+    suspend fun deleteSymbol(model:PortfolioModel)=
+        portfolioModelDAO.deleteModel(model)
+}

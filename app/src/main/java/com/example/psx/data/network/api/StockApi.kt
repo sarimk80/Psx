@@ -4,12 +4,15 @@ import com.example.psx.data.network.dot.RootDot
 import com.example.psx.domain.model.Companies
 import com.example.psx.domain.model.Dividend
 import com.example.psx.domain.model.Fundamentals
+import com.example.psx.domain.model.KLineModel
+import com.example.psx.domain.model.MarketDividend
 import com.example.psx.domain.model.Root
 import com.example.psx.domain.model.Sector
 import com.example.psx.domain.model.SymbolsModel
 import com.example.psx.domain.model.Ticker
 import retrofit2.http.GET
 import retrofit2.http.Path
+import retrofit2.http.Url
 
 interface StockApi {
     //https://psxterminal.com/
@@ -33,4 +36,10 @@ interface StockApi {
 
     @GET("/api/symbols")
     suspend fun getSymbolList():SymbolsModel
+
+    @GET
+    suspend fun getMarketData(@Url url: String):List<MarketDividend>
+
+    @GET("/api/klines/{symbol}/{timeframe}")
+    suspend fun getKLineModel(@Path("symbol") symbol:String, @Path("timeframe") timeframe:String):KLineModel
 }

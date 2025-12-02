@@ -7,10 +7,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Check
@@ -18,7 +22,10 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
@@ -32,6 +39,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -42,6 +50,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.psx.views.PortfolioView
 import com.example.psx.views.SearchView
 import com.example.psx.views.SectorView
 import dagger.hilt.android.AndroidEntryPoint
@@ -99,7 +108,11 @@ fun AppNavHost(
             SectorView()
         }
         composable(Destination.Portfolio.route){
-            Home()
+            PortfolioView(
+                onTickerClick = {type,symbol ->
+                    navController.navigate("ticker_detail/$type/$symbol")
+                }
+            )
         }
         composable(Destination.Search.route){
             SearchView(
@@ -163,9 +176,12 @@ class MainActivity : ComponentActivity() {
             PsxTheme {
                 Scaffold(modifier = Modifier.fillMaxSize(),
                     bottomBar = {
-                        NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
+                        NavigationBar(windowInsets = NavigationBarDefaults.windowInsets,
+                            //contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                            ) {
                         Destination.entries.forEachIndexed { index, destination ->
                             NavigationBarItem(
+                                alwaysShowLabel = false,
                                 selected = selectedDestination.intValue == index,
                                 onClick = {
                                     navController.navigate(route = destination.route)
@@ -176,14 +192,15 @@ class MainActivity : ComponentActivity() {
                                         destination.icon,
                                         contentDescription = destination.contentDescription
                                     )
-                                },
-                                label = {
-                                    Text(destination.label)
                                 }
+//                                label = {
+//                                    Text(destination.label)
+//                                }
                             )
                         }
                     }
-            }
+            },
+
 
                     ) { innerPadding ->
                     AppNavHost(navController,startDestination, modifier = Modifier.padding(innerPadding))

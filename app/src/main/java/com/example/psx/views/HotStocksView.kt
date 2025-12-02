@@ -59,8 +59,9 @@ import com.example.psx.domain.model.TopStocks
 
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.pointer.pointerInput
-
-import com.example.psx.ui.theme.FinancialColors
+import com.example.compose.financialGreen
+import com.example.compose.financialGrey
+import com.example.compose.financialRed
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,8 +81,8 @@ fun HotStocks(
             TopAppBar(
                 title = { Text("Market Movers") },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
                 )
             )
         }
@@ -219,11 +220,11 @@ fun StockItem(
     onTickerClick: (String, String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val priceColor = if (isGainer) FinancialColors.PositiveGreen else FinancialColors.NegativeRed
+    val priceColor = if (isGainer) financialGreen else financialRed
     val containerColor = if (isGainer) {
-        FinancialColors.PositiveGreen.copy(alpha = 0.1f)
+        financialGreen.copy(alpha = 0.1f)
     } else {
-        FinancialColors.NegativeRed.copy(alpha = 0.1f)
+        financialRed.copy(alpha = 0.1f)
     }
 
     Card(
@@ -289,7 +290,7 @@ fun StockItem(
                 horizontalAlignment = Alignment.End
             ) {
                 Text(
-                    text = "$${stock.price.format(2)}",
+                    text = "${stock.price.format(2)}",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -350,17 +351,17 @@ fun MarketOverviewCards(data: GainersData) {
                 MarketStatItem(
                     title = "Gainers",
                     value = data.gainers.toString(),
-                    color = FinancialColors.PositiveGreen
+                    color = financialGreen
                 )
                 MarketStatItem(
                     title = "Losers",
                     value = data.losers.toString(),
-                    color = FinancialColors.NegativeRed
+                    color = financialRed
                 )
                 MarketStatItem(
                     title = "Unchanged",
                     value = data.unchanged.toString(),
-                    color = FinancialColors.NeutralGray
+                    color = financialGrey
                 )
             }
         }

@@ -4,6 +4,8 @@ import com.example.psx.data.network.dot.api.StockApi
 import com.example.psx.domain.model.Companies
 import com.example.psx.domain.model.Dividend
 import com.example.psx.domain.model.Fundamentals
+import com.example.psx.domain.model.KLineModel
+import com.example.psx.domain.model.MarketDividend
 import com.example.psx.domain.model.Root
 import com.example.psx.domain.model.Sector
 import com.example.psx.domain.model.StockResult
@@ -76,6 +78,27 @@ class StockRepository(
     override suspend fun getSymbolList(): StockResult<SymbolsModel> = withContext(dispatcher){
         return@withContext try {
             val result = stockApi.getSymbolList()
+            StockResult.Success(result)
+        }catch (e:Exception){
+            StockResult.Error("Failed${e.toString()}")
+        }
+    }
+
+
+
+    override suspend fun getMarketDividend(): StockResult<List<MarketDividend>> = withContext(dispatcher){
+        return@withContext try {
+            val result = stockApi.getMarketData("https://sarim-pix.hf.space/dividend_history")
+            StockResult.Success(result)
+        }catch (e:Exception){
+            StockResult.Error("Failed${e.toString()}")
+        }
+    }
+
+
+    override suspend fun getKLineModel(symbol:String,timeFrame:String): StockResult<KLineModel> = withContext(dispatcher){
+        return@withContext try {
+            val result = stockApi.getKLineModel(symbol,timeFrame)
             StockResult.Success(result)
         }catch (e:Exception){
             StockResult.Error("Failed${e.toString()}")
