@@ -51,7 +51,7 @@ class TickerDetailViewModel@Inject constructor(
                 val companyDetail = async { getCompanyDetail(symbol) }
                 val companyFundamental = async { getCompanyFundamental(symbol) }
                 val companyDividend = async { getCompanyDividend(symbol) }
-                val kLine = async { getKLineModelUseCase(symbol,"1h") }
+                val kLine = async { getKLineModelUseCase(symbol,"1d") }
 
                 val (tickerResult,companyResult,fundamentalResult,dividendResult,kLineResult) =
                     awaitAll(tickerDetail,companyDetail,companyFundamental,companyDividend,kLine)
@@ -88,6 +88,14 @@ class TickerDetailViewModel@Inject constructor(
                     }
                 }
 
+                val resultKLine = when(kLineResult){
+                    is StockResult.Success -> kLineResult.data
+                    is StockResult.Loading -> null
+                    is StockResult.Error ->{
+                        _uiState.value = _uiState.value.copy(error = kLineResult.message)
+                    }
+                }
+
 
 
                 _uiState.value = _uiState.value.copy(
@@ -95,6 +103,7 @@ class TickerDetailViewModel@Inject constructor(
                     company = company as Companies,
                     fundamentals=fundamental as Fundamentals,
                     dividend = dividend as Dividend,
+                    kLine = resultKLine as KLineModel,
                     isLoading = false,
                     error = null
                 )
@@ -236,6 +245,7 @@ data class TickerDetailUiState(
     val listOfTicker:List<Ticker>? = null,
     val dividend: Dividend? = null,
     val marketDividend:List<MarketDividend>? = null,
+    val kLine:KLineModel? = null,
     val isLoading: Boolean = true,
     val error: String? = null,
     val isDividendLoading:Boolean = true,

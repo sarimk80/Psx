@@ -18,6 +18,6 @@ data class KLineModelData (
     val open: Double,
     val high: Double,
     val low: Double,
-    val close: Long,
+    val close: Double,
     val volume: Long
 )

@@ -180,7 +180,7 @@ fun PortfolioView(
                 }
             }
             when{
-                uiState.isLoading -> Text("Loading")
+                uiState.isLoading -> LoadingState()
                 uiState.error !=null -> Text(uiState.error!!)
                 uiState.listOfStocks!=null -> PortfolioContent(
                     items = uiState.listOfStocks!!,
@@ -391,7 +391,7 @@ fun PortfolioActionButton(
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = if (isInPortfolio) "In Portfolio" else "Add to Portfolio",
+            text = if (isInPortfolio) "Added" else "Add",
             style = MaterialTheme.typography.labelLarge
         )
     }

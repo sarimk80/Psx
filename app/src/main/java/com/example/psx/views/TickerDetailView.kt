@@ -20,7 +20,9 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.Mosque
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.material.icons.filled.SwapVert
@@ -28,8 +30,9 @@ import androidx.compose.material.icons.filled.TrendingDown
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -52,25 +55,76 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.compose.financialGreen
 import com.example.compose.financialGrey
 import com.example.compose.financialRed
 import com.example.compose.financialWarning
+import com.example.compose.primaryLight
 import com.example.psx.domain.model.DividendData
 import com.example.psx.domain.model.FundamentalData
 import com.example.psx.domain.model.KeyPerson
 import com.example.psx.domain.model.TickerData
 import com.example.psx.presentation.viewModel.TickerDetailViewModel
 
+import com.example.psx.domain.model.KLineModelData
+import com.example.psx.presentation.helpers.formatTimestamp
+import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisGuidelineComponent
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisLabelComponent
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisLineComponent
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisTickComponent
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
+import com.patrykandpatrick.vico.compose.common.fill
+import com.patrykandpatrick.vico.core.cartesian.AutoScrollCondition
+import com.patrykandpatrick.vico.core.cartesian.CartesianChart
+import com.patrykandpatrick.vico.core.cartesian.Scroll
+import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianLayerModel
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
+import com.patrykandpatrick.vico.core.cartesian.data.LineCartesianLayerModel
+import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
+import com.patrykandpatrick.vico.core.cartesian.marker.CartesianMarker
+import com.patrykandpatrick.vico.core.cartesian.marker.DefaultCartesianMarker
+import com.patrykandpatrick.vico.core.common.component.TextComponent
+import com.patrykandpatrick.vico.core.common.shader.ShaderProvider
+import com.example.psx.presentation.helpers.formatShortDate
+import com.example.psx.presentation.helpers.formatVolume
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberCandlestickCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianLayerRangeProvider
+import com.patrykandpatrick.vico.core.cartesian.data.candlestickSeries
+import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
+import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
+import com.patrykandpatrick.vico.core.common.component.LineComponent
+import com.patrykandpatrick.vico.core.common.data.ExtraStore
+import com.patrykandpatrick.vico.core.common.shape.Shape
+import kotlin.math.ceil
+import kotlin.math.floor
+import kotlin.math.min
+
 
 @Composable
 fun TickerDetailView(type: String, symbol: String, onBack: () -> Unit) {
+
     val viewModel: TickerDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState
+    val klineUiState by viewModel.uiKlineState
 
     LaunchedEffect(key1 = symbol) {
         viewModel.getTickerAndCompanyDetail(type = type, symbol = symbol)
@@ -94,12 +148,14 @@ fun TickerDetailView(type: String, symbol: String, onBack: () -> Unit) {
                 uiState.isLoading -> TickerLoadingState()
                 uiState.error != null -> TickerErrorState(error = uiState.error!!, onRetry = {viewModel.getTickerAndCompanyDetail(type = type, symbol = symbol)})
                 uiState.stocks != null && uiState.company != null &&
-                        uiState.fundamentals != null && uiState.dividend != null ->
+                        uiState.fundamentals != null && uiState.dividend != null
+                        && uiState.kLine != null ->
                     CombinedTickerDetailContent(
                         tickerData = uiState.stocks!!.data,
                         companyData = uiState.company!!.data,
                         fundamentalData = uiState.fundamentals!!.data,
-                        dividendData = uiState.dividend!!.data
+                        dividendData = uiState.dividend!!.data,
+                        kLineModel = uiState.kLine!!.data
                     )
                 else -> TickerLoadingState()
             }
@@ -107,6 +163,7 @@ fun TickerDetailView(type: String, symbol: String, onBack: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun TickerLoadingState() {
     Box(
@@ -117,10 +174,7 @@ fun TickerLoadingState() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(48.dp),
-                color = MaterialTheme.colorScheme.primary
-            )
+            ContainedLoadingIndicator()
             Text(
                 text = "Loading sector data...",
                 style = MaterialTheme.typography.bodyMedium,
@@ -221,16 +275,15 @@ fun CombinedTickerDetailContent(
     tickerData: TickerData,
     companyData: CompaniesData,
     fundamentalData: FundamentalData,
-    dividendData: List<DividendData>
+    dividendData: List<DividendData>,
+    kLineModel: List<KLineModelData>
 ) {
     var selectedTab by remember { mutableStateOf(0) }
-    val tabs = listOf("Overview", "Company", "Financials", "Dividends")
+    val tabs = listOf("Overview", "Company", "Financials", "Dividends","Chart")
 
     Column(modifier = Modifier.fillMaxSize()) {
         // Quick Stats Header - Always visible
         QuickStatsHeader(tickerData, fundamentalData)
-
-        ChartView()
 
         TabRow(
             selectedTabIndex = selectedTab,
@@ -259,17 +312,115 @@ fun CombinedTickerDetailContent(
             1 -> CompanyTab(companyData)
             2 -> FinancialsTab(fundamentalData)
             3 -> DividendsTab(dividendData, companyData.symbol)
+            4 -> ChartView(kLineModel = kLineModel)
         }
     }
 }
 
 @Composable
-fun ChartView(){
+fun ChartView(
+    kLineModel: List<KLineModelData>
+) {
+    if (kLineModel.isEmpty()) return
+
+    // Sort data chronologically
+    val sortedData = remember(kLineModel) {
+        kLineModel.sortedBy { it.timestamp }
+    }
+
+    val xValues = remember(sortedData) { sortedData.indices.map { it.toFloat() } }
+    val openValues = remember(sortedData) { sortedData.map { it.open.toFloat() } }
+    val closeValues = remember(sortedData) { sortedData.map { it.close.toFloat() } }
+    val highValues = remember(sortedData) { sortedData.map { it.high.toFloat() } }
+    val lowValues = remember(sortedData) { sortedData.map { it.low.toFloat() } }
+
+    // Volume for the second chart
+    val volumeValues = remember(sortedData) { sortedData.map { it.volume.toFloat() } }
+
+    val dateList = remember(sortedData) { sortedData.map { formatShortDate(it.timestamp) } }
+
+    val modelProducerPrice = remember { CartesianChartModelProducer() }
+    val modelProducerVolume = remember { CartesianChartModelProducer() }
+
+    // Push CANDLE data
+    LaunchedEffect(sortedData) {
+        modelProducerPrice.runTransaction {
+            candlestickSeries(
+                x = xValues,
+                opening = openValues,
+                closing = closeValues,
+                high = highValues,
+                low = lowValues,
+            )
+        }
+
+        // Push VOLUME bar data
+//        modelProducerVolume.runTransaction {
+//            columnSeries {
+//                series(volumeValues)
+//            }
+//        }
+    }
+
+    // Format X-axis
+    val dateFormatter = remember(dateList) {
+        CartesianValueFormatter { _, value, _ ->
+            dateList[value.toInt().coerceIn(0, dateList.lastIndex)]
+        }
+    }
+
+    // Price formatting
+    val priceFormatter = remember {
+        CartesianValueFormatter { _, value, _ ->
+            String.format("%.2f", value)
+        }
+    }
 
 
+    val priceRangeProvider = remember {
+        object : CartesianLayerRangeProvider {
+            override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore): Double {
+                val priceMin = min(openValues.min(), closeValues.min())
+                return priceMin * 0.98 // 2% padding
+            }
 
+            override fun getMaxY(minY: Double, maxY: Double, extraStore: ExtraStore): Double {
+                val priceMax = max(openValues.max().toLong(), closeValues.max().toLong())
+                return priceMax * 1.02 // 2% padding
+            }
+        }
+    }
 
+    val scrollState = rememberVicoScrollState(initialScroll = Scroll.Absolute.End)
+
+    Column {
+
+        /** ------------------ PRICE CHART ------------------ */
+        CartesianChartHost(
+            scrollState = scrollState,
+            chart = rememberCartesianChart(
+                rememberCandlestickCartesianLayer(rangeProvider = priceRangeProvider),
+                startAxis = VerticalAxis.rememberStart(
+                    valueFormatter = priceFormatter
+                ),
+                bottomAxis = HorizontalAxis.rememberBottom(
+                    guideline = null,
+                    valueFormatter = dateFormatter,
+                    labelRotationDegrees = 45f,
+                ),
+                marker = DefaultCartesianMarker(
+                    label = rememberTextComponent()
+                )
+            ),
+            modelProducer = modelProducerPrice,
+            modifier = Modifier.height(320.dp),
+        )
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+    }
 }
+
 
 @Composable
 fun QuickStatsHeader(tickerData: TickerData, fundamentalData: FundamentalData) {
@@ -333,11 +484,13 @@ fun QuickStatsHeader(tickerData: TickerData, fundamentalData: FundamentalData) {
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Text(
-                    text = fundamentalData.sector,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.primary
+                Icon(
+                    imageVector = if (fundamentalData.isNonCompliant) Icons.Default.Remove else Icons.Default.Mosque,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(16.dp)
                 )
+
             }
         }
     }
@@ -1188,6 +1341,7 @@ fun formatLargeNumber(value: Long): String {
     if (value < 1_000_000_000_000) return String.format("%.1fB", value / 1_000_000_000.0)
     return String.format("%.1fT", value / 1_000_000_000_000.0)
 }
+
 
 // Update your existing CompanyDetail function to use the new structure
 @Composable
