@@ -18,7 +18,7 @@ interface PortfolioModelDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPortfolio(portfolioModel: PortfolioModel)
 
-    @Delete
-    suspend fun deleteModel(portfolioModel: PortfolioModel)
+    @Query("DELETE FROM portfoliomodel WHERE symbol = :symbol")
+    suspend fun deleteModel(symbol: String)
 
 }

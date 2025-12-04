@@ -13,6 +13,6 @@ class PortfolioRepo @Inject constructor(
     suspend fun insertSymbol(model:PortfolioModel) =
         portfolioModelDAO.insertPortfolio(model)
 
-    suspend fun deleteSymbol(model:PortfolioModel)=
-        portfolioModelDAO.deleteModel(model)
+    suspend fun deleteSymbol(symbol: String)=
+        portfolioModelDAO.deleteModel(symbol)
 }

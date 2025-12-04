@@ -13,6 +13,7 @@ import com.example.psx.domain.usecase.TickerUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
@@ -90,20 +91,20 @@ class PortfolioViewModel @Inject constructor(
     fun addToPortfolioModel(symbol:String){
         viewModelScope.launch {
             try {
-                repo.insertSymbol(PortfolioModel(symbol = symbol))
-                getAllPortfolioTicker()
+                val currentList = portfolioModels.value
+                val exist = currentList.any { it.symbol == symbol }
+                if(exist){
+                    repo.deleteSymbol(symbol)
+                }else{
+                    repo.insertSymbol(PortfolioModel(symbol = symbol))
+                }
+                //delay(5000)
+                //getAllPortfolioTicker()
             }catch (e:Exception){
                 _uiState.value = _uiState.value.copy(
                     error = "Failed to add to watchlist: ${e.message}"
                 )
             }
-        }
-    }
-
-    fun deleteModel(portfolioModel: PortfolioModel){
-        viewModelScope.launch {
-            repo.deleteSymbol(portfolioModel)
-            getAllPortfolioTicker()
         }
     }
 

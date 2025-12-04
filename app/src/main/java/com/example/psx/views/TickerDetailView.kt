@@ -13,10 +13,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.ErrorOutline
@@ -103,6 +107,7 @@ import com.patrykandpatrick.vico.core.common.component.TextComponent
 import com.patrykandpatrick.vico.core.common.shader.ShaderProvider
 import com.example.psx.presentation.helpers.formatShortDate
 import com.example.psx.presentation.helpers.formatVolume
+import com.example.psx.views.StatItem
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberCandlestickCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
 import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
@@ -333,14 +338,27 @@ fun ChartView(
     val closeValues = remember(sortedData) { sortedData.map { it.close.toFloat() } }
     val highValues = remember(sortedData) { sortedData.map { it.high.toFloat() } }
     val lowValues = remember(sortedData) { sortedData.map { it.low.toFloat() } }
-
-    // Volume for the second chart
     val volumeValues = remember(sortedData) { sortedData.map { it.volume.toFloat() } }
 
     val dateList = remember(sortedData) { sortedData.map { formatShortDate(it.timestamp) } }
 
     val modelProducerPrice = remember { CartesianChartModelProducer() }
-    val modelProducerVolume = remember { CartesianChartModelProducer() }
+    val columnVolume = remember { CartesianChartModelProducer() }
+
+
+    // Calculate stats
+    val stats = remember(sortedData) {
+        val current = sortedData.last()
+        val first = sortedData.first()
+        val change = current.close - first.close
+        val changePercent = (change / first.close) * 100
+
+        val highest = sortedData.maxOf { it.high }
+        val lowest = sortedData.minOf { it.low }
+        val avgVolume = sortedData.map { it.volume }.average()
+
+        Triple(change, changePercent, highest to lowest)
+    }
 
     // Push CANDLE data
     LaunchedEffect(sortedData) {
@@ -354,12 +372,12 @@ fun ChartView(
             )
         }
 
-        // Push VOLUME bar data
-//        modelProducerVolume.runTransaction {
-//            columnSeries {
-//                series(volumeValues)
-//            }
-//        }
+        columnVolume.runTransaction {
+            columnSeries {
+                series(volumeValues)
+            }
+        }
+
     }
 
     // Format X-axis
@@ -392,10 +410,27 @@ fun ChartView(
     }
 
     val scrollState = rememberVicoScrollState(initialScroll = Scroll.Absolute.End)
+    val currentData = sortedData.lastOrNull()
 
-    Column {
 
-        /** ------------------ PRICE CHART ------------------ */
+    Column(modifier = Modifier.
+    verticalScroll(rememberScrollState())
+    ) {
+
+        Spacer(modifier = Modifier.height(8.dp))
+        // Stats row
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            StatItem("High", "${String.format("%.2f", stats.third.first)}")
+            StatItem("Low", "${String.format("%.2f", stats.third.second)}")
+            StatItem("Period", "${sortedData.size} days")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
         CartesianChartHost(
             scrollState = scrollState,
             chart = rememberCartesianChart(
@@ -416,7 +451,30 @@ fun ChartView(
             modifier = Modifier.height(320.dp),
         )
 
-        Spacer(modifier = Modifier.height(6.dp))
+
+
+
+//        CartesianChartHost(
+//            scrollState = scrollState,
+//            chart = rememberCartesianChart(
+//               // rememberCandlestickCartesianLayer(rangeProvider = priceRangeProvider),
+//                startAxis = VerticalAxis.rememberStart(
+//                    valueFormatter = priceFormatter
+//                ),
+//                bottomAxis = HorizontalAxis.rememberBottom(
+//                    guideline = null,
+//                    valueFormatter = dateFormatter,
+//                    labelRotationDegrees = 45f,
+//                ),
+//                marker = DefaultCartesianMarker(
+//                    label = rememberTextComponent()
+//                )
+//            ),
+//            modelProducer = columnVolume,
+//            modifier = Modifier.height(320.dp),
+//        )
+
+        Spacer(modifier = Modifier.height(8.dp))
 
     }
 }

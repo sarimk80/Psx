@@ -165,11 +165,8 @@ fun PortfolioView(
                 ) {
                     AddStockBottomSheetContent(
                         onTickerClick = {type, symbol ->
-                            if(portfolioItems.contains(PortfolioModel(symbol = symbol))){
-                                viewModel.deleteModel(PortfolioModel(symbol = symbol))
-                            }else{
-                                viewModel.addToPortfolioModel(symbol)
-                            }
+                            viewModel.addToPortfolioModel(symbol)
+
                             showBottomSheet = false
                         },
                         onDismiss = { showBottomSheet = false },
