@@ -192,10 +192,10 @@ class MainActivity : ComponentActivity() {
                                         destination.icon,
                                         contentDescription = destination.contentDescription
                                     )
+                                },
+                                label = {
+                                    Text(destination.label)
                                 }
-//                                label = {
-//                                    Text(destination.label)
-//                                }
                             )
                         }
                     }

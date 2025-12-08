@@ -116,6 +116,8 @@ import com.patrykandpatrick.vico.core.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.core.cartesian.data.candlestickSeries
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
 import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
+import com.patrykandpatrick.vico.core.common.Fill
+import com.patrykandpatrick.vico.core.common.Insets
 import com.patrykandpatrick.vico.core.common.component.LineComponent
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.patrykandpatrick.vico.core.common.shape.Shape
@@ -363,19 +365,25 @@ fun ChartView(
     // Push CANDLE data
     LaunchedEffect(sortedData) {
         modelProducerPrice.runTransaction {
-            candlestickSeries(
-                x = xValues,
-                opening = openValues,
-                closing = closeValues,
-                high = highValues,
-                low = lowValues,
-            )
-        }
-
-        columnVolume.runTransaction {
-            columnSeries {
-                series(volumeValues)
+            try {
+                candlestickSeries(
+                    x = xValues,
+                    opening = openValues,
+                    closing = closeValues,
+                    high = highValues,
+                    low = lowValues,
+                )
+            }catch (e: Exception){
+                candlestickSeries(
+                    x = xValues,
+                    opening = openValues,
+                    closing = closeValues,
+                    high = highValues,
+                    low = xValues,
+                )
             }
+
+
         }
 
     }
@@ -394,6 +402,36 @@ fun ChartView(
         }
     }
 
+    val markerFormatter = remember(sortedData) {
+        DefaultCartesianMarker.ValueFormatter { context, targets ->
+            // Get the first target (assuming single data point)
+            val target = targets.firstOrNull()
+
+            if (target != null) {
+                val index = target.x.toInt()
+                val data = sortedData.getOrNull(index)
+
+                if (data != null) {
+                    // Return formatted string with volume
+                    val trend = if (data.close >= data.open) "📈" else "📉"
+
+                    buildString {
+                        append("$trend ")
+                        append("C: ${String.format("%.2f", data.close)}- ")
+                        append(" H: ${formatVolume(data.high)}- ")
+                        append(" L: ${formatVolume(data.low)}- ")
+                        append(" O: ${formatVolume(data.open)}- ")
+                        append(" V: ${formatVolume(data.volume.toDouble())}- ")
+                        append(" D: ${formatShortDate(data.timestamp)}")
+                    }
+                } else {
+                    ""
+                }
+            } else {
+                ""
+            }
+        }
+    }
 
     val priceRangeProvider = remember {
         object : CartesianLayerRangeProvider {
@@ -411,6 +449,7 @@ fun ChartView(
 
     val scrollState = rememberVicoScrollState(initialScroll = Scroll.Absolute.End)
     val currentData = sortedData.lastOrNull()
+
 
 
     Column(modifier = Modifier.
@@ -436,48 +475,39 @@ fun ChartView(
             chart = rememberCartesianChart(
                 rememberCandlestickCartesianLayer(rangeProvider = priceRangeProvider),
                 startAxis = VerticalAxis.rememberStart(
-                    valueFormatter = priceFormatter
+                    valueFormatter = priceFormatter,
+                    label = rememberTextComponent(
+                        color = Color.Black,
+                        textSize = 8.sp
+                    )
                 ),
                 bottomAxis = HorizontalAxis.rememberBottom(
+                    label = rememberTextComponent(
+                        color = Color.Black,
+                        textSize = 8.sp
+                    ),
                     guideline = null,
                     valueFormatter = dateFormatter,
                     labelRotationDegrees = 45f,
                 ),
                 marker = DefaultCartesianMarker(
-                    label = rememberTextComponent()
+                    label = rememberTextComponent(
+                        padding = Insets(horizontalDp = 12f, verticalDp = 8f),
+                        color = Color.Black,
+                        textSize = 12.sp,
+                    ),
+                    valueFormatter = markerFormatter,
                 )
             ),
             modelProducer = modelProducerPrice,
-            modifier = Modifier.height(320.dp),
+            modifier = Modifier.height(350.dp),
         )
-
-
-
-
-//        CartesianChartHost(
-//            scrollState = scrollState,
-//            chart = rememberCartesianChart(
-//               // rememberCandlestickCartesianLayer(rangeProvider = priceRangeProvider),
-//                startAxis = VerticalAxis.rememberStart(
-//                    valueFormatter = priceFormatter
-//                ),
-//                bottomAxis = HorizontalAxis.rememberBottom(
-//                    guideline = null,
-//                    valueFormatter = dateFormatter,
-//                    labelRotationDegrees = 45f,
-//                ),
-//                marker = DefaultCartesianMarker(
-//                    label = rememberTextComponent()
-//                )
-//            ),
-//            modelProducer = columnVolume,
-//            modifier = Modifier.height(320.dp),
-//        )
-
         Spacer(modifier = Modifier.height(8.dp))
 
     }
 }
+
+
 
 
 @Composable

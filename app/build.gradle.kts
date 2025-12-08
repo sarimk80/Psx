@@ -62,6 +62,8 @@ dependencies {
     implementation ("com.google.accompanist:accompanist-pager-indicators:0.28.0")
     implementation("androidx.room:room-ktx:2.6.1")
     implementation("androidx.compose.ui:ui-text-google-fonts:1.9.3")
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.27.0")
+
     implementation(libs.vico.compose)
     implementation(libs.vico.views)
     implementation(libs.vico.compose.m3)

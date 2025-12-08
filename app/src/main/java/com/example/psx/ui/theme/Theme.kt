@@ -232,6 +232,7 @@ import com.example.compose.tertiaryDark
 import com.example.compose.tertiaryLight
 import com.example.compose.tertiaryLightHighContrast
 import com.example.ui.theme.AppTypography
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 
 private val lightScheme = lightColorScheme(
@@ -487,9 +488,22 @@ fun PsxTheme(
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
-        darkTheme -> darkScheme
+        darkTheme -> lightScheme
         else -> lightScheme
     }
+
+
+    val systemUiController = rememberSystemUiController()
+    if(darkTheme){
+        systemUiController.setSystemBarsColor(
+            color = Color.Transparent
+        )
+    }else{
+        systemUiController.setSystemBarsColor(
+            color = Color.White
+        )
+    }
+
 
     MaterialTheme(
         colorScheme = colorScheme,
