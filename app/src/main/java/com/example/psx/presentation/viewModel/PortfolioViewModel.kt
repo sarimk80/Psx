@@ -98,6 +98,7 @@ class PortfolioViewModel @Inject constructor(
                 }else{
                     repo.insertSymbol(PortfolioModel(symbol = symbol))
                 }
+                delay(1000)
             }catch (e:Exception){
                 _uiState.value = _uiState.value.copy(
                     error = "Failed to add to watchlist: ${e.message}"

@@ -12,9 +12,9 @@ data class Dividend(
 
 data class DividendData (
     val symbol: String,
-    val exDate: String,
-    val paymentDate: String,
-    val recordDate: String,
+    val ex_date: String,
+    val payment_date: String,
+    val record_date: String,
     val amount: Double,
     val year: Long
 )

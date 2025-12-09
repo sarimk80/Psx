@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -69,9 +70,9 @@ enum class Destination(
     val contentDescription: String
 ){
     Home("home","Home", Icons.Default.Home,"Home"),
+    Portfolio("portfolio","Portfolio",Icons.Default.AccountBalanceWallet,"Portfolio"),
     HotStocks("hot stocks","HotStocks",Icons.AutoMirrored.Filled.TrendingUp,"Hot stocks"),
     Sectors("sector","Sectors",Icons.Default.PieChart,"Sectors"),
-    Portfolio("portfolio","Portfolio",Icons.Default.AccountBalanceWallet,"Portfolio"),
     Search("Search","Search",Icons.Default.Search,"Search");
 
     companion object {
@@ -168,6 +169,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        installSplashScreen()
         setContent {
             val navController = rememberNavController()
             val startDestination = Destination.Home

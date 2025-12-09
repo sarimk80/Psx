@@ -83,6 +83,7 @@ import com.example.psx.domain.model.Ticker
 import com.example.psx.presentation.helpers.number_format
 import com.example.psx.presentation.viewModel.SearchUiState
 import com.example.psx.presentation.viewModel.SearchViewModel
+import kotlinx.coroutines.delay
 
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -104,8 +105,11 @@ fun PortfolioView(
 
 
     LaunchedEffect(Unit) {
-        viewModel.getAllPortfolioTicker()
         searchViewModel.getSymbolList()
+        while (true){
+            viewModel.getAllPortfolioTicker()
+            delay(30_000)
+        }
     }
 
 
@@ -114,18 +118,6 @@ fun PortfolioView(
         topBar = {
             TopAppBar(
                 title = { Text("My Portfolio") },
-                actions = {
-                    IconButton(
-                        onClick = { viewModel.addToPortfolioModel("HUBC") },
-                        enabled = !uiState.isLoading
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Add stock",
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                },
 
             )
         },

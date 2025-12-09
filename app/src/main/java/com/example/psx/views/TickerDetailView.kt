@@ -1336,7 +1336,7 @@ fun DividendItem(dividend: DividendData) {
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "Ex-date: ${dividend.exDate} • Payment: ${dividend.paymentDate}",
+                    text = "Ex-date: ${dividend.ex_date} • Payment: ${dividend.payment_date}",
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
