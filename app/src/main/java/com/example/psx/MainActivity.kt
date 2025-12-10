@@ -15,11 +15,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.PieChart
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.FabPosition
@@ -69,11 +72,11 @@ enum class Destination(
     val icon: ImageVector,
     val contentDescription: String
 ){
-    Home("home","Home", Icons.Default.Home,"Home"),
-    Portfolio("portfolio","Portfolio",Icons.Default.AccountBalanceWallet,"Portfolio"),
-    HotStocks("hot stocks","HotStocks",Icons.AutoMirrored.Filled.TrendingUp,"Hot stocks"),
-    Sectors("sector","Sectors",Icons.Default.PieChart,"Sectors"),
-    Search("Search","Search",Icons.Default.Search,"Search");
+    Home("home","Home", Icons.Filled.BarChart,"Home"),
+    Portfolio("portfolio","Holdings",Icons.Default.AccountBalanceWallet,"Portfolio"),
+    HotStocks("hot stocks","Movers",Icons.AutoMirrored.Filled.TrendingUp,"Hot stocks"),
+    Sectors("sector","Industries",Icons.Default.PieChart,"Sectors"),
+    Search("Search","Screener",Icons.Filled.FilterAlt,"Search");
 
     companion object {
         const val TICKER_DETAIL_ROUTE = "ticker_detail/{type}/{symbol}"
@@ -147,20 +150,6 @@ fun AppNavHost(
         }
 
 
-//        Destination.entries.forEach { destination ->
-//
-//        composable(destination.route){
-//            when(destination){
-//                Destination.Home -> Home()
-//                Destination.HotStocks -> HotStocks()
-//                Destination.Sectors -> SectorView()
-//                Destination.Portfolio -> HotStocks()
-//                Destination.Search -> Home()
-//
-//            }
-//        }
-//
-//        }
     }
 }
 
@@ -179,11 +168,10 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize(),
                     bottomBar = {
                         NavigationBar(windowInsets = NavigationBarDefaults.windowInsets,
-                            //contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                             ) {
                         Destination.entries.forEachIndexed { index, destination ->
                             NavigationBarItem(
-                                alwaysShowLabel = false,
+                                alwaysShowLabel = true,
                                 selected = selectedDestination.intValue == index,
                                 onClick = {
                                     navController.navigate(route = destination.route)
