@@ -73,6 +73,7 @@ import com.example.compose.financialGreen
 import com.example.compose.financialRed
 import com.example.psx.domain.model.MarketDividend
 import com.example.psx.presentation.helpers.number_format
+import kotlinx.coroutines.delay
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -82,8 +83,11 @@ fun Home() {
     val uiState by viewModel.uiState
 
     LaunchedEffect(Unit) {
-        viewModel.getTickerDetailAll(type = "IDC", symbol = listOf("KSE100","ALLSHR","KMI30","PSXDIV20","KSE30","MII30"))
         viewModel.getMarketDividend()
+        while (true){
+            viewModel.getTickerDetailAll(type = "IDC", symbol = listOf("KSE100","ALLSHR","KMI30","PSXDIV20","KSE30","MII30"))
+            delay(70_000)
+        }
     }
 
     Scaffold(topBar = { TopAppBar(
