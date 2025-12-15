@@ -74,7 +74,6 @@ class PortfolioViewModel @Inject constructor(
               val tickerResponse = ticketResult.mapNotNull { result ->
                   if (result is StockResult.Success) result.data else null
               }
-              print(tickerResponse)
               _uiState.value = _uiState.value.copy(
                   isLoading = false,
                   listOfStocks = tickerResponse,
@@ -98,7 +97,7 @@ class PortfolioViewModel @Inject constructor(
                 }else{
                     repo.insertSymbol(PortfolioModel(symbol = symbol))
                 }
-                delay(1000)
+                delay(30_000)
             }catch (e:Exception){
                 _uiState.value = _uiState.value.copy(
                     error = "Failed to add to watchlist: ${e.message}"
