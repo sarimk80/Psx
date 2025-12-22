@@ -9,13 +9,11 @@ import com.example.psx.domain.model.Dividend
 import com.example.psx.domain.model.Fundamentals
 import com.example.psx.domain.model.KLineModel
 import com.example.psx.domain.model.MarketDividend
-import com.example.psx.domain.model.Root
 import com.example.psx.domain.model.StockResult
 import com.example.psx.domain.model.Ticker
 import com.example.psx.domain.usecase.CompanyDividendUseCase
 import com.example.psx.domain.usecase.CompanyFundamentalUseCase
 import com.example.psx.domain.usecase.CompanyUseCase
-import com.example.psx.domain.usecase.GainersUseCase
 import com.example.psx.domain.usecase.KLineModelUseCase
 import com.example.psx.domain.usecase.MarketDividendUseCase
 import com.example.psx.domain.usecase.TickerUseCase

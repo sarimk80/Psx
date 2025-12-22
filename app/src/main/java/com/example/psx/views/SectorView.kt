@@ -3,6 +3,7 @@
 package com.example.psx.views
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,7 +29,6 @@ import androidx.compose.material.icons.filled.TrendingDown
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -51,6 +51,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.compose.financialGreen
 import com.example.compose.financialRed
@@ -157,13 +158,50 @@ fun SectorContent(sector: Sector) {
                 modifier = Modifier.padding(bottom = 8.dp)
             )
         }
+// comment for now
+//        item {
+//            // Calculate number of columns based on screen width
+//            val columnCount = 3 // Adjust as needed
+//
+//            Column(
+//                modifier = Modifier.fillMaxWidth()
+//            ) {
+//                sortedSectors.chunked(columnCount).forEach { rowItems ->
+//                    Row(
+//                        modifier = Modifier.fillMaxWidth(),
+//                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+//                    ) {
+//                        rowItems.forEach { (sectorName, data) ->
+//                            Box(
+//                                modifier = Modifier
+//                                    .weight(1f)
+//                                    .aspectRatio(1f) // Make items square
+//                            ) {
+//                                SectorHeatmapTile(
+//                                    sector = data,
+//                                    sectorName = sectorName,
+//                                    onClick = {}
+//                                )
+//                            }
+//                        }
+//                        // Fill empty spaces if row has fewer items
+//                        repeat(columnCount - rowItems.size) {
+//                            Box(modifier = Modifier.weight(1f))
+//                        }
+//                    }
+//                    Spacer(modifier = Modifier.height(12.dp))
+//                }
+//            }
+//        }
+
 
         // Sector List
         items(sortedSectors, key = { it.key }) { (sectorName, data) ->
             SectorItem(
                 sectorName = sectorName,
                 data = data,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {}
             )
         }
         item {
@@ -171,6 +209,43 @@ fun SectorContent(sector: Sector) {
         }
     }
 }
+
+@Composable
+fun SectorHeatmapTile(
+    sector: Datum,
+    sectorName: String,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(90.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(heatmapColor(sector.avgChange))
+            .clickable { onClick() }
+            .padding(8.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = sectorName,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = Color.White,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = String.format("%.2f%%", sector.avgChange),
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
+    }
+}
+
 
 @Composable
 fun SectorMarketSummary(sectorData: Map<String, Datum>) {
@@ -253,7 +328,8 @@ fun SectorMarketSummary(sectorData: Map<String, Datum>) {
 fun SectorItem(
     sectorName: String,
     data: Datum,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
 ) {
     val isPositive = data.avgChangePercent >= 0
     val performanceColor = if (isPositive) financialGreen else financialRed
@@ -270,9 +346,7 @@ fun SectorItem(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface
         ),
-        onClick = {
-            // Handle sector click - could navigate to sector detail
-        }
+        onClick = { onClick() }
     ) {
         Row(
             modifier = Modifier
@@ -521,3 +595,12 @@ private fun formatLargeNumber(number: Long): String {
         else -> number.toString()
     }
 }
+
+fun heatmapColor(change: Double): Color =
+    when {
+        change >= 3 -> Color(0xFF1B5E20)   // Dark green
+        change >= 1 -> Color(0xFF4CAF50)   // Green
+        change > -1 -> Color(0xFF9E9E9E)   // Neutral
+        change > -3 -> Color(0xFFE57373)   // Light red
+        else -> Color(0xFFB71C1C)           // Dark red
+    }

@@ -4,7 +4,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.psx.domain.model.Root
 import com.example.psx.domain.model.StockResult
 import com.example.psx.domain.model.SymbolsModel
 import com.example.psx.domain.usecase.SymbolListUseCase

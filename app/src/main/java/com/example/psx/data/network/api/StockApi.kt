@@ -1,6 +1,5 @@
 package com.example.psx.data.network.dot.api
 
-import com.example.psx.data.network.dot.RootDot
 import com.example.psx.domain.model.Companies
 import com.example.psx.domain.model.Dividend
 import com.example.psx.domain.model.Fundamentals
