@@ -57,6 +57,19 @@ class PortfolioViewModel @Inject constructor(
 
     }
 
+    fun getSectorTicker(symbols:List<String>){
+        _uiState.value = _uiState.value.copy(isLoading = true)
+         var portfolioViewModelList = mutableListOf<PortfolioModel>()
+       symbols.forEach { symbol ->
+           portfolioViewModelList.add(PortfolioModel(
+               symbol = symbol
+           ))
+       }
+        viewModelScope.launch{
+            loadTickersForSymbols(portfolioViewModelList)
+        }
+    }
+
   private suspend fun loadTickersForSymbols(symbols:  List<PortfolioModel>){
 
       viewModelScope.launch {

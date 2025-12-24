@@ -593,7 +593,7 @@ fun PortfolioContent(
     ) {
         item {
             Text(
-                text = "${items.size} stocks in watchlist",
+                text = "${items.size} stocks",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 8.dp)

@@ -60,7 +60,9 @@ import com.example.psx.domain.model.Sector
 import com.example.psx.presentation.viewModel.SectorViewModel
 
 @Composable
-fun SectorView() {
+fun SectorView(
+    onSectorClick: (String, Datum) -> Unit = {_, _ -> }
+) {
     val viewModel: SectorViewModel = hiltViewModel()
     val uiState by viewModel.uiState
 
@@ -86,7 +88,7 @@ fun SectorView() {
                     error = uiState.error!!,
                     onRetry = { viewModel.getSectorAll() }
                 )
-                uiState.stocks != null -> SectorContent(uiState.stocks!!)
+                uiState.stocks != null -> SectorContent(uiState.stocks!!, onClick = onSectorClick)
                 else -> SectorLoadingState()
             }
         }
@@ -135,7 +137,7 @@ fun SectorTopAppBar(onRefresh: () -> Unit) {
 }
 
 @Composable
-fun SectorContent(sector: Sector) {
+fun SectorContent(sector: Sector,onClick: (String,Datum) -> Unit) {
     val sortedSectors = sector.data.entries.sortedByDescending { it.value.avgChangePercent }
 
     LazyColumn(
@@ -158,42 +160,6 @@ fun SectorContent(sector: Sector) {
                 modifier = Modifier.padding(bottom = 8.dp)
             )
         }
-// comment for now
-//        item {
-//            // Calculate number of columns based on screen width
-//            val columnCount = 3 // Adjust as needed
-//
-//            Column(
-//                modifier = Modifier.fillMaxWidth()
-//            ) {
-//                sortedSectors.chunked(columnCount).forEach { rowItems ->
-//                    Row(
-//                        modifier = Modifier.fillMaxWidth(),
-//                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-//                    ) {
-//                        rowItems.forEach { (sectorName, data) ->
-//                            Box(
-//                                modifier = Modifier
-//                                    .weight(1f)
-//                                    .aspectRatio(1f) // Make items square
-//                            ) {
-//                                SectorHeatmapTile(
-//                                    sector = data,
-//                                    sectorName = sectorName,
-//                                    onClick = {}
-//                                )
-//                            }
-//                        }
-//                        // Fill empty spaces if row has fewer items
-//                        repeat(columnCount - rowItems.size) {
-//                            Box(modifier = Modifier.weight(1f))
-//                        }
-//                    }
-//                    Spacer(modifier = Modifier.height(12.dp))
-//                }
-//            }
-//        }
-
 
         // Sector List
         items(sortedSectors, key = { it.key }) { (sectorName, data) ->
@@ -201,7 +167,7 @@ fun SectorContent(sector: Sector) {
                 sectorName = sectorName,
                 data = data,
                 modifier = Modifier.fillMaxWidth(),
-                onClick = {}
+                onClick = { onClick(sectorName, data) }
             )
         }
         item {
@@ -214,7 +180,7 @@ fun SectorContent(sector: Sector) {
 fun SectorHeatmapTile(
     sector: Datum,
     sectorName: String,
-    onClick: () -> Unit
+    onClick: (String,Datum) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -222,7 +188,7 @@ fun SectorHeatmapTile(
             .height(90.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(heatmapColor(sector.avgChange))
-            .clickable { onClick() }
+            .clickable { onClick(sectorName, sector) }
             .padding(8.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally

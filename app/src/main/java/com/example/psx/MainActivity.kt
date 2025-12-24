@@ -2,6 +2,7 @@ package com.example.psx
 
 import TickerDetailView
 import android.app.Application
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -54,9 +55,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.psx.domain.model.Datum
+import com.example.psx.domain.model.DatumNavType
 import com.example.psx.views.PortfolioView
 import com.example.psx.views.SearchView
+import com.example.psx.views.SectorDetailView
 import com.example.psx.views.SectorView
+import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.HiltAndroidApp
 
@@ -109,7 +114,13 @@ fun AppNavHost(
             )
         }
         composable(Destination.Sectors.route){
-            SectorView()
+            SectorView(
+                onSectorClick = {sectorName,sector ->
+                    val datatum = sector
+                    val json = Uri.encode(Gson().toJson(datatum))
+                    navController.navigate("sector_detail/$sectorName/$json")
+                }
+            )
         }
         composable(Destination.Portfolio.route){
             PortfolioView(
@@ -147,6 +158,31 @@ fun AppNavHost(
                 onBack = { navController.popBackStack() }
             )
 
+        }
+
+        composable(
+            route = "sector_detail/{sectorName}/{datum}",
+            arguments = listOf(
+                navArgument("sectorName") {
+                    type = NavType.StringType
+                },
+                navArgument("datum") {
+                    type = DatumNavType
+                }
+            )
+        ) { backStackEntry ->
+            val sectorName = backStackEntry.arguments?.getString("sectorName") ?: "REG"
+            val datum = backStackEntry.arguments?.getString("datum")?.let {
+                DatumNavType.parseValue(it)
+            }
+            SectorDetailView(
+                sectorName = sectorName,
+                sector = datum!!,
+                onTickerClick = {type,symbol ->
+                    navController.navigate("ticker_detail/$type/$symbol")
+                },
+                onBack = { navController.popBackStack() }
+            )
         }
 
 
