@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.psx"
+    namespace = "com.pizza.psx"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.psx"
+        applicationId = "com.pizza.psx"
         minSdk = 33
         targetSdk = 35
         versionCode = 1
