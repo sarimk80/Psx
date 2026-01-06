@@ -7,4 +7,5 @@ import androidx.room.PrimaryKey
 data class PortfolioModel(
     @PrimaryKey()
     val symbol: String,
+    val volume: Int = 1
 )

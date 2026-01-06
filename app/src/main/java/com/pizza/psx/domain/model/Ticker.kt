@@ -22,5 +22,6 @@ data class TickerData (
     val ask: Double,
     val bidVol: Long,
     val askVol: Long,
-    val timestamp: Long
+    val timestamp: Long,
+    var stockCount: Int = 0
 )

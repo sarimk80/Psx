@@ -49,6 +49,7 @@ class PortfolioViewModel @Inject constructor(
             repo.getAllSymbols
                 .distinctUntilChanged()
                 .collect { symbols ->
+                    print(symbols)
                     loadTickersForSymbols(symbols)
                 }
 
@@ -62,7 +63,8 @@ class PortfolioViewModel @Inject constructor(
          var portfolioViewModelList = mutableListOf<PortfolioModel>()
        symbols.forEach { symbol ->
            portfolioViewModelList.add(PortfolioModel(
-               symbol = symbol
+               symbol = symbol,
+               volume = 1
            ))
        }
         viewModelScope.launch{
@@ -72,6 +74,7 @@ class PortfolioViewModel @Inject constructor(
 
   private suspend fun loadTickersForSymbols(symbols:  List<PortfolioModel>){
 
+
       viewModelScope.launch {
           try {
               val ticketResult = symbols.map { sym ->
@@ -79,10 +82,20 @@ class PortfolioViewModel @Inject constructor(
                   async { getTickerDetail(type = "REG", symbol = sym.symbol) }
               }.awaitAll()
 
+              val symbolToVolumeMap = symbols.associate { it.symbol to it.volume }
 
               val tickerResponse = ticketResult.mapNotNull { result ->
-                  if (result is StockResult.Success) result.data else null
+                  if (result is StockResult.Success) {
+
+                      result.data.apply{
+                         data.stockCount = symbolToVolumeMap[result.data.data.symbol] ?: 0
+                      }
+
+                  }else null
               }
+
+
+
               _uiState.value = _uiState.value.copy(
                   isLoading = false,
                   listOfStocks = tickerResponse,
@@ -96,7 +109,7 @@ class PortfolioViewModel @Inject constructor(
 
     }
 
-    fun addToPortfolioModel(symbol:String){
+    fun addToPortfolioModel(symbol:String,volume: Int){
         viewModelScope.launch {
             try {
                 val currentList = portfolioModels.value
@@ -104,7 +117,7 @@ class PortfolioViewModel @Inject constructor(
                 if(exist){
                     repo.deleteSymbol(symbol)
                 }else{
-                    repo.insertSymbol(PortfolioModel(symbol = symbol))
+                    repo.insertSymbol(PortfolioModel(symbol = symbol, volume = volume))
                 }
                 delay(30_000)
             }catch (e:Exception){

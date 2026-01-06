@@ -65,6 +65,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-text-google-fonts:1.9.3")
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.27.0")
     implementation ("androidx.core:core-splashscreen:1.0.1")
+    implementation ("io.github.ehsannarmani:compose-charts:0.1.10")
 
     implementation(libs.vico.compose)
     implementation(libs.vico.views)

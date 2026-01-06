@@ -20,12 +20,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.StarBorder
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -34,6 +38,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,6 +47,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -60,11 +66,25 @@ import com.pizza.psx.domain.model.PortfolioModel
 import com.pizza.psx.presentation.viewModel.PortfolioViewModel
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.window.DialogProperties
 import com.pizza.compose.financialGreen
 import com.pizza.compose.financialRed
 import com.pizza.psx.domain.model.Ticker
+import com.pizza.psx.presentation.helpers.generateColorFromSymbol
+import com.pizza.psx.presentation.helpers.generateColors
+import com.pizza.psx.presentation.helpers.getColorFromIndex
+import com.pizza.psx.presentation.helpers.getRandomColor
+import com.pizza.psx.presentation.helpers.number_format
+import com.pizza.psx.presentation.helpers.randomColor
 import com.pizza.psx.presentation.viewModel.SearchUiState
 import com.pizza.psx.presentation.viewModel.SearchViewModel
+import com.pizza.psx.views.charts.ChartData
+import com.pizza.psx.views.charts.DonutChartWithLegend
+import com.pizza.psx.views.charts.InteractiveDonutChart
+import ir.ehsannarmani.compose_charts.PieChart
+import ir.ehsannarmani.compose_charts.models.Pie
 import kotlinx.coroutines.delay
 
 import java.text.SimpleDateFormat
@@ -83,6 +103,11 @@ fun PortfolioView(
     val searchUiState by searchViewModel.uiState
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showBottomSheet by remember { mutableStateOf(false) }
+    var showAddStockDialog by remember { mutableStateOf(false) }
+
+    var selectedSymbol by remember { mutableStateOf("") }
+    var stockCount by remember { mutableStateOf("1") }
+
     val portfolioItems by viewModel.portfolioModels.collectAsStateWithLifecycle()
 
 
@@ -139,9 +164,10 @@ fun PortfolioView(
                 ) {
                     AddStockBottomSheetContent(
                         onTickerClick = {type, symbol ->
-                            viewModel.addToPortfolioModel(symbol)
+                            //viewModel.addToPortfolioModel(symbol, volume = 10)
+                            selectedSymbol = symbol
 
-                            showBottomSheet = false
+                            showAddStockDialog = true
                         },
                         onDismiss = { showBottomSheet = false },
                         searchUiState = searchUiState,
@@ -149,6 +175,21 @@ fun PortfolioView(
                     )
 
                 }
+            }
+            if(showAddStockDialog){
+                AddStockDialog(
+                    symbol = selectedSymbol,
+                    stockCount = stockCount,
+                    errorMessage = "",
+                    onDismiss = { showAddStockDialog = false },
+                    onConfirm = {
+                        viewModel.addToPortfolioModel(selectedSymbol, volume = stockCount.toInt())
+                        showAddStockDialog = false
+                        showBottomSheet = false
+
+                                },
+                    onStockCountChange = { stockCount = it }
+                )
             }
             when{
                 uiState.isLoading -> LoadingState()
@@ -166,6 +207,93 @@ fun PortfolioView(
             }
         }
     }
+}
+
+@Composable
+fun AddStockDialog(
+    symbol: String,
+    stockCount: String,
+    errorMessage: String?,
+    onDismiss: () -> Unit,
+    onStockCountChange: (String) -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Add $symbol to Portfolio",
+                style = MaterialTheme.typography.titleLarge
+            )
+        },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = stockCount,
+                    onValueChange = onStockCountChange,
+                    label = { Text("Number of Stocks") },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = { onConfirm() }
+                    ),
+                    singleLine = true,
+                    isError = errorMessage != null,
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Numbers,
+                            contentDescription = null
+                        )
+                    }
+                )
+
+                if (errorMessage != null) {
+                    Text(
+                        text = errorMessage,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
+
+                // Quick selection buttons
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    listOf("1", "10", "50", "100").forEach { quantity ->
+                        FilterChip(
+                            selected = stockCount == quantity,
+                            onClick = { onStockCountChange(quantity) },
+                            label = { Text(quantity) },
+                            modifier = Modifier.padding(horizontal = 4.dp)
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm,
+                enabled = stockCount.isNotEmpty()
+            ) {
+                Text("Add")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        },
+        properties = DialogProperties(
+            dismissOnClickOutside = false
+        )
+    )
 }
 
 @Composable
@@ -482,6 +610,11 @@ fun CompactWatchlistItemCard(
                     Text(
                         text = item.data.symbol,
                         style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = "${item.data.stockCount} x ${number_format(item.data.price)}",
+                        style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Medium
                     )
                 }
@@ -491,7 +624,7 @@ fun CompactWatchlistItemCard(
                 horizontalAlignment = Alignment.End
             ) {
                 Text(
-                    text = "${String.format("%.2f", item.data.price)}",
+                    text = number_format(item.data.price * item.data.stockCount),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -587,9 +720,46 @@ fun PortfolioContent(
     onEditItem: (Ticker) -> Unit,
     onTickerClick: (String, String) -> Unit
 ) {
+    val sampleData = remember(items) {
+
+        items.mapIndexed { index,ticker ->
+            Pie(
+                label = ticker.data.symbol,
+                data = ticker.data.stockCount.toDouble(),
+                color = getColorFromIndex(index)
+            )
+        }
+    }
+
+    val chartSampleData = remember(items) {
+
+        items.mapIndexed { index,ticker ->
+            ChartData(
+                label = ticker.data.symbol,
+                value = ticker.data.stockCount.toFloat(),
+                color = getColorFromIndex(index),
+                price = (ticker.data.price.toFloat() * ticker.data.stockCount.toFloat())
+            )
+        }
+    }
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+
+        item {
+            DonutChartWithLegend(
+                data = chartSampleData,
+
+            )
+//            PieChart(
+//                modifier = Modifier.size(200.dp),
+//                data = sampleData,
+//                spaceDegree = 7f,
+//                selectedPaddingDegree = 4f,
+//                style = Pie.Style.Stroke(width = 100.dp)
+//            )
+        }
+
         item {
             Text(
                 text = "${items.size} stocks",
