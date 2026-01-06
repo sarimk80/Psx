@@ -15,7 +15,10 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -48,8 +51,8 @@ class PortfolioViewModel @Inject constructor(
         viewModelScope.launch {
             repo.getAllSymbols
                 .distinctUntilChanged()
-                .collect { symbols ->
-                    print(symbols)
+                .first()
+                .let { symbols ->
                     loadTickersForSymbols(symbols)
                 }
 
