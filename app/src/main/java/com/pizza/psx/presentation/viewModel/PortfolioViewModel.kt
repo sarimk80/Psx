@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.Duration
 
 
 @HiltViewModel
@@ -122,7 +123,7 @@ class PortfolioViewModel @Inject constructor(
                 }else{
                     repo.insertSymbol(PortfolioModel(symbol = symbol, volume = volume))
                 }
-                delay(30_000)
+                getAllPortfolioTicker()
             }catch (e:Exception){
                 _uiState.value = _uiState.value.copy(
                     error = "Failed to add to watchlist: ${e.message}"

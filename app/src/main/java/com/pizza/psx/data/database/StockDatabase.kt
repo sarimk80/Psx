@@ -10,7 +10,7 @@ import com.pizza.psx.domain.model.PortfolioModel
 
 @Database(
     entities = [PortfolioModel::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class StockDatabase: RoomDatabase() {

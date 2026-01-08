@@ -115,7 +115,7 @@ fun PortfolioView(
         searchViewModel.getSymbolList()
         while (true){
             viewModel.getAllPortfolioTicker()
-            delay(30_000)
+            delay(70_000)
         }
     }
 
@@ -164,7 +164,6 @@ fun PortfolioView(
                 ) {
                     AddStockBottomSheetContent(
                         onTickerClick = {type, symbol ->
-                            //viewModel.addToPortfolioModel(symbol, volume = 10)
                             selectedSymbol = symbol
 
                             showAddStockDialog = true
@@ -526,18 +525,7 @@ fun EmptyWatchlistState(onAddClick: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 modifier = Modifier.padding(top = 8.dp)
             )
-            Button(
-                onClick = onAddClick,
-                modifier = Modifier.padding(top = 24.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            ) {
-                Icon(Icons.Default.Add, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Add First Stock")
-            }
+
         }
     }
 }
@@ -720,16 +708,6 @@ fun PortfolioContent(
     onEditItem: (Ticker) -> Unit,
     onTickerClick: (String, String) -> Unit
 ) {
-    val sampleData = remember(items) {
-
-        items.mapIndexed { index,ticker ->
-            Pie(
-                label = ticker.data.symbol,
-                data = ticker.data.stockCount.toDouble(),
-                color = getColorFromIndex(index)
-            )
-        }
-    }
 
     val chartSampleData = remember(items) {
 
@@ -742,43 +720,43 @@ fun PortfolioContent(
             )
         }
     }
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
+    if(items.isEmpty()){
+        EmptyWatchlistState(
+            onAddClick = {}
+        )
+    }
+    else {
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
 
-        item {
-            DonutChartWithLegend(
-                data = chartSampleData,
+            item {
+                DonutChartWithLegend(
+                    data = chartSampleData,
 
-            )
-//            PieChart(
-//                modifier = Modifier.size(200.dp),
-//                data = sampleData,
-//                spaceDegree = 7f,
-//                selectedPaddingDegree = 4f,
-//                style = Pie.Style.Stroke(width = 100.dp)
-//            )
-        }
+                    )
+            }
 
-        item {
-            Text(
-                text = "${items.size} stocks",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-        }
+            item {
+                Text(
+                    text = "${items.size} stocks",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
 
-        items(items) { item ->
-            CompactWatchlistItemCard(
-                item = item,
-                onRemove = { onRemoveItem(item.data.symbol) },
-                onTickerClick = { onTickerClick("REG",item.data.symbol) }
-            )
-        }
+            items(items) { item ->
+                CompactWatchlistItemCard(
+                    item = item,
+                    onRemove = { onRemoveItem(item.data.symbol) },
+                    onTickerClick = { onTickerClick("REG", item.data.symbol) }
+                )
+            }
 
-        item {
-            Spacer(modifier = Modifier.height(80.dp))
+            item {
+                Spacer(modifier = Modifier.height(80.dp))
+            }
         }
     }
 }
