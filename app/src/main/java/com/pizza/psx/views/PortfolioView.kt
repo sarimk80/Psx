@@ -554,7 +554,9 @@ fun CompactWatchlistItemCard(
     item: Ticker,
     onRemove: () -> Unit,
     modifier: Modifier = Modifier,
-    onTickerClick: () -> Unit
+    onTickerClick: () -> Unit,
+    isHideVolume: Boolean = true,
+    isHideSector: Boolean = true
 ) {
     Card(
         onClick = onTickerClick,
@@ -600,11 +602,23 @@ fun CompactWatchlistItemCard(
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.SemiBold
                     )
-                    Text(
-                        text = "${item.data.stockCount} x ${number_format(item.data.price)}",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Medium
-                    )
+                    when {
+                        isHideVolume -> {
+                            Text(
+                                text = "${item.data.stockCount} x ${number_format(item.data.price)}",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+
+                        isHideSector -> {
+                            Text(
+                                text = item.data.sectorName,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
                 }
             }
 

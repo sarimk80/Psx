@@ -43,6 +43,7 @@ import com.pizza.psx.views.SearchView
 import com.pizza.psx.views.SectorDetailView
 import com.pizza.psx.views.SectorView
 import com.google.gson.Gson
+import com.pizza.psx.views.IndexDetailView
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.HiltAndroidApp
 
@@ -85,7 +86,11 @@ fun AppNavHost(
         startDestination = startDestination.route
     ){
         composable(Destination.Home.route){
-            Home()
+            Home(
+                onIndexClick = {indexSymbol ->
+                    navController.navigate("indexDetail/$indexSymbol")
+                }
+            )
         }
         composable(Destination.HotStocks.route){
             HotStocks(
@@ -163,6 +168,26 @@ fun AppNavHost(
                     navController.navigate("ticker_detail/$type/$symbol")
                 },
                 onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable  (
+            route = "indexDetail/{indexSymbol}",
+            arguments = listOf(
+                navArgument("indexSymbol") {
+                    type = NavType.StringType
+                    defaultValue = "KSE100" // Default market type
+                }
+
+            )
+        ){backStackEntry ->
+            val indexSymbol = backStackEntry.arguments?.getString("indexSymbol") ?: "KSE100"
+            IndexDetailView(
+                indexSymbol =  indexSymbol,
+                onTickerClick = {symbol ->
+                    navController.navigate("ticker_detail/REG/$symbol")
+                },
+                onBackClick = { navController.popBackStack() }
             )
         }
 

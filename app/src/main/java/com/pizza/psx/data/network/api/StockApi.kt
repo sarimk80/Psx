@@ -3,6 +3,7 @@ package com.pizza.psx.data.network.dot.api
 import com.pizza.psx.domain.model.Companies
 import com.pizza.psx.domain.model.Dividend
 import com.pizza.psx.domain.model.Fundamentals
+import com.pizza.psx.domain.model.IndexDetailModel
 import com.pizza.psx.domain.model.KLineModel
 import com.pizza.psx.domain.model.MarketDividend
 import com.pizza.psx.domain.model.Root
@@ -41,4 +42,7 @@ interface StockApi {
 
     @GET("/api/klines/{symbol}/{timeframe}")
     suspend fun getKLineModel(@Path("symbol") symbol:String, @Path("timeframe") timeframe:String):KLineModel
+
+    @GET
+    suspend fun getIndexData(@Url url: String):List<IndexDetailModel>
 }

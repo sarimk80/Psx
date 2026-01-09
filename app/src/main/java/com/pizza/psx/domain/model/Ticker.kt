@@ -23,5 +23,6 @@ data class TickerData (
     val bidVol: Long,
     val askVol: Long,
     val timestamp: Long,
-    var stockCount: Int = 0
+    var stockCount: Int = 0,
+    var sectorName: String = ""
 )

@@ -3,6 +3,7 @@ package com.pizza.psx.domain.repo
 import com.pizza.psx.domain.model.Companies
 import com.pizza.psx.domain.model.Dividend
 import com.pizza.psx.domain.model.Fundamentals
+import com.pizza.psx.domain.model.IndexDetailModel
 import com.pizza.psx.domain.model.KLineModel
 import com.pizza.psx.domain.model.MarketDividend
 import com.pizza.psx.domain.model.Root
@@ -28,4 +29,6 @@ interface StockRepo {
     suspend fun getMarketDividend():StockResult<List<MarketDividend>>
 
     suspend fun getKLineModel(symbol: String,timeFrame:String):StockResult<KLineModel>
+
+    suspend fun getIndexDetail(indexName: String): StockResult<List<IndexDetailModel>>
 }

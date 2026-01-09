@@ -30,7 +30,8 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun DonutChartWithLegend(
     data: List<ChartData>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isShowCentralContent: Boolean = true
 ) {
     Column(
         modifier = modifier,
@@ -47,14 +48,16 @@ fun DonutChartWithLegend(
                 radius = 100.dp,
                 modifier = modifier.padding(16.dp)
             )
-            Box(
-                modifier = modifier
-                    .size((100 * 1.2f).dp)
-                    .background(Color.Transparent),
-                contentAlignment = Alignment.Center
-            ) {
-                CenterContent(data = data)
-            }
+          if(isShowCentralContent) {
+              Box(
+                  modifier = modifier
+                      .size((100 * 1.2f).dp)
+                      .background(Color.Transparent),
+                  contentAlignment = Alignment.Center
+              ) {
+                  CenterContent(data = data)
+              }
+          }
         }
 
 

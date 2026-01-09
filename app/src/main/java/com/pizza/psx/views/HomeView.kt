@@ -73,14 +73,16 @@ import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Home() {
+fun Home(
+    onIndexClick:(String) -> Unit = { _ -> }
+) {
     val viewModel: TickerDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState
 
     LaunchedEffect(Unit) {
         viewModel.getMarketDividend()
         while (true){
-            viewModel.getTickerDetailAll(type = "IDC", symbol = listOf("KSE100","ALLSHR","KMI30","PSXDIV20","KSE30","MII30"))
+            viewModel.getTickerDetailAll(type = "IDC", symbol = listOf("KSE100","KMI30","PSXDIV20","KSE30","MII30"))
             delay(70_000)
         }
     }
@@ -117,7 +119,7 @@ fun Home() {
                 uiState.error != null -> HomeErrorState(
                     error = uiState.error!!,
                     onRetry = {
-                        viewModel.getTickerDetailAll(type = "IDC", symbol = listOf("KSE100","ALLSHR","KMI30","PSXDIV20","KSE30","MII30"))
+                        viewModel.getTickerDetailAll(type = "IDC", symbol = listOf("KSE100","KMI30","PSXDIV20","KSE30","MII30"))
                     },
                     modifier = Modifier.weight(1f)
                 )
@@ -125,12 +127,13 @@ fun Home() {
                     tickers = uiState.listOfTicker!!,
                     marketDividends = uiState.marketDividend,
                     isDividendLoading = uiState.isDividendLoading,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    onIndexClick = onIndexClick
                 )
                 else -> HomeErrorState(
                     error = "No data available",
                     onRetry = {
-                        viewModel.getTickerDetailAll(type = "IDC", symbol = listOf("KSE100","ALLSHR","KMI30","PSXDIV20","KSE30","MII30"))
+                        viewModel.getTickerDetailAll(type = "IDC", symbol = listOf("KSE100","KMI30","PSXDIV20","KSE30","MII30"))
                     },
                     modifier = Modifier.weight(1f)
                 )
@@ -144,11 +147,12 @@ fun HomeContent(
     tickers: List<Ticker>,
     marketDividends: List<MarketDividend>?,
     isDividendLoading: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onIndexClick: (String) -> Unit
 ) {
     LazyColumn(modifier = modifier) {
         item {
-            TickerHorizontalPager(tickers = tickers)
+            TickerHorizontalPager(tickers = tickers, onIndexClick = onIndexClick)
         }
 
         item {
@@ -168,7 +172,8 @@ fun HomeContent(
 @Composable
 fun TickerHorizontalPager(
     tickers: List<Ticker>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onIndexClick: (String) -> Unit
 ) {
     val pagerState = rememberPagerState { tickers.size }
 
@@ -180,7 +185,7 @@ fun TickerHorizontalPager(
                 .fillMaxWidth()
                 .height(280.dp) // Fixed height instead of weight
         ) { page ->
-            TickerPage(ticker = tickers[page])
+            TickerPage(ticker = tickers[page], onClick = onIndexClick)
         }
 
         // Page indicators
@@ -531,8 +536,9 @@ fun DotsIndicator(
 }
 
 @Composable
-fun TickerPage(ticker: Ticker) {
+fun TickerPage(ticker: Ticker, onClick: (String) -> Unit) {
     Card(
+        onClick = { onClick(ticker.data.symbol) },
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),

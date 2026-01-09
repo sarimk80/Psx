@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +13,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -21,7 +25,9 @@ import androidx.compose.material.icons.filled.TrendingFlat
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,96 +41,135 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pizza.psx.R
 import com.pizza.psx.domain.model.Datum
 import com.pizza.psx.presentation.viewModel.PortfolioViewModel
 import com.pizza.psx.presentation.helpers.formatVolume
 import com.pizza.psx.presentation.helpers.formatCurrency
 
-
 @Composable
-fun  SectorDetailView(sectorName: String,
-                      sector: Datum,
-                      onTickerClick: (String, String) -> Unit = { _, _ -> },
-                      onBack: () -> Unit)
-{
-
+fun SectorDetailView(
+    sectorName: String,
+    sector: Datum,
+    onTickerClick: (String, String) -> Unit = { _, _ -> },
+    onBack: () -> Unit
+) {
     val viewModel: PortfolioViewModel = hiltViewModel()
     val uiState by viewModel.uiState
+    val listState = rememberLazyListState()
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(sector.symbols) {
         viewModel.getSectorTicker(sector.symbols)
     }
 
     Scaffold(
-        topBar = {
+        topBar = { SectorTopBar(sectorName, onBack) },
 
-            SectorDetailTopBar(
-                sectorName = sectorName,
-                onBackClick = onBack
-            )
-        }
     ) { padding ->
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(padding)
-            .padding(horizontal = 16.dp)
-        ){
-            // Sector Overview Card
-            SectorOverviewCard(sector = sector)
+        // Main content - LazyColumn with header as first item
+        LazyColumn(
+            state = listState,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(
+                top = 8.dp,
+                bottom = 16.dp,
+                start = 16.dp,
+                end = 16.dp
+            )
+        ) {
+            // Header item (non-scrollable part is now scrollable)
+            item {
+                SectorOverviewCard(sector)
+            }
 
+            // Loading state
+            if (uiState.isLoading) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(100.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        LoadingCard()
+                    }
+                }
+            }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            // Error state
+            uiState.error?.let { error ->
+                item {
+                    ErrorState(error)
+                }
+            }
 
-            when{
-                uiState.isLoading -> LoadingState()
-                uiState.error !=null -> Text(uiState.error!!)
-                uiState.listOfStocks!=null -> PortfolioContent(
-                    items = uiState.listOfStocks!!,
-                    onRemoveItem = { symbol ->
-                        //viewModel.removeFromWatchlist(symbol)
-                    },
-                    onEditItem = { item ->
-                        // Open edit dialog
-                    },
-                    onTickerClick = onTickerClick
-                )
+            // Empty state
+            if (!uiState.isLoading && uiState.listOfStocks.isNullOrEmpty()) {
+                item {
+                    EmptyState()
+                }
+            }
+
+            // Stocks list
+            if (!uiState.listOfStocks.isNullOrEmpty()) {
+                items(
+                    uiState.listOfStocks!!,
+                    key = { it.data.symbol }
+                ) { item ->
+                    CompactWatchlistItemCard(
+                        item = item,
+                        onRemove = {},
+                        onTickerClick = {
+                            onTickerClick("REG", item.data.symbol)
+                        },
+                        isHideVolume = false,
+                        isHideSector = false
+                    )
+                }
+            }
+
+            // Bottom padding for FAB
+            item {
+                Spacer(modifier = Modifier.height(80.dp))
             }
         }
     }
+
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SectorDetailTopBar(
+private fun SectorTopBar(
     sectorName: String,
-    onBackClick: () -> Unit
+    onBack: () -> Unit
 ) {
     TopAppBar(
         title = {
             Text(
                 text = sectorName,
-                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
         },
         navigationIcon = {
-            IconButton(onClick = onBackClick) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back"
-                )
+            IconButton(onClick = onBack) {
+                Icon(Icons.Default.ArrowBack, null)
             }
-        },
-
-        )
+        }
+    )
 }
+
 
 
 @Composable
@@ -347,6 +392,39 @@ private fun SentimentBadge(
             text = label,
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun LoadingCard() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            ContainedLoadingIndicator()
+
+        }
+    }
+}
+
+@Composable
+private fun ErrorState(message: String) {
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Text(message, color = MaterialTheme.colorScheme.error)
+    }
+}
+
+@Composable
+private fun EmptyState() {
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Text(
+            "No stocks available in this sector",
+            style = MaterialTheme.typography.bodyMedium
         )
     }
 }

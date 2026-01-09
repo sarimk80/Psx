@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Stockistan</string>
+    <string name="back">Back</string>
+    <string name="loading_index_data">Loading index data…</string>
+    <string name="error_loading_data">Error Loading Data</string>
+    <string name="retry">Retry</string>
+    <string name="no_data_available">No Data Available</string>
+    <string name="tap_to_refresh">Pull down or tap to refresh</string>
+    <string name="refresh">Refresh</string>
+    <string name="scroll_to_top">Scroll to top</string>
 </resources>

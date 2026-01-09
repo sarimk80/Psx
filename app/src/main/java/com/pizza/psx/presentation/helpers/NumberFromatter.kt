@@ -1,5 +1,6 @@
 package com.pizza.psx.presentation.helpers
 
+import androidx.compose.material3.Switch
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import com.pizza.psx.views.charts.ChartData
@@ -127,4 +128,13 @@ val CHART_COLORS = listOf(
 
 fun getColorFromIndex(index: Int): Color {
     return CHART_COLORS[index % CHART_COLORS.size]
+}
+
+fun stringToIndexString(index: String): String = when(index) {
+    "KSE100" -> "kse_100"
+    "KMI30" -> "kmi_30"
+    "PSXDIV20" -> "psx_div_20"
+    "KSE30" -> "kse_30"
+    "MII30" -> "mii_30"
+    else -> "kse_100" // default case
 }
