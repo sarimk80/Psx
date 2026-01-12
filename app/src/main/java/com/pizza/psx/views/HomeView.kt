@@ -83,7 +83,7 @@ fun Home(
         viewModel.getMarketDividend()
         while (true){
             viewModel.getTickerDetailAll(type = "IDC", symbol = listOf("KSE100","KMI30","PSXDIV20","KSE30","MII30"))
-            delay(70_000)
+            delay(90_000)
         }
     }
 

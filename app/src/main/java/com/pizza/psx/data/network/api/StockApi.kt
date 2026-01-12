@@ -8,6 +8,7 @@ import com.pizza.psx.domain.model.KLineModel
 import com.pizza.psx.domain.model.MarketDividend
 import com.pizza.psx.domain.model.Root
 import com.pizza.psx.domain.model.Sector
+import com.pizza.psx.domain.model.SectorResponse
 import com.pizza.psx.domain.model.SymbolsModel
 import com.pizza.psx.domain.model.Ticker
 import retrofit2.http.GET
@@ -45,4 +46,7 @@ interface StockApi {
 
     @GET
     suspend fun getIndexData(@Url url: String):List<IndexDetailModel>
+
+    @GET
+    suspend fun getSectorResponse(@Url url: String):SectorResponse
 }

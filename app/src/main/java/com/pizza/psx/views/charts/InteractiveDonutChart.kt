@@ -49,8 +49,8 @@ fun InteractiveDonutChart(
     data: List<ChartData>,
     modifier: Modifier = Modifier,
     radius: Dp = 120.dp,
-    strokeWidth: Dp = 35.dp,
-    gapAngle: Float = 2f,
+    strokeWidth: Dp = 40.dp,
+    gapAngle: Float = 5f,
     onSegmentClick: (ChartData) -> Unit = {}
 ) {
     var selectedSegment by remember { mutableStateOf<Int?>(null) }

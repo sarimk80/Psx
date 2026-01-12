@@ -9,6 +9,7 @@ import com.pizza.psx.domain.model.KLineModel
 import com.pizza.psx.domain.model.MarketDividend
 import com.pizza.psx.domain.model.Root
 import com.pizza.psx.domain.model.Sector
+import com.pizza.psx.domain.model.SectorResponse
 import com.pizza.psx.domain.model.StockResult
 import com.pizza.psx.domain.model.SymbolsModel
 import com.pizza.psx.domain.model.Ticker
@@ -109,6 +110,15 @@ class StockRepository(
     override suspend fun getIndexDetail(indexName: String): StockResult<List<IndexDetailModel>> = withContext(dispatcher){
         return@withContext try {
             val result = stockApi.getIndexData("https://sarim-pix.hf.space/index/${indexName}")
+            StockResult.Success(result)
+        }catch (e:Exception){
+            StockResult.Error("Failed${e.toString()}")
+        }
+    }
+
+    override suspend fun getSectorResponse(): StockResult<SectorResponse> = withContext(dispatcher){
+        return@withContext try {
+            val result = stockApi.getSectorResponse("https://sarim-pix.hf.space/gainer_loosers")
             StockResult.Success(result)
         }catch (e:Exception){
             StockResult.Error("Failed${e.toString()}")

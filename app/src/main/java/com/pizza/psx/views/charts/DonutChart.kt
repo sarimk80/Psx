@@ -44,7 +44,7 @@ fun DonutChartWithLegend(
             // Chart
             InteractiveDonutChart(
                 data = data,
-                strokeWidth = 15.dp,
+                strokeWidth = 18.dp,
                 radius = 100.dp,
                 modifier = modifier.padding(16.dp)
             )
@@ -163,7 +163,7 @@ fun LegendItem(chartData: ChartData, percentage: Float) {
     ) {
         Box(
             modifier = Modifier
-                .size(16.dp)
+                .size(10.dp)
                 .background(chartData.color, CircleShape)
         )
 
@@ -172,21 +172,16 @@ fun LegendItem(chartData: ChartData, percentage: Float) {
         Column() {
             Text(
                 text = chartData.label,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.labelSmall,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             Text(
                 text = "${String.format("%.1f", percentage)}%",
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
-//        Text(
-//            text = "${String.format("%.0f", chartData.value)}",
-//            style = MaterialTheme.typography.bodyMedium,
-//            fontWeight = FontWeight.Medium
-//        )
     }
 }
