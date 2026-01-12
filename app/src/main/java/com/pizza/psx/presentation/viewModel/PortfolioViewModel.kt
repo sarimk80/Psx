@@ -204,6 +204,13 @@ class PortfolioViewModel @Inject constructor(
         }
     }
 
+    fun checkIfSymbolExist(symbol: String): Boolean {
+        val currentList = portfolioModels.value
+        return currentList.any { it.symbol == symbol }
+    }
+
+
+
 }
 
 

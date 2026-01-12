@@ -573,7 +573,7 @@ fun StockItem(
                 horizontalAlignment = Alignment.End
             ) {
                 Text(
-                    text = stock.current,
+                    text = stock.high,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface

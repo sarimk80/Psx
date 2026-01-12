@@ -164,9 +164,14 @@ fun PortfolioView(
                 ) {
                     AddStockBottomSheetContent(
                         onTickerClick = {type, symbol ->
-                            selectedSymbol = symbol
+                            if(viewModel.checkIfSymbolExist(symbol = symbol)){
+                                viewModel.addToPortfolioModel(symbol, volume = 0)
+                                showBottomSheet = false
+                            }else{
+                                selectedSymbol = symbol
+                                showAddStockDialog = true
+                            }
 
-                            showAddStockDialog = true
                         },
                         onDismiss = { showBottomSheet = false },
                         searchUiState = searchUiState,
