@@ -37,6 +37,8 @@ import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.TrendingDown
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Circle
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Timelapse
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -46,9 +48,14 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -68,6 +75,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -79,6 +87,7 @@ import com.pizza.compose.financialRed
 import com.pizza.psx.domain.model.SectorResponse
 import com.pizza.psx.domain.model.StockData
 import com.pizza.psx.domain.model.TopStocks
+import com.pizza.psx.presentation.helpers.number_format
 import com.pizza.psx.presentation.viewModel.HomeViewModel
 
 
@@ -173,44 +182,36 @@ fun MarketMoversContent(
             )
         }
 
-        // Tab Row with better styling
-        TabRow(
-            selectedTabIndex = selectedTab,
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.fillMaxWidth(),
-            indicator = { tabPositions ->
-                Box(
-                    modifier = Modifier
-                        .padding(horizontal = 4.dp)
-                        .tabIndicatorOffset(tabPositions[selectedTab])
-                        .height(3.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.primary,
-                            shape = RoundedCornerShape(2.dp)
-                        )
-                )
-            },
-            divider = {}
-        ) {
+        SingleChoiceSegmentedButtonRow(modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)) {
+
             tabs.forEachIndexed { index, title ->
-                val isSelected = selectedTab == index
-                Tab(
-                    text = {
-                        Text(
-                            text = title,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = if (isSelected) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    },
-                    selected = isSelected,
+                SegmentedButton(
+                    selected = selectedTab == index,
                     onClick = { selectedTab = index },
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 12.dp)
-                )
+                    shape = SegmentedButtonDefaults.itemShape(
+                        index = index,
+                        count = tabs.size
+                    ),
+                    colors = SegmentedButtonDefaults.colors(
+                        activeContainerColor = MaterialTheme.colorScheme.primary,
+                        activeContentColor = MaterialTheme.colorScheme.onPrimary,
+                        inactiveContainerColor = MaterialTheme.colorScheme.surface,
+                        inactiveContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                ) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = if (selectedTab == index)
+                            FontWeight.SemiBold
+                        else
+                            FontWeight.Medium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
         }
 
@@ -500,8 +501,250 @@ fun StockItem(
     onTickerClick: (String, String) -> Unit,
 ) {
     val priceColor = if (isGainer) financialGreen else financialRed
-    val changeSign = if (isGainer) "+" else ""
-   // val changeValue = stock.changeDouble
+    val changeSign = if (isGainer && stock.change.toDoubleOrNull() ?: 0.0 > 0) "+" else ""
+    val changePercentage = calculateChangePercentage(stock.current, stock.ldcp)
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .clickable { onTickerClick("REG", stock.script_name) },
+        elevation = CardDefaults.cardElevation(2.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            // Top Section: Rank, Symbol/Name, and Price with Change
+            Row(
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // Left Side: Rank and Stock Info
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    // Rank Badge - More prominent
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(
+                                brush = Brush.verticalGradient(
+                                    colors = if (isGainer) {
+                                        listOf(
+                                            financialGreen.copy(alpha = 0.15f),
+                                            financialGreen.copy(alpha = 0.08f)
+                                        )
+                                    } else {
+                                        listOf(
+                                            financialRed.copy(alpha = 0.15f),
+                                            financialRed.copy(alpha = 0.08f)
+                                        )
+                                    }
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = rank.toString(),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = priceColor
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(14.dp))
+
+                    // Symbol and Volume
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        Text(
+                            text = stock.script_name,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.widthIn(max = 140.dp)
+                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ShowChart,
+                                contentDescription = "Volume",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Text(
+                                text = formatVolume(stock.volume),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+
+                // Right Side: Price and Change - More prominent
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = number_format(stock.current.toDouble()),
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    // Change Badge with background
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = priceColor.copy(alpha = 0.12f),
+                        modifier = Modifier.padding(0.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (isGainer) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
+                                contentDescription = if (isGainer) "Increase" else "Decrease",
+                                tint = priceColor,
+                                modifier = Modifier.size(14.dp)
+                            )
+
+                            Text(
+                                text = "$changeSign${stock.change}",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = priceColor,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            Text(
+                                text = "($changeSign$changePercentage%)",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = priceColor,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Divider for better separation
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 14.dp),
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+            )
+
+            // Bottom Section: Price Statistics - Improved layout
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                PriceStatItem(
+                    label = "High",
+                    value = stock.high,
+                    color = financialGreen,
+                    icon = Icons.Default.TrendingUp
+                )
+
+                PriceStatItem(
+                    label = "Low",
+                    value = stock.low,
+                    color = financialRed,
+                    icon = Icons.Default.TrendingDown
+                )
+
+                PriceStatItem(
+                    label = "Open",
+                    value = stock.open,
+                    color = MaterialTheme.colorScheme.primary,
+                    icon = Icons.Default.Circle
+                )
+
+                PriceStatItem(
+                    label = "Prev",
+                    value = stock.ldcp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    icon = Icons.Default.History
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun PriceStatItem(
+    label: String,
+    value: String,
+    color: Color,
+    icon: ImageVector
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = Modifier.padding(horizontal = 2.dp)
+    ) {
+        // Icon with subtle background
+        Box(
+            modifier = Modifier
+                .size(28.dp)
+                .clip(CircleShape)
+                .background(color.copy(alpha = 0.1f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = color,
+                modifier = Modifier.size(14.dp)
+            )
+        }
+
+        // Label
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = FontWeight.Medium,
+            textAlign = TextAlign.Center
+        )
+
+        // Value - More prominent
+        Text(
+            text = number_format(value.toDouble()),
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+
+@Composable
+fun CompactStockItem(
+    stock: StockData,
+    isGainer: Boolean,
+    rank: Int,
+    onTickerClick: (String, String) -> Unit,
+) {
+    val priceColor = if (isGainer) financialGreen else financialRed
 
     Card(
         modifier = Modifier
@@ -522,7 +765,7 @@ fun StockItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Left side: Rank and Symbol
+            // Left: Rank and Symbol
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.weight(1f)
@@ -530,7 +773,7 @@ fun StockItem(
                 // Rank Badge
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
+                        .size(32.dp)
                         .clip(CircleShape)
                         .background(
                             color = if (isGainer) financialGreen.copy(alpha = 0.1f)
@@ -540,7 +783,7 @@ fun StockItem(
                 ) {
                     Text(
                         text = rank.toString(),
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = priceColor
                     )
@@ -548,7 +791,7 @@ fun StockItem(
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                // Symbol and Name
+                // Symbol
                 Column {
                     Text(
                         text = stock.script_name,
@@ -557,54 +800,56 @@ fun StockItem(
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.widthIn(max = 150.dp)
+                        modifier = Modifier.widthIn(max = 100.dp)
                     )
 
+                    // Price range
                     Text(
-                        text = "LTP: ${stock.current}",
-                        style = MaterialTheme.typography.labelMedium,
+                        text = "${stock.low} - ${stock.high}",
+                        style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
 
-            // Right side: Price and Change
+            // Right: Price Info
             Column(
                 horizontalAlignment = Alignment.End
             ) {
+                // Current Price
                 Text(
-                    text = stock.high,
+                    text = stock.current,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
+                // Change
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = if (isGainer) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
-                        contentDescription = if (isGainer) "Increase" else "Decrease",
-                        tint = priceColor,
-                        modifier = Modifier.size(16.dp)
-                    )
-
-                    Spacer(modifier = Modifier.width(4.dp))
-
                     Text(
-                        text = "$changeSign${stock.change}",
+                        text = stock.change,
                         style = MaterialTheme.typography.bodyMedium,
                         color = priceColor,
                         fontWeight = FontWeight.Medium
                     )
 
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
 
-                    Text(
-                        text = "(${changeSign}${calculateChangePercentage(stock.current, stock.ldcp)}%)",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = priceColor
-                    )
+                    // Open indicator
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = "O:${stock.open}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
         }
