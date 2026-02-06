@@ -9,6 +9,7 @@ import com.pizza.psx.domain.model.MarketDividend
 import com.pizza.psx.domain.model.Root
 import com.pizza.psx.domain.model.Sector
 import com.pizza.psx.domain.model.SectorResponse
+import com.pizza.psx.domain.model.SymbolDetail
 import com.pizza.psx.domain.model.SymbolsModel
 import com.pizza.psx.domain.model.Ticker
 import retrofit2.http.GET
@@ -49,4 +50,7 @@ interface StockApi {
 
     @GET
     suspend fun getSectorResponse(@Url url: String):SectorResponse
+
+    @GET
+    suspend fun getSymbolDetail(@Url url: String): SymbolDetail
 }

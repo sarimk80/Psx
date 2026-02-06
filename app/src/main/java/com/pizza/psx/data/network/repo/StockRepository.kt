@@ -11,6 +11,7 @@ import com.pizza.psx.domain.model.Root
 import com.pizza.psx.domain.model.Sector
 import com.pizza.psx.domain.model.SectorResponse
 import com.pizza.psx.domain.model.StockResult
+import com.pizza.psx.domain.model.SymbolDetail
 import com.pizza.psx.domain.model.SymbolsModel
 import com.pizza.psx.domain.model.Ticker
 import com.pizza.psx.domain.repo.StockRepo
@@ -119,6 +120,15 @@ class StockRepository(
     override suspend fun getSectorResponse(): StockResult<SectorResponse> = withContext(dispatcher){
         return@withContext try {
             val result = stockApi.getSectorResponse("https://sarim-pix.hf.space/gainer_loosers")
+            StockResult.Success(result)
+        }catch (e:Exception){
+            StockResult.Error("Failed${e.toString()}")
+        }
+    }
+
+    override suspend fun getSymbolDetail(symbol: String): StockResult<SymbolDetail> = withContext(dispatcher){
+        return@withContext try {
+            val result = stockApi.getSymbolDetail("https://sarim-pix.hf.space/get_symbol_detail${symbol}")
             StockResult.Success(result)
         }catch (e:Exception){
             StockResult.Error("Failed${e.toString()}")

@@ -111,7 +111,7 @@ fun IndexDetailView(
                 title = {
                     Text(
                         text = displayIndexName,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.SemiBold
                     )
                 },

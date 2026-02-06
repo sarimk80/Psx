@@ -43,6 +43,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -65,7 +66,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import com.pizza.compose.financialGreen
+import com.pizza.compose.financialGrey
 import com.pizza.compose.financialRed
+import com.pizza.compose.financialWarning
 import com.pizza.psx.domain.model.MarketDividend
 import com.pizza.psx.presentation.helpers.number_format
 import kotlinx.coroutines.delay
@@ -89,24 +92,13 @@ fun Home(
 
     Scaffold(topBar = { TopAppBar(
         title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Default.ShowChart,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    "Market Indices",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
+            Text(
+                "Market Indices",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold
+            )
         },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            titleContentColor = MaterialTheme.colorScheme.onSurface
-        )
+
     )
     }) { padding ->
         Column(
@@ -570,7 +562,7 @@ fun TickerPage(ticker: Ticker, onClick: (String) -> Unit) {
                         text = ticker.data.symbol,
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
+                        //color = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
@@ -628,7 +620,7 @@ fun TickerPage(ticker: Ticker, onClick: (String) -> Unit) {
                         label = "High",
                         value = number_format(ticker.data.high),
                         icon = Icons.Default.TrendingUp,
-                        color = Color(0xFF00C853)
+                        color = financialGreen
                     )
                 }
                 item {
@@ -636,7 +628,7 @@ fun TickerPage(ticker: Ticker, onClick: (String) -> Unit) {
                         label = "Low",
                         value = number_format(ticker.data.low),
                         icon = Icons.Default.TrendingDown,
-                        color = Color(0xFFD32F2F)
+                        color = financialRed
                     )
                 }
                 item {
@@ -644,7 +636,7 @@ fun TickerPage(ticker: Ticker, onClick: (String) -> Unit) {
                         label = "Volume",
                         value = formatVolume(ticker.data.volume),
                         icon = Icons.Default.BarChart,
-                        color = MaterialTheme.colorScheme.primary
+                        color = financialGrey
                     )
                 }
                 item {
@@ -652,7 +644,7 @@ fun TickerPage(ticker: Ticker, onClick: (String) -> Unit) {
                         label = "Trades",
                         value = formatNumber(ticker.data.trades),
                         icon = Icons.Default.SwapHoriz,
-                        color = MaterialTheme.colorScheme.secondary
+                        color = financialWarning
                     )
                 }
             }
@@ -755,7 +747,7 @@ fun HomeErrorState(
 }
 
 // Helper functions for formatting
-private fun formatVolume(volume: Long): String {
+ fun formatVolume(volume: Long): String {
     return when {
         volume >= 1_000_000 -> "%.2fM".format(volume / 1_000_000.0)
         volume >= 1_000 -> "%.2fK".format(volume / 1_000.0)

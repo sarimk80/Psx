@@ -124,7 +124,11 @@ fun PortfolioView(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("My Portfolio") },
+                title = {
+                    Text("My Portfolio",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold)
+                        },
 
             )
         },
@@ -694,13 +698,7 @@ fun StatItem(
 }
 
 // Helper functions for formatting
-private fun formatVolume(volume: Long): String {
-    return when {
-        volume >= 1_000_000 -> "%.2fM".format(volume / 1_000_000.0)
-        volume >= 1_000 -> "%.1fK".format(volume / 1_000.0)
-        else -> volume.toString()
-    }
-}
+
 
 private fun formatCurrency(value: Double): String {
     return when {

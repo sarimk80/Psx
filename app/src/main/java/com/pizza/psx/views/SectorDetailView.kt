@@ -157,9 +157,8 @@ private fun SectorTopBar(
         title = {
             Text(
                 text = sectorName,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold
             )
         },
         navigationIcon = {

@@ -1,3 +1,5 @@
+package com.pizza.psx.views
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -40,12 +42,14 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
+import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,6 +61,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -86,13 +91,30 @@ import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.core.cartesian.marker.DefaultCartesianMarker
 import com.pizza.psx.presentation.helpers.formatShortDate
 import com.pizza.psx.presentation.helpers.formatVolume
-import com.pizza.psx.views.StatItem
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberCandlestickCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
+import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
+import com.patrykandpatrick.vico.compose.common.component.shapeComponent
+import com.patrykandpatrick.vico.compose.common.fill
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.core.cartesian.data.candlestickSeries
+import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
+import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.core.cartesian.layer.CartesianLayerPadding
+import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
+import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
+import com.patrykandpatrick.vico.core.cartesian.marker.CartesianMarker
+import com.patrykandpatrick.vico.core.common.Fill
 import com.patrykandpatrick.vico.core.common.Insets
+import com.patrykandpatrick.vico.core.common.component.LineComponent
+import com.patrykandpatrick.vico.core.common.component.TextComponent
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
+import com.patrykandpatrick.vico.core.common.shape.Shape
+import com.pizza.psx.domain.model.SymbolDetail
 import kotlin.math.min
 
 
@@ -132,7 +154,8 @@ fun TickerDetailView(type: String, symbol: String, onBack: () -> Unit) {
                         companyData = uiState.company!!.data,
                         fundamentalData = uiState.fundamentals!!.data,
                         dividendData = uiState.dividend!!.data,
-                        kLineModel = uiState.kLine!!.data
+                        kLineModel = uiState.kLine!!.data,
+                        symbolDetail = uiState.symbolDetail!!
                     )
                 else -> TickerLoadingState()
             }
@@ -221,9 +244,7 @@ fun TickerDetailTopAppBar(
             Text(
                 text = symbol.uppercase(),
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                fontWeight = FontWeight.SemiBold
             )
         },
         navigationIcon = {
@@ -253,16 +274,17 @@ fun CombinedTickerDetailContent(
     companyData: CompaniesData,
     fundamentalData: FundamentalData,
     dividendData: List<DividendData>,
-    kLineModel: List<KLineModelData>
+    kLineModel: List<KLineModelData>,
+    symbolDetail: SymbolDetail
 ) {
     var selectedTab by remember { mutableStateOf(0) }
-    val tabs = listOf("Overview", "Company", "Financials", "Dividends","Chart")
+    val tabs = listOf("Overview", "Company", "Financials", "Dividends","Chart","Corporate Actions")
 
     Column(modifier = Modifier.fillMaxSize()) {
         // Quick Stats Header - Always visible
         QuickStatsHeader(tickerData, fundamentalData)
 
-        TabRow(
+        ScrollableTabRow(
             selectedTabIndex = selectedTab,
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.primary,
@@ -290,9 +312,261 @@ fun CombinedTickerDetailContent(
             2 -> FinancialsTab(fundamentalData)
             3 -> DividendsTab(dividendData, companyData.symbol)
             4 -> ChartView(kLineModel = kLineModel)
+            5 -> CorporateAction(symbolDetail = symbolDetail)
         }
     }
 }
+
+@Composable
+fun CorporateAction(symbolDetail: SymbolDetail) {
+
+    val annual = remember(symbolDetail.financials.annual) {
+        symbolDetail.financials.annual.sortedBy { it.period }
+    }
+
+    val ratios = remember(symbolDetail.ratios) {
+        symbolDetail.ratios.sortedBy { it.period }
+    }
+
+    // Derived values (better than multiple remembers)
+    val xValues by remember {
+        derivedStateOf { annual.map { it.period.toInt() } }
+    }
+
+    val profitValues by remember {
+        derivedStateOf { annual.map { it.profitAfterTax ?: 0L } }
+    }
+
+    val salesValues by remember {
+        derivedStateOf { annual.map { it.sales ?: 0L } }
+    }
+
+    val epsValues by remember {
+        derivedStateOf { annual.map { it.eps ?: 0.0 } }
+    }
+
+    val pegValues by remember {
+        derivedStateOf { ratios.map { it.peg ?: 0.0 } }
+    }
+
+    val epsGrowthValues by remember {
+        derivedStateOf { ratios.map { it.epsGrowth ?: 0.0 } }
+    }
+
+    val netMargin by remember {
+        derivedStateOf { ratios.map { it.netProfitMargin ?: 0.0 } }
+    }
+
+    val grossMargin by remember {
+        derivedStateOf { ratios.map { it.grossProfitMargin ?: 0.0 } }
+    }
+
+    // Producers
+    val columnProducer = remember { CartesianChartModelProducer() }
+    val epsProducer = remember { CartesianChartModelProducer() }
+    val pegProducer = remember { CartesianChartModelProducer() }
+    val growthProducer = remember { CartesianChartModelProducer() }
+    val marginProducer = remember { CartesianChartModelProducer() }
+
+    // Populate producers safely
+    LaunchedEffect(annual) {
+        columnProducer.runTransaction {
+            columnSeries {
+                series(xValues, profitValues)
+                series(xValues, salesValues)
+            }
+        }
+
+        epsProducer.runTransaction {
+            lineSeries { series(xValues, epsValues) }
+        }
+    }
+
+    LaunchedEffect(ratios) {
+        pegProducer.runTransaction {
+            lineSeries { series(xValues, pegValues) }
+        }
+
+        growthProducer.runTransaction {
+            lineSeries { series(xValues, epsGrowthValues) }
+        }
+
+        marginProducer.runTransaction {
+            columnSeries {
+                series(xValues, netMargin)
+                series(xValues, grossMargin)
+            }
+        }
+    }
+
+    val labelFormatter = remember {
+        CartesianValueFormatter { _, value, _ -> formatVolume(value) }
+    }
+
+    val marker = rememberDefaultCartesianMarker(
+        label = TextComponent()
+    )
+    // ✅ Make scrollable (very important for charts!)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+
+        ChartTitle("Revenue vs Profit")
+        ColumnChart(columnProducer, labelFormatter,marker)
+
+        ChartTitle("EPS")
+        LineChart(epsProducer,marker)
+
+        ChartTitle("EPS Growth")
+        LineChart(growthProducer,marker)
+
+        ChartTitle("PEG Ratio")
+        LineChart(pegProducer,marker)
+
+        ChartTitle("Profit Margins")
+        ColumnChart(marginProducer, labelFormatter,marker)
+    }
+}
+
+
+@Composable
+fun ChartCard(
+    title: String,
+    subtitle: String,
+    content: @Composable () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp, bottom = 16.dp)
+            )
+            content()
+        }
+    }
+}
+
+@Composable
+fun ColumnChart(
+    producer: CartesianChartModelProducer,
+    formatter: CartesianValueFormatter?,
+    marker: CartesianMarker
+) {
+    CartesianChartHost(
+        chart = rememberCartesianChart(
+            rememberColumnCartesianLayer(
+                dataLabel = TextComponent(),
+                dataLabelValueFormatter = formatter!!,
+                //spacing = 8.dp
+            ),
+            marker = marker,
+            startAxis = VerticalAxis.rememberStart(
+                valueFormatter = formatter,
+                guideline = null,
+                itemPlacer = VerticalAxis.ItemPlacer.step(step = { 5.0 })
+            ),
+            bottomAxis = HorizontalAxis.rememberBottom(
+                guideline = null,
+                itemPlacer = HorizontalAxis.ItemPlacer.aligned()
+            ),
+        ),
+        modelProducer = producer,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(300.dp)
+            .padding(top = 8.dp)
+    )
+}
+
+@Composable
+fun LineChart(
+    producer: CartesianChartModelProducer,
+    marker: CartesianMarker
+) {
+    val lineColor = financialWarning
+
+    CartesianChartHost(
+        chart = rememberCartesianChart(
+            rememberLineCartesianLayer(
+                lineProvider = LineCartesianLayer.LineProvider.series(
+                    LineCartesianLayer.Line(
+                        fill = LineCartesianLayer.LineFill.single(
+                            fill(lineColor)
+                        ),
+                        areaFill = LineCartesianLayer.AreaFill.single(
+                            fill(lineColor.copy(alpha = 0.2f))
+                        ),
+                        //cap = Paint.Cap.ROUND,
+                        //thickness = 3.dp,
+                        pointProvider = LineCartesianLayer.PointProvider.single(
+                            LineCartesianLayer.Point(
+                                component = rememberShapeComponent(
+                                    shape = Shape.Rectangle,
+                                    fill = fill(lineColor)
+
+                                ),
+                                //size = 10.dp
+                            )
+                        )
+                    )
+                )
+            ),
+            marker = marker,
+            startAxis = VerticalAxis.rememberStart(
+                guideline = rememberLineComponent(
+                    fill = Fill.Black,
+                    //color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                    thickness = 1.dp,
+                    shape = Shape.Rectangle
+                ),
+                itemPlacer = VerticalAxis.ItemPlacer.step(step = { 5.0 })
+            ),
+            bottomAxis = HorizontalAxis.rememberBottom(
+                guideline = null,
+                itemPlacer = HorizontalAxis.ItemPlacer.aligned()
+            ),
+        ),
+        modelProducer = producer,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(300.dp)
+            .padding(top = 8.dp)
+    )
+}
+
+@Composable
+fun ChartTitle(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleMedium
+    )
+}
+
+
 
 @Composable
 fun ChartView(

@@ -10,6 +10,7 @@ import com.pizza.psx.domain.model.Root
 import com.pizza.psx.domain.model.Sector
 import com.pizza.psx.domain.model.SectorResponse
 import com.pizza.psx.domain.model.StockResult
+import com.pizza.psx.domain.model.SymbolDetail
 import com.pizza.psx.domain.model.SymbolsModel
 import com.pizza.psx.domain.model.Ticker
 
@@ -34,4 +35,6 @@ interface StockRepo {
     suspend fun getIndexDetail(indexName: String): StockResult<List<IndexDetailModel>>
 
     suspend fun getSectorResponse(): StockResult<SectorResponse>
+
+    suspend fun getSymbolDetail(symbol: String): StockResult<SymbolDetail>
 }

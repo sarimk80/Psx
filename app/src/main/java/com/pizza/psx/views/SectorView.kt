@@ -99,40 +99,14 @@ fun SectorView(
 fun SectorTopAppBar(onRefresh: () -> Unit) {
     TopAppBar(
         title = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.PieChart,
-                    contentDescription = "Sectors",
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-                Column {
-                    Text(
-                        text = "Market Sectors",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Text(
-                        text = "Sector-wise performance",
-                        style = MaterialTheme.typography.labelSmall,
-                    )
-                }
-            }
+            Text(
+                text = "Market Sectors",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold
+            )
         },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            titleContentColor = MaterialTheme.colorScheme.onSurface
-        ),
-        actions = {
-            IconButton(onClick = onRefresh) {
-                Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = "Refresh sectors"
-                )
-            }
-        }
+
+
     )
 }
 
@@ -553,14 +527,14 @@ fun SectorErrorState(error: String, onRetry: () -> Unit) {
 // Extension functions for formatting
 private fun Double.format(digits: Int): String = "%.${digits}f".format(this)
 
-private fun formatLargeNumber(number: Long): String {
-    return when {
-        number >= 1_000_000_000 -> "${(number / 1_000_000_000.0).format(1)}B"
-        number >= 1_000_000 -> "${(number / 1_000_000.0).format(1)}M"
-        number >= 1_000 -> "${(number / 1_000.0).format(1)}K"
-        else -> number.toString()
-    }
-}
+//private fun formatLargeNumber(number: Long): String {
+//    return when {
+//        number >= 1_000_000_000 -> "${(number / 1_000_000_000.0).format(1)}B"
+//        number >= 1_000_000 -> "${(number / 1_000_000.0).format(1)}M"
+//        number >= 1_000 -> "${(number / 1_000.0).format(1)}K"
+//        else -> number.toString()
+//    }
+//}
 
 fun heatmapColor(change: Double): Color =
     when {

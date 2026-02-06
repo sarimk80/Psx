@@ -10,12 +10,14 @@ import com.pizza.psx.domain.model.Fundamentals
 import com.pizza.psx.domain.model.KLineModel
 import com.pizza.psx.domain.model.MarketDividend
 import com.pizza.psx.domain.model.StockResult
+import com.pizza.psx.domain.model.SymbolDetail
 import com.pizza.psx.domain.model.Ticker
 import com.pizza.psx.domain.usecase.CompanyDividendUseCase
 import com.pizza.psx.domain.usecase.CompanyFundamentalUseCase
 import com.pizza.psx.domain.usecase.CompanyUseCase
 import com.pizza.psx.domain.usecase.KLineModelUseCase
 import com.pizza.psx.domain.usecase.MarketDividendUseCase
+import com.pizza.psx.domain.usecase.SymbolDetailUseCase
 import com.pizza.psx.domain.usecase.TickerUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -31,7 +33,8 @@ class TickerDetailViewModel@Inject constructor(
     private val getCompanyFundamental:CompanyFundamentalUseCase,
     private val getCompanyDividend: CompanyDividendUseCase,
     private val marketDividendUseCase: MarketDividendUseCase,
-    private val getKLineModelUseCase: KLineModelUseCase
+    private val getKLineModelUseCase: KLineModelUseCase,
+    private val getSymbolDetailUseCase: SymbolDetailUseCase
 
 ): ViewModel() {
 
@@ -50,9 +53,19 @@ class TickerDetailViewModel@Inject constructor(
                 val companyFundamental = async { getCompanyFundamental(symbol) }
                 val companyDividend = async { getCompanyDividend(symbol) }
                 val kLine = async { getKLineModelUseCase(symbol,"1d") }
+                val symbolDetailOverview = async { getSymbolDetailUseCase(symbol) }
 
-                val (tickerResult,companyResult,fundamentalResult,dividendResult,kLineResult) =
-                    awaitAll(tickerDetail,companyDetail,companyFundamental,companyDividend,kLine)
+//                val (tickerResult,companyResult,fundamentalResult,dividendResult,kLineResult,symbolDetailResult) =
+//                    awaitAll(tickerDetail,companyDetail,companyFundamental,companyDividend,kLine,symbolDetailOverview)
+
+                val results = awaitAll(tickerDetail, companyDetail, companyFundamental, companyDividend, kLine, symbolDetailOverview)
+
+                val tickerResult = results[0] as StockResult<Ticker>
+                val companyResult = results[1] as StockResult<Companies>
+                val fundamentalResult = results[2] as StockResult<Fundamentals>
+                val dividendResult = results[3] as StockResult<Dividend>
+                val kLineResult = results[4] as StockResult<KLineModel>
+                val symbolDetailResult = results[5] as StockResult<SymbolDetail>
 
                 val ticker = when(tickerResult){
                     is StockResult.Success -> tickerResult.data
@@ -94,6 +107,14 @@ class TickerDetailViewModel@Inject constructor(
                     }
                 }
 
+                val resultSymbolOverview = when(symbolDetailResult){
+                    is StockResult.Success -> symbolDetailResult.data
+                    is StockResult.Loading -> null
+                    is StockResult.Error ->{
+                        _uiState.value = _uiState.value.copy(error = symbolDetailResult.message)
+                    }
+                }
+
 
 
                 _uiState.value = _uiState.value.copy(
@@ -102,6 +123,7 @@ class TickerDetailViewModel@Inject constructor(
                     fundamentals=fundamental as Fundamentals,
                     dividend = dividend as Dividend,
                     kLine = resultKLine as KLineModel,
+                    symbolDetail = resultSymbolOverview as SymbolDetail,
                     isLoading = false,
                     error = null
                 )
@@ -243,6 +265,7 @@ data class TickerDetailUiState(
     val listOfTicker:List<Ticker>? = null,
     val dividend: Dividend? = null,
     val marketDividend:List<MarketDividend>? = null,
+    val symbolDetail: SymbolDetail? = null,
     val kLine:KLineModel? = null,
     val isLoading: Boolean = true,
     val error: String? = null,

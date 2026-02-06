@@ -1,6 +1,6 @@
 package com.pizza.psx
 
-import TickerDetailView
+import com.pizza.psx.views.TickerDetailView
 import android.app.Application
 import android.net.Uri
 import android.os.Bundle

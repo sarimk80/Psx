@@ -62,7 +62,9 @@ fun SearchView(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Search Symbols") },
+                title = { Text("Search Symbols",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold) },
 
             )
         }
