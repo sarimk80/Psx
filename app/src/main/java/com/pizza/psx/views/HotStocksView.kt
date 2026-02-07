@@ -455,7 +455,7 @@ fun StockList(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             itemsIndexed(stocks.take(20)) { index, stock ->
-                StockItem(
+                CompactStockItem(
                     stock = stock,
                     isGainer = isGainer,
                     rank = index + 1,
