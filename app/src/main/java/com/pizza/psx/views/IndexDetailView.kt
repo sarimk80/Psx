@@ -49,6 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pizza.psx.R
+import com.pizza.psx.domain.model.IndexDetailModel
 import com.pizza.psx.domain.model.SectorName
 import com.pizza.psx.presentation.helpers.getColorFromIndex
 import com.pizza.psx.presentation.helpers.stringToIndexString
@@ -68,6 +69,7 @@ fun IndexDetailView(
     viewModel: PortfolioViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState
+    val indexUiState by viewModel.indexUiState
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
@@ -80,6 +82,7 @@ fun IndexDetailView(
 
     // Load data when screen opens
     LaunchedEffect(indexSymbol) {
+        viewModel.getChartIndex(indexName = stringToIndexString(indexSymbol))
         viewModel.getIndexDetail(indexName = stringToIndexString(indexSymbol))
     }
 
@@ -136,11 +139,11 @@ fun IndexDetailView(
                     .padding(paddingValues)
             ) {
                 when {
-                    uiState.isLoading && uiState.listOfStocks.isNullOrEmpty() -> {
+                  uiState.isLoading && uiState.listOfStocks.isNullOrEmpty() -> {
                         FullScreenLoading()
                     }
 
-                    uiState.error != null && uiState.listOfStocks.isNullOrEmpty() -> {
+                    (uiState.error != null && uiState.listOfStocks.isNullOrEmpty() || indexUiState.error != null) -> {
                         ErrorStateIndex(
                             error = uiState.error!!,
                             onRetry = {
@@ -155,6 +158,7 @@ fun IndexDetailView(
                             listState = listState,
                             onTickerClick = onTickerClick,
                             displayIndexName = displayIndexName,
+                            chartStocks = indexUiState.listOfStocks!!,
                             onRefresh = {
                                 isRefreshing = true
                                 coroutineScope.launch {
@@ -180,6 +184,7 @@ fun IndexDetailView(
         }
     )
 }
+
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -285,27 +290,28 @@ private fun ContentLoadedState(
     listState: LazyListState,
     onTickerClick: (String) -> Unit,
     displayIndexName: String,
+    chartStocks: List<IndexDetailModel>,
     onRefresh: () -> Unit,
     isRefreshing: Boolean
 ) {
-    // Calculate sector data for chart
-    val sectorCount = remember(uiState.listOfStocks) {
-        uiState.listOfStocks?.groupBy { it.data.sectorName }
-            ?.map { (sectorName, tickers) ->
-                SectorName(sectorName, tickers.size)
-            } ?: emptyList()
-    }
-
-    val chartSampleData = remember(sectorCount) {
-        sectorCount.mapIndexed { index, sector ->
-            ChartData(
-                label = sector.sectorName.ifEmpty { "Unknown" },
-                value = sector.sectorCount.toFloat(),
-                color = getColorFromIndex(index),
-                price = sectorCount.size.toFloat()
-            )
-        }
-    }
+//    // Calculate sector data for chart
+//    val sectorCount = remember(uiState.listOfStocks) {
+//        uiState.listOfStocks?.groupBy { it.data.sectorName }
+//            ?.map { (sectorName, tickers) ->
+//                SectorName(sectorName, tickers.size)
+//            } ?: emptyList()
+//    }
+//
+//    val chartSampleData = remember(sectorCount) {
+//        sectorCount.mapIndexed { index, sector ->
+//            ChartData(
+//                label = sector.sectorName.ifEmpty { "Unknown" },
+//                value = sector.sectorCount.toFloat(),
+//                color = getColorFromIndex(index),
+//                price = sectorCount.size.toFloat()
+//            )
+//        }
+//    }
 
     // Calculate total stocks count
     val totalStocks = uiState.listOfStocks?.size ?: 0
@@ -330,29 +336,32 @@ private fun ContentLoadedState(
                 Spacer(modifier = Modifier.height(4.dp))
             }
         }
+item{
+    IndexChartSection(stocks = chartStocks)
 
-        // Donut chart section
-        if (chartSampleData.isNotEmpty()) {
-            item {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                ) {
-                    Text(
-                        text = "Sector Distribution",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-                    DonutChartWithLegend(
-                        data = chartSampleData,
-                        isShowCentralContent = false
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-                }
-            }
-        }
+}
+//        // Donut chart section
+//        if (chartSampleData.isNotEmpty()) {
+//            item {
+//                Column(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(horizontal = 16.dp)
+//                ) {
+//                    Text(
+//                        text = "Sector Distribution",
+//                        style = MaterialTheme.typography.titleMedium,
+//                        fontWeight = FontWeight.SemiBold,
+//                        modifier = Modifier.padding(bottom = 16.dp)
+//                    )
+//                    DonutChartWithLegend(
+//                        data = chartSampleData,
+//                        isShowCentralContent = false
+//                    )
+//                    Spacer(modifier = Modifier.height(24.dp))
+//                }
+//            }
+//        }
 
         // Stocks list header
         item {
@@ -389,4 +398,52 @@ private fun ContentLoadedState(
         }
     }
 
+}
+
+
+@Composable
+private fun IndexChartSection(
+    stocks: List<IndexDetailModel>
+) {
+
+    val sectorCount = remember(stocks) {
+        stocks.groupBy { it.sector }
+            .map { (sectorName, tickers) ->
+                SectorName(sectorName, tickers.size)
+            }
+    }
+
+    val chartData = remember(sectorCount) {
+        sectorCount.mapIndexed { index, sector ->
+            ChartData(
+                label = sector.sectorName.ifEmpty { "Unknown" },
+                value = sector.sectorCount.toFloat(),
+                color = getColorFromIndex(index),
+                price = sectorCount.size.toFloat()
+            )
+        }
+    }
+
+    if (chartData.isEmpty()) return
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+
+        Text(
+            text = "Sector Distribution",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        DonutChartWithLegend(
+            data = chartData,
+            isShowCentralContent = false
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+    }
 }

@@ -4,6 +4,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pizza.psx.domain.model.IndexDetailModel
 import com.pizza.psx.domain.model.PortfolioModel
 import com.pizza.psx.domain.model.StockResult
 import com.pizza.psx.domain.model.Ticker
@@ -38,7 +39,10 @@ class PortfolioViewModel @Inject constructor(
 
 
     private val _uiState = mutableStateOf(PortfolioUiState())
+    private val _indexUiState = mutableStateOf(IndexList())
+
     val uiState: State<PortfolioUiState> = _uiState
+    val indexUiState: State<IndexList> = _indexUiState
 
     val portfolioModels: StateFlow<List<PortfolioModel>> =
         repo.getAllSymbols
@@ -104,6 +108,30 @@ class PortfolioViewModel @Inject constructor(
                 }
 
             }catch (e:Exception){
+            }
+        }
+    }
+
+    fun getChartIndex(indexName: String){
+        viewModelScope.launch {
+            _indexUiState.value = _indexUiState.value.copy(isLoading = true)
+
+            try {
+
+                when(val result = indexDetailUseCase(indexName = indexName)){
+                    is StockResult.Success -> {
+                        _indexUiState.value = _indexUiState.value.copy(listOfStocks = result.data, isLoading = false)
+                    }
+                    is StockResult.Error -> {
+                        _indexUiState.value = _indexUiState.value.copy(error = result.message)
+                    }
+                    StockResult.Loading -> {
+                        _indexUiState.value = _indexUiState.value.copy(isLoading = true)
+                    }
+                }
+
+            }catch (e:Exception){
+                _indexUiState.value = _indexUiState.value.copy(isLoading = false, error = e.message)
             }
         }
     }
@@ -218,4 +246,10 @@ data class PortfolioUiState(
     val isLoading: Boolean = true,
     val error: String? = null,
     val listOfStocks:List<Ticker>?=null
+)
+//List<IndexDetailModel>
+data class IndexList(
+    val isLoading: Boolean = true,
+    val error: String? = null,
+    val listOfStocks:List<IndexDetailModel>?=null
 )
