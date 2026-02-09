@@ -37,10 +37,7 @@ A modern Android application providing **real-time PSX market data**, **company 
 ### **Market & Indices**
 | Home Screen | Market Indices | Sector Distribution |
 |-------------|----------------|---------------------|
-|   
-  <img src="https://github.com/user-attachments/assets/9abb5444-b3b0-4921-94ff-2c87c16b0bb7" width="200" alt="Detailed View 4"/>
-
- | <img src="https://github.com/user-attachments/assets/08e376f8-03a0-413d-83bf-d785d61450ba" width="250" alt="Market Indices"/> | <img src="https://github.com/user-attachments/assets/fcddca11-3417-4bae-b5ef-3385a4b7eb83" width="250" alt="Sector Distribution"/> |
+| <img src="https://github.com/user-attachments/assets/9abb5444-b3b0-4921-94ff-2c87c16b0bb7" width="250" alt="Detailed View 4"/>| <img src="https://github.com/user-attachments/assets/08e376f8-03a0-413d-83bf-d785d61450ba" width="250" alt="Market Indices"/> | <img src="https://github.com/user-attachments/assets/fcddca11-3417-4bae-b5ef-3385a4b7eb83" width="250" alt="Sector Distribution"/> |
 
 ### **Stock Details & Analysis**
 | Stock Details | Price Charts | Company Financials |
