@@ -111,13 +111,13 @@ fun PortfolioView(
     val portfolioItems by viewModel.portfolioModels.collectAsStateWithLifecycle()
 
 
-    LaunchedEffect(Unit) {
-        searchViewModel.getSymbolList()
-        while (true){
-            viewModel.getAllPortfolioTicker()
-            delay(70_000)
-        }
-    }
+//    LaunchedEffect(Unit) {
+//        //searchViewModel.getSymbolList()
+//        while (true){
+//            viewModel.getAllPortfolioTicker()
+//            delay(70_000)
+//        }
+//    }
 
 
 

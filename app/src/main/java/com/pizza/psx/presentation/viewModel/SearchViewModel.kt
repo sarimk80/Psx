@@ -20,6 +20,10 @@ class SearchViewModel @Inject constructor(
     private val _uiState = mutableStateOf(SearchUiState())
     val uiState: State<SearchUiState> = _uiState
 
+    init {
+        getSymbolList()
+    }
+
     fun getSymbolList(){
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)

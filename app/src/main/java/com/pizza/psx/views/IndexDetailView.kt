@@ -53,6 +53,8 @@ import com.pizza.psx.domain.model.IndexDetailModel
 import com.pizza.psx.domain.model.SectorName
 import com.pizza.psx.presentation.helpers.getColorFromIndex
 import com.pizza.psx.presentation.helpers.stringToIndexString
+import com.pizza.psx.presentation.viewModel.IndexDetailUiState
+import com.pizza.psx.presentation.viewModel.IndexDetailViewModel
 import com.pizza.psx.presentation.viewModel.PortfolioUiState
 import com.pizza.psx.presentation.viewModel.PortfolioViewModel
 import com.pizza.psx.views.charts.ChartData
@@ -66,7 +68,7 @@ fun IndexDetailView(
     indexSymbol: String,
     onBackClick: () -> Unit,
     onTickerClick: (String) -> Unit,
-    viewModel: PortfolioViewModel = hiltViewModel(),
+    viewModel: IndexDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState
     val indexUiState by viewModel.indexUiState
@@ -80,11 +82,6 @@ fun IndexDetailView(
         indexSymbol.replace("_", " ").uppercase()
     }
 
-    // Load data when screen opens
-    LaunchedEffect(indexSymbol) {
-        viewModel.getChartIndex(indexName = stringToIndexString(indexSymbol))
-        viewModel.getIndexDetail(indexName = stringToIndexString(indexSymbol))
-    }
 
     // Show error snackbar
     LaunchedEffect(uiState.error) {
@@ -286,7 +283,7 @@ private fun EmptyState(
 
 @Composable
 private fun ContentLoadedState(
-    uiState: PortfolioUiState,
+    uiState: IndexDetailUiState,
     listState: LazyListState,
     onTickerClick: (String) -> Unit,
     displayIndexName: String,

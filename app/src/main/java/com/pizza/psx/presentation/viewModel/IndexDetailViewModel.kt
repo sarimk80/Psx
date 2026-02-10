@@ -2,115 +2,55 @@ package com.pizza.psx.presentation.viewModel
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pizza.psx.domain.model.IndexDetailModel
 import com.pizza.psx.domain.model.PortfolioModel
 import com.pizza.psx.domain.model.StockResult
 import com.pizza.psx.domain.model.Ticker
-import com.pizza.psx.domain.repo.PortfolioRepo
 import com.pizza.psx.domain.usecase.IndexDetailUseCase
 import com.pizza.psx.domain.usecase.TickerUseCase
+import com.pizza.psx.presentation.helpers.stringToIndexString
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.time.Duration
-
 
 @HiltViewModel
-class PortfolioViewModel @Inject constructor(
-    private val repo:PortfolioRepo,
+class IndexDetailViewModel @Inject constructor(
     private val getTickerDetail: TickerUseCase,
     private val indexDetailUseCase: IndexDetailUseCase,
-):ViewModel(){
+    savedStateHandle: SavedStateHandle
+):ViewModel() {
 
+    private val _uiState = mutableStateOf(IndexDetailUiState())
+    private val _indexUiState = mutableStateOf(IndexChartList())
 
+    val uiState: State<IndexDetailUiState> = _uiState
+    val indexUiState: State<IndexChartList> = _indexUiState
 
-    private val _uiState = mutableStateOf(PortfolioUiState())
-    private val _indexUiState = mutableStateOf(IndexList())
-
-    val uiState: State<PortfolioUiState> = _uiState
-    val indexUiState: State<IndexList> = _indexUiState
-
-    val portfolioModels: StateFlow<List<PortfolioModel>> =
-        repo.getAllSymbols
-            .map { items -> items }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = emptyList()
-            )
+   private val indexSymbol: String = checkNotNull(savedStateHandle["indexSymbol"])
 
     init {
-        startPortfolioPolling()
-    }
-
-    private fun startPortfolioPolling() {
-        viewModelScope.launch {
-            while (true) {
-                getAllPortfolioTicker()
-                delay(70_000)
-            }
-        }
-    }
-
-
-    fun getAllPortfolioTicker(){
-        _uiState.value = _uiState.value.copy(isLoading = true)
-
-        viewModelScope.launch {
-            repo.getAllSymbols
-                .distinctUntilChanged()
-                .first()
-                .let { symbols ->
-                    loadTickersForSymbols(symbols,emptyList())
-                }
-
-        }
-
-
-    }
-
-    fun getSectorTicker(symbols:List<String>){
-        _uiState.value = _uiState.value.copy(isLoading = true)
-         var portfolioViewModelList = mutableListOf<PortfolioModel>()
-       symbols.forEach { symbol ->
-           portfolioViewModelList.add(PortfolioModel(
-               symbol = symbol,
-               volume = 1
-           ))
-       }
-        viewModelScope.launch{
-            loadTickersForSymbols(portfolioViewModelList,emptyList())
-        }
+        getIndexDetail(stringToIndexString(indexSymbol))
+        getChartIndex(stringToIndexString(indexSymbol))
     }
 
     fun getIndexDetail(indexName:String){
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             var portfolioViewModelList = mutableListOf<PortfolioModel>()
-         try {
+            try {
 
                 when(val result = indexDetailUseCase(indexName = indexName)){
                     is StockResult.Success -> {
-                       result.data.forEach{data ->
-                           portfolioViewModelList.add(PortfolioModel(
-                               symbol = data.symbol,
-                               volume = 1
-                           ))
-                       }
+                        result.data.forEach{data ->
+                            portfolioViewModelList.add(PortfolioModel(
+                                symbol = data.symbol,
+                                volume = 1
+                            ))
+                        }
                         var sectorName = result.data.map{it.sector}
                         loadTickersForSymbols(symbols = portfolioViewModelList,sectorName)
                     }
@@ -149,7 +89,6 @@ class PortfolioViewModel @Inject constructor(
             }
         }
     }
-
     private suspend fun loadTickersForSymbols(symbols: List<PortfolioModel>, sectorName: List<String>) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
@@ -226,43 +165,15 @@ class PortfolioViewModel @Inject constructor(
             }
         }
     }
-
-    fun addToPortfolioModel(symbol:String,volume: Int){
-        viewModelScope.launch {
-            try {
-                val currentList = portfolioModels.value
-                val exist = currentList.any { it.symbol == symbol }
-                if(exist){
-                    repo.deleteSymbol(symbol)
-                }else{
-                    repo.insertSymbol(PortfolioModel(symbol = symbol, volume = volume))
-                }
-                getAllPortfolioTicker()
-            }catch (e:Exception){
-                _uiState.value = _uiState.value.copy(
-                    error = "Failed to add to watchlist: ${e.message}"
-                )
-            }
-        }
-    }
-
-    fun checkIfSymbolExist(symbol: String): Boolean {
-        val currentList = portfolioModels.value
-        return currentList.any { it.symbol == symbol }
-    }
-
-
-
 }
 
-
-data class PortfolioUiState(
+data class IndexDetailUiState(
     val isLoading: Boolean = true,
     val error: String? = null,
     val listOfStocks:List<Ticker>?=null
 )
 //List<IndexDetailModel>
-data class IndexList(
+data class IndexChartList(
     val isLoading: Boolean = true,
     val error: String? = null,
     val listOfStocks:List<IndexDetailModel>?=null

@@ -115,6 +115,7 @@ import com.patrykandpatrick.vico.core.common.Insets
 import com.patrykandpatrick.vico.core.common.component.LineComponent
 import com.patrykandpatrick.vico.core.common.component.TextComponent
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
+import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import com.patrykandpatrick.vico.core.common.shape.Shape
 import com.pizza.psx.domain.model.SymbolDetail
 import kotlin.math.min
@@ -314,125 +315,10 @@ fun CombinedTickerDetailContent(
             2 -> FinancialsTab(fundamentalData)
             3 -> DividendsTab(dividendData, companyData.symbol)
             4 -> ChartView(kLineModel = kLineModel,symbolDetail = symbolDetail)
-            //5 -> CorporateAction(symbolDetail = symbolDetail)
         }
     }
 }
 
-@Composable
-fun CorporateAction(symbolDetail: SymbolDetail) {
-
-    val annual = remember(symbolDetail.financials.annual) {
-        symbolDetail.financials.annual.sortedBy { it.period }
-    }
-
-    val ratios = remember(symbolDetail.ratios) {
-        symbolDetail.ratios.sortedBy { it.period }
-    }
-
-    // Derived values (better than multiple remembers)
-    val xValues by remember {
-        derivedStateOf { annual.map { it.period.toInt() } }
-    }
-
-    val profitValues by remember {
-        derivedStateOf { annual.map { it.profitAfterTax ?: 0L } }
-    }
-
-    val salesValues by remember {
-        derivedStateOf { annual.map { it.sales ?: 0L } }
-    }
-
-    val epsValues by remember {
-        derivedStateOf { annual.map { it.eps ?: 0.0 } }
-    }
-
-    val pegValues by remember {
-        derivedStateOf { ratios.map { it.peg ?: 0.0 } }
-    }
-
-    val epsGrowthValues by remember {
-        derivedStateOf { ratios.map { it.epsGrowth ?: 0.0 } }
-    }
-
-    val netMargin by remember {
-        derivedStateOf { ratios.map { it.netProfitMargin ?: 0.0 } }
-    }
-
-    val grossMargin by remember {
-        derivedStateOf { ratios.map { it.grossProfitMargin ?: 0.0 } }
-    }
-
-    // Producers
-    val columnProducer = remember { CartesianChartModelProducer() }
-    val epsProducer = remember { CartesianChartModelProducer() }
-    val pegProducer = remember { CartesianChartModelProducer() }
-    val growthProducer = remember { CartesianChartModelProducer() }
-    val marginProducer = remember { CartesianChartModelProducer() }
-
-    // Populate producers safely
-    LaunchedEffect(annual) {
-        columnProducer.runTransaction {
-            columnSeries {
-                series(xValues, profitValues)
-                series(xValues, salesValues)
-            }
-        }
-
-        epsProducer.runTransaction {
-            lineSeries { series(xValues, epsValues) }
-        }
-    }
-
-    LaunchedEffect(ratios) {
-        pegProducer.runTransaction {
-            lineSeries { series(xValues, pegValues) }
-        }
-
-        growthProducer.runTransaction {
-            lineSeries { series(xValues, epsGrowthValues) }
-        }
-
-        marginProducer.runTransaction {
-            columnSeries {
-                series(xValues, netMargin)
-                series(xValues, grossMargin)
-            }
-        }
-    }
-
-    val labelFormatter = remember {
-        CartesianValueFormatter { _, value, _ -> formatVolume(value) }
-    }
-
-    val marker = rememberDefaultCartesianMarker(
-        label = TextComponent()
-    )
-    // ✅ Make scrollable (very important for charts!)
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
-    ) {
-
-        ChartTitle("Revenue vs Profit")
-        ColumnChart(columnProducer, labelFormatter,marker)
-
-        ChartTitle("EPS")
-        LineChart(epsProducer,marker)
-
-        ChartTitle("EPS Growth")
-        LineChart(growthProducer,marker)
-
-        ChartTitle("PEG Ratio")
-        LineChart(pegProducer,marker)
-
-        ChartTitle("Profit Margins")
-        ColumnChart(marginProducer, labelFormatter,marker)
-    }
-}
 
 
 @Composable
@@ -476,7 +362,8 @@ fun ChartCard(
 fun ColumnChart(
     producer: CartesianChartModelProducer,
     formatter: CartesianValueFormatter?,
-    marker: CartesianMarker
+    marker: CartesianMarker,
+    maxColumnValue: Double
 ) {
 
     val legendColors = listOf(
@@ -492,9 +379,12 @@ fun ColumnChart(
     val columnComponents = legendColors.map { color ->
         rememberLineComponent(
             fill = fill(color),
-            thickness = 24.dp
+            thickness = 24.dp,
+            shape = CorneredShape.rounded(40)
         )
     }
+
+    val paddedMax = maxColumnValue * 1.15 // 15% headroom
 
     Column {
         // ✅ Legend
@@ -518,7 +408,12 @@ fun ColumnChart(
                 rememberColumnCartesianLayer(
                     dataLabel = TextComponent(),
                     dataLabelValueFormatter = formatter!!,
-                    columnProvider = ColumnCartesianLayer.ColumnProvider.series(columnComponents)
+                    columnProvider = ColumnCartesianLayer.ColumnProvider.series(columnComponents),
+                    rangeProvider = CartesianLayerRangeProvider.fixed(
+                        minY = 0.0,
+                        maxY = paddedMax
+
+                    )
                 ),
                 marker = marker,
                 startAxis = VerticalAxis.rememberStart(
@@ -888,6 +783,14 @@ fun ChartView(
         valueFormatter = lineMarkerFormatter
     )
 
+    val maxColumnValue = remember(profitValues, salesValues) {
+        (profitValues + salesValues).maxOrNull()?.toDouble() ?: 0.0
+    }
+
+
+    val maxRatioColumnValue = remember(netMargin, grossMargin) {
+        (netMargin + grossMargin).maxOrNull()?.toDouble() ?: 0.0
+    }
     Column(modifier = Modifier.
     verticalScroll(rememberScrollState())
         .padding(horizontal = 8.dp)
@@ -943,7 +846,7 @@ fun ChartView(
         Spacer(modifier = Modifier.height(8.dp))
 
         ChartTitle("Revenue vs Profit")
-        ColumnChart(columnProducer, labelFormatter,marker)
+        ColumnChart(columnProducer, labelFormatter,marker,maxColumnValue)
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -963,7 +866,7 @@ fun ChartView(
         Spacer(modifier = Modifier.height(8.dp))
 
         ChartTitle("Profit Margins")
-        ColumnChart(marginProducer, labelFormatter,ratrioMarker)
+        ColumnChart(marginProducer, labelFormatter,ratrioMarker,maxRatioColumnValue)
 
         Spacer(modifier = Modifier.height(100.dp))
 
