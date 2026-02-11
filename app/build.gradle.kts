@@ -15,8 +15,8 @@ android {
         applicationId = "com.pizza.psx"
         minSdk = 33
         targetSdk = 35
-        versionCode = 5
-        versionName = "1.4"
+        versionCode = 8
+        versionName = "1.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -66,6 +66,7 @@ dependencies {
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.27.0")
     implementation ("androidx.core:core-splashscreen:1.0.1")
     implementation ("io.github.ehsannarmani:compose-charts:0.1.10")
+    implementation("androidx.browser:browser:1.8.0")
 
     implementation(libs.vico.compose)
     implementation(libs.vico.views)

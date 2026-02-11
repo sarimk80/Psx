@@ -52,6 +52,7 @@ import com.pizza.psx.domain.model.Datum
 import com.pizza.psx.presentation.viewModel.PortfolioViewModel
 import com.pizza.psx.presentation.helpers.formatVolume
 import com.pizza.psx.presentation.helpers.formatCurrency
+import com.pizza.psx.presentation.viewModel.SectorViewModel
 
 @Composable
 fun SectorDetailView(
@@ -60,8 +61,8 @@ fun SectorDetailView(
     onTickerClick: (String, String) -> Unit = { _, _ -> },
     onBack: () -> Unit
 ) {
-    val viewModel: PortfolioViewModel = hiltViewModel()
-    val uiState by viewModel.uiState
+    val viewModel: SectorViewModel = hiltViewModel()
+    val uiState by viewModel.sectorDetailUiState
     val listState = rememberLazyListState()
 
     LaunchedEffect(sector.symbols) {

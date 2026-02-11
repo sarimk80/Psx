@@ -1,5 +1,8 @@
 package com.pizza.psx.views
 
+import android.content.Context
+import android.net.Uri
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,11 +23,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Calculate
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Mosque
+import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Repeat
@@ -32,6 +38,7 @@ import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material.icons.filled.TrendingDown
 import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ContainedLoadingIndicator
@@ -40,11 +47,13 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -65,6 +74,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
@@ -117,6 +127,7 @@ import com.patrykandpatrick.vico.core.common.component.TextComponent
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import com.patrykandpatrick.vico.core.common.shape.Shape
+import com.pizza.psx.domain.model.Announcement
 import com.pizza.psx.domain.model.SymbolDetail
 import kotlin.math.min
 
@@ -287,11 +298,20 @@ fun CombinedTickerDetailContent(
         // Quick Stats Header - Always visible
         QuickStatsHeader(tickerData, fundamentalData)
 
-        TabRow(
+        PrimaryScrollableTabRow(
             selectedTabIndex = selectedTab,
+            edgePadding = 8.dp,
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            indicator = {
+                TabRowDefaults.PrimaryIndicator(
+                    modifier = Modifier.tabIndicatorOffset(selectedTab),
+                    width = 32.dp,      // shorter = more modern
+                    height = 3.dp
+                )
+            },
+            minTabWidth = 72.dp
         ) {
             tabs.forEachIndexed { index, title ->
                 Tab(
@@ -312,7 +332,7 @@ fun CombinedTickerDetailContent(
         when (selectedTab) {
             0 -> OverviewTab(tickerData, companyData, fundamentalData)
             1 -> CompanyTab(companyData)
-            2 -> FinancialsTab(fundamentalData)
+            2 -> FinancialsTab(fundamentalData,symbolDetail)
             3 -> DividendsTab(dividendData, companyData.symbol)
             4 -> ChartView(kLineModel = kLineModel,symbolDetail = symbolDetail)
         }
@@ -418,12 +438,20 @@ fun ColumnChart(
                 marker = marker,
                 startAxis = VerticalAxis.rememberStart(
                     valueFormatter = formatter,
+                    label = rememberTextComponent(
+                        color = Color.Black,
+                        textSize = 8.sp
+                    ),
                     guideline = null,
                     itemPlacer = VerticalAxis.ItemPlacer.step(step = { 5.0 })
                 ),
                 bottomAxis = HorizontalAxis.rememberBottom(
                     guideline = null,
-                    itemPlacer = HorizontalAxis.ItemPlacer.aligned()
+                    itemPlacer = HorizontalAxis.ItemPlacer.aligned(),
+                    label = rememberTextComponent(
+                        color = Color.Black,
+                        textSize = 8.sp
+                    )
                 ),
             ),
             modelProducer = producer,
@@ -1484,17 +1512,113 @@ private fun formatRelativeTime(timestamp: Long): String {
 
 private fun max(a: Long, b: Long): Long = if (a > b) a else b
 @Composable
-fun FinancialsTab(fundamentalData: FundamentalData) {
+fun FinancialsTab(fundamentalData: FundamentalData,symbolDetail: SymbolDetail) {
+
+    val context = LocalContext.current
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        item { FinancialStatsCard(fundamentalData) }
         item { ValuationMetricsCard(fundamentalData) }
         item { PerformanceMetricsCard(fundamentalData) }
+
+        item { Text(
+            text = "Announcements",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface
+        ) }
+
+        items(symbolDetail.announcements) { announcement ->
+
+            AnnouncementCard(
+                announcement = announcement,
+                onClick = {
+                    openPdfCustomTab(
+                        context,
+                        "https://dps.psx.com.pk${announcement.pdfLink}"
+                    )
+                }
+            )
+        }
+        item { Spacer(modifier = Modifier.padding(top = 30.dp)) }
     }
 }
+
+@Composable
+fun AnnouncementCard(
+    announcement: Announcement,
+    onClick: () -> Unit
+) {
+
+    Card(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(3.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            // PDF Icon Bubble
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Description,
+                    contentDescription = "PDF",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            Spacer(modifier = Modifier.width(14.dp))
+
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+
+                Text(
+                    text = announcement.title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = announcement.date,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Icon(
+                imageVector = Icons.Default.OpenInNew,
+                contentDescription = "Open",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
 
 @Composable
 fun FinancialStatsCard(fundamentalData: FundamentalData) {
@@ -1811,7 +1935,13 @@ fun LegendItem(
     }
 }
 
+fun openPdfCustomTab(context: Context, url: String) {
+    val customTabsIntent = CustomTabsIntent.Builder()
+        .setShowTitle(true)
+        .build()
 
+    customTabsIntent.launchUrl(context, Uri.parse(url))
+}
 
 fun formatLargeNumber(value: Long): String {
     if (value < 1_000) return value.toString()

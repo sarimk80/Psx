@@ -40,6 +40,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -208,11 +209,18 @@ fun MarketDividendSection(
 
 
         // Tabs
-        TabRow(
+        PrimaryTabRow(
             selectedTabIndex = selectedTab,
             modifier = Modifier.fillMaxWidth(),
             containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.primary
+            contentColor = MaterialTheme.colorScheme.primary,
+            indicator = {
+                TabRowDefaults.PrimaryIndicator(
+                    modifier = Modifier.tabIndicatorOffset(selectedTab),
+                    width = 32.dp,      // shorter = more modern
+                    height = 3.dp
+                )
+            },
         ) {
             tabs.forEachIndexed { index, title ->
                 Tab(
