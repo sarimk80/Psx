@@ -223,6 +223,13 @@ val financialRed = Color(0XFFe84118)
 val financialGrey = Color(0xFF7f8fa6)
 val financialWarning = Color(0xFFfbc531)
 
+val purpleColor = Color(0xFF6c5ce7)
+
+val green = Color(0xFF22a6b3)
+
+var veryBerry = Color(0xFFB53471)
+var baraRed = Color(0xFFED4C67)
+
 
 
 

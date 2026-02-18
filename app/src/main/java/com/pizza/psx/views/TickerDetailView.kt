@@ -1,6 +1,8 @@
 package com.pizza.psx.views
 
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.background
@@ -23,7 +25,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Calculate
@@ -112,6 +113,8 @@ import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.patrykandpatrick.vico.compose.common.component.shapeComponent
 import com.patrykandpatrick.vico.compose.common.fill
+import com.patrykandpatrick.vico.core.cartesian.axis.Axis
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModel
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.core.cartesian.data.candlestickSeries
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
@@ -120,6 +123,9 @@ import com.patrykandpatrick.vico.core.cartesian.layer.CartesianLayerPadding
 import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
 import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.core.cartesian.marker.CartesianMarker
+import com.patrykandpatrick.vico.core.cartesian.marker.CartesianMarkerVisibilityListener
+import com.patrykandpatrick.vico.core.cartesian.marker.ColumnCartesianLayerMarkerTarget
+import com.patrykandpatrick.vico.core.cartesian.marker.LineCartesianLayerMarkerTarget
 import com.patrykandpatrick.vico.core.common.Fill
 import com.patrykandpatrick.vico.core.common.Insets
 import com.patrykandpatrick.vico.core.common.component.LineComponent
@@ -127,8 +133,13 @@ import com.patrykandpatrick.vico.core.common.component.TextComponent
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import com.patrykandpatrick.vico.core.common.shape.Shape
+import com.pizza.compose.baraRed
+import com.pizza.compose.green
+import com.pizza.compose.purpleColor
+import com.pizza.compose.veryBerry
 import com.pizza.psx.domain.model.Announcement
 import com.pizza.psx.domain.model.SymbolDetail
+import com.pizza.psx.presentation.helpers.number_format
 import kotlin.math.min
 
 
@@ -387,8 +398,8 @@ fun ColumnChart(
 ) {
 
     val legendColors = listOf(
-        Color(0xFF4CAF50), // example colors
-        Color(0xFF2196F3)
+        Color(0xFF1dd1a1),
+        Color(0xFF54a0ff)
     )
 
     val legendLabels = listOf(
@@ -400,7 +411,7 @@ fun ColumnChart(
         rememberLineComponent(
             fill = fill(color),
             thickness = 24.dp,
-            shape = CorneredShape.rounded(40)
+            shape = CorneredShape.rounded(60)
         )
     }
 
@@ -467,31 +478,29 @@ fun ColumnChart(
 @Composable
 fun LineChart(
     producer: CartesianChartModelProducer,
-    marker: CartesianMarker
+    marker: CartesianMarker,
+    color: Color
 ) {
-    val lineColor = financialWarning
 
     CartesianChartHost(
         chart = rememberCartesianChart(
             rememberLineCartesianLayer(
                 lineProvider = LineCartesianLayer.LineProvider.series(
                     LineCartesianLayer.Line(
+                        pointConnector = LineCartesianLayer.PointConnector.cubic(0.5f),
                         fill = LineCartesianLayer.LineFill.single(
-                            fill(lineColor)
+                            fill(color)
                         ),
                         areaFill = LineCartesianLayer.AreaFill.single(
-                            fill(lineColor.copy(alpha = 0.2f))
+                            fill(color.copy(alpha = 0.2f))
                         ),
-                        //cap = Paint.Cap.ROUND,
-                        //thickness = 3.dp,
                         pointProvider = LineCartesianLayer.PointProvider.single(
                             LineCartesianLayer.Point(
                                 component = rememberShapeComponent(
                                     shape = Shape.Rectangle,
-                                    fill = fill(lineColor)
+                                    fill = fill(color),
 
                                 ),
-                                //size = 10.dp
                             )
                         )
                     )
@@ -499,12 +508,7 @@ fun LineChart(
             ),
             marker = marker,
             startAxis = VerticalAxis.rememberStart(
-                guideline = rememberLineComponent(
-                    fill = Fill.Black,
-                    //color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
-                    thickness = 1.dp,
-                    shape = Shape.Rectangle
-                ),
+                guideline = null,
                 itemPlacer = VerticalAxis.ItemPlacer.step(step = { 5.0 })
             ),
             bottomAxis = HorizontalAxis.rememberBottom(
@@ -553,6 +557,7 @@ fun ChartView(
     val dateList = remember(sortedData) { sortedData.map { formatShortDate(it.timestamp) } }
 
     val modelProducerPrice = remember { CartesianChartModelProducer() }
+    val lineProducer = remember { CartesianChartModelProducer() }
     val columnVolume = remember { CartesianChartModelProducer() }
 
 
@@ -573,27 +578,25 @@ fun ChartView(
 
     // Push CANDLE data
     LaunchedEffect(sortedData) {
-        modelProducerPrice.runTransaction {
+        lineProducer.runTransaction {
             try {
-                candlestickSeries(
-                    x = xValues,
-                    opening = openValues,
-                    closing = closeValues,
-                    high = highValues,
-                    low = lowValues,
-                )
+                lineSeries {
+                    series(xValues,closeValues)
+                }
+                columnSeries {
+                    series(xValues,volumeValues)
+                }
             }catch (e: Exception){
-                candlestickSeries(
-                    x = xValues,
-                    opening = openValues,
-                    closing = closeValues,
-                    high = highValues,
-                    low = xValues,
-                )
+                lineSeries {
+                    series(xValues,openValues)
+                }
+                columnSeries {
+                    series(xValues,volumeValues)
+                }
             }
 
-
         }
+
 
     }
 
@@ -819,6 +822,70 @@ fun ChartView(
     val maxRatioColumnValue = remember(netMargin, grossMargin) {
         (netMargin + grossMargin).maxOrNull()?.toDouble() ?: 0.0
     }
+
+    val lineColor = veryBerry
+    val columnColor = baraRed
+
+    var markerTargets by remember { mutableStateOf<List<CartesianMarker.Target>>(emptyList()) }
+
+    var selectedXValue by remember { mutableStateOf(0.0) }
+    var selectedYValue by remember { mutableStateOf(0.0) }
+
+    val markerVisibilityListener = remember {
+
+
+        fun List<CartesianMarker.Target>.lastEntry() =
+            lastOrNull()?.let { target ->
+                when (target) {
+                    is LineCartesianLayerMarkerTarget ->
+                        target.points.lastOrNull()?.entry
+
+                    is ColumnCartesianLayerMarkerTarget ->
+                        target.columns.lastOrNull()?.entry
+
+                    else -> null
+                }
+            }
+
+
+
+
+        object : CartesianMarkerVisibilityListener {
+            override fun onShown(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+                targets
+                    .filterIsInstance<LineCartesianLayerMarkerTarget>()
+                    .firstOrNull()
+                    ?.points
+                    ?.firstOrNull()
+                    ?.entry
+                    ?.let {
+                        selectedXValue = it.x
+                        selectedYValue = it.y
+                    }
+            }
+
+            override fun onUpdated(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+
+                targets
+                    .filterIsInstance<LineCartesianLayerMarkerTarget>()
+                    .firstOrNull()
+                    ?.points
+                    ?.firstOrNull()
+                    ?.entry
+                    ?.let {
+                        selectedXValue = it.x
+                        selectedYValue = it.y
+                    }
+            }
+
+            override fun onHidden(marker: CartesianMarker) {
+                selectedXValue = 0.0
+                selectedYValue = 0.0
+            }
+        }
+    }
+
+
     Column(modifier = Modifier.
     verticalScroll(rememberScrollState())
         .padding(horizontal = 8.dp)
@@ -832,16 +899,55 @@ fun ChartView(
                 .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
-            StatItem("High", "${String.format("%.2f", stats.third.first)}")
-            StatItem("Low", "${String.format("%.2f", stats.third.second)}")
-            StatItem("Period", "${sortedData.size} days")
+            if (selectedXValue != 0.0 || selectedYValue != 0.0) {
+                StatItem("Price",  number_format(selectedYValue) )
+                StatItem("Volume", formatVolume(volumeValues[selectedXValue.toInt()].toLong()))
+                StatItem("Date", dateList[selectedXValue.toInt()])
+
+            }else{
+                StatItem("High", "${String.format("%.2f", stats.third.first)}")
+                StatItem("Low", "${String.format("%.2f", stats.third.second)}")
+                StatItem("Period", "${sortedData.size} days")
+            }
         }
         Spacer(modifier = Modifier.height(8.dp))
 
         CartesianChartHost(
             scrollState = scrollState,
+            //chart = rememberCartesianChart(),
             chart = rememberCartesianChart(
-                rememberCandlestickCartesianLayer(rangeProvider = priceRangeProvider),
+                rememberLineCartesianLayer(
+
+                    lineProvider = LineCartesianLayer.LineProvider.series(
+
+                        LineCartesianLayer.Line(
+                            pointConnector = LineCartesianLayer.PointConnector.cubic(0.9f),
+                            fill = remember {
+                                LineCartesianLayer.LineFill.single(
+                                    fill(lineColor)
+                                )
+                            },
+                            areaFill = LineCartesianLayer.AreaFill.single(
+                                fill(lineColor.copy(alpha = 0.1f))
+                            ),
+                        )
+
+
+                    ),
+                    verticalAxisPosition = Axis.Position.Vertical.Start
+
+                ),
+                rememberColumnCartesianLayer(
+
+                    columnProvider = ColumnCartesianLayer.ColumnProvider.series(
+                        rememberLineComponent(
+                            fill = fill(columnColor.copy(alpha = 0.5f)),
+                            thickness = 10.dp,
+                            shape = CorneredShape.rounded(60)
+                        )
+                    ),
+                    verticalAxisPosition = Axis.Position.Vertical.End
+                ),
                 startAxis = VerticalAxis.rememberStart(
                     valueFormatter = priceFormatter,
                     label = rememberTextComponent(
@@ -850,26 +956,57 @@ fun ChartView(
                     )
                 ),
                 bottomAxis = HorizontalAxis.rememberBottom(
+                    valueFormatter = dateFormatter,
+                    labelRotationDegrees = 45f,
                     label = rememberTextComponent(
                         color = Color.Black,
                         textSize = 8.sp
                     ),
-                    guideline = null,
-                    valueFormatter = dateFormatter,
-                    labelRotationDegrees = 45f,
                 ),
                 marker = DefaultCartesianMarker(
-                    label = rememberTextComponent(
-                        padding = Insets(horizontalDp = 12f, verticalDp = 8f),
-                        color = Color.Black,
-                        textSize = 12.sp,
-                    ),
-                    valueFormatter = markerFormatter,
-                )
+                    label = TextComponent(
+                        textSizeSp = 0.0f
+                    )
+                ),
+                markerVisibilityListener = markerVisibilityListener
             ),
-            modelProducer = modelProducerPrice,
-            modifier = Modifier.height(350.dp),
+            modelProducer = lineProducer,
+
+            modifier = Modifier.height(400.dp),
         )
+
+//        CartesianChartHost(
+//            scrollState = scrollState,
+//            chart = rememberCartesianChart(
+//                rememberCandlestickCartesianLayer(rangeProvider = priceRangeProvider),
+//                startAxis = VerticalAxis.rememberStart(
+//                    valueFormatter = priceFormatter,
+//                    label = rememberTextComponent(
+//                        color = Color.Black,
+//                        textSize = 8.sp
+//                    )
+//                ),
+//                bottomAxis = HorizontalAxis.rememberBottom(
+//                    label = rememberTextComponent(
+//                        color = Color.Black,
+//                        textSize = 8.sp
+//                    ),
+//                    guideline = null,
+//                    valueFormatter = dateFormatter,
+//                    labelRotationDegrees = 45f,
+//                ),
+//                marker = DefaultCartesianMarker(
+//                    label = rememberTextComponent(
+//                        padding = Insets(horizontalDp = 12f, verticalDp = 8f),
+//                        color = Color.Black,
+//                        textSize = 12.sp,
+//                    ),
+//                    valueFormatter = markerFormatter,
+//                )
+//            ),
+//            modelProducer = modelProducerPrice,
+//            modifier = Modifier.height(350.dp),
+//        )
         Spacer(modifier = Modifier.height(8.dp))
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -879,17 +1016,17 @@ fun ChartView(
         Spacer(modifier = Modifier.height(8.dp))
 
         ChartTitle("EPS")
-        LineChart(epsProducer,marker)
+        LineChart(epsProducer,marker,financialGrey)
 
         Spacer(modifier = Modifier.height(8.dp))
 
         ChartTitle("EPS Growth")
-        LineChart(growthProducer,ratrioMarker)
+        LineChart(growthProducer,ratrioMarker,green)
 
         Spacer(modifier = Modifier.height(8.dp))
 
         ChartTitle("PEG Ratio")
-        LineChart(pegProducer,ratrioMarker)
+        LineChart(pegProducer,ratrioMarker,purpleColor)
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -1543,7 +1680,7 @@ fun FinancialsTab(fundamentalData: FundamentalData,symbolDetail: SymbolDetail) {
                 }
             )
         }
-        item { Spacer(modifier = Modifier.padding(top = 30.dp)) }
+        item { Spacer(modifier = Modifier.padding(top = 50.dp)) }
     }
 }
 
@@ -1559,7 +1696,7 @@ fun AnnouncementCard(
             .fillMaxWidth()
             .padding(vertical = 6.dp),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(3.dp),
+        elevation = CardDefaults.cardElevation(1.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         )
@@ -1939,8 +2076,17 @@ fun openPdfCustomTab(context: Context, url: String) {
     val customTabsIntent = CustomTabsIntent.Builder()
         .setShowTitle(true)
         .build()
+    try {
+        customTabsIntent.launchUrl(context, Uri.parse(url))
+    } catch (e: ActivityNotFoundException) {
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = Uri.parse(url)
+            type = "application/pdf"
+        }
+        context.startActivity(intent)
+    }
 
-    customTabsIntent.launchUrl(context, Uri.parse(url))
+
 }
 
 fun formatLargeNumber(value: Long): String {
