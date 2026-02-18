@@ -747,11 +747,32 @@ fun PortfolioContent(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
-            item {
-                DonutChartWithLegend(
-                    data = chartSampleData,
+            item{
+                Spacer(modifier = Modifier.padding(top = 6.dp))
+            }
 
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    elevation = CardDefaults.cardElevation(6.dp),
+                ) {
+                    DonutChartWithLegend(
+                        data = chartSampleData,
                     )
+                }
+
+            }
+            item{
+                Text(
+                    text = "Your holdings",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(bottom = 2.dp, top = 8.dp)
+                )
             }
 
             item {
@@ -759,7 +780,7 @@ fun PortfolioContent(
                     text = "${items.size} stocks",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier.padding(bottom = 8.dp, top = 2.dp)
                 )
             }
 

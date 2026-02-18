@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,7 +51,7 @@ fun InteractiveDonutChart(
     modifier: Modifier = Modifier,
     radius: Dp = 120.dp,
     strokeWidth: Dp = 40.dp,
-    gapAngle: Float = 5f,
+    gapAngle: Float = 10f,
     onSegmentClick: (ChartData) -> Unit = {}
 ) {
     var selectedSegment by remember { mutableStateOf<Int?>(null) }
@@ -59,7 +60,7 @@ fun InteractiveDonutChart(
     Box(
         modifier = modifier
             .size(radius * 2)
-            .pointerInput(Unit) {
+//            .pointerInput(Unit) {
 //                detectTapGestures { offset ->
 //                    touchPosition = Offset(offset.x.toFloat(), offset.y.toFloat())
 //                    val center = size.center
@@ -70,7 +71,7 @@ fun InteractiveDonutChart(
 //                        onSegmentClick(data[index])
 //                    }
 //                }
-            }
+//            }
     ) {//getRandomColor
         Canvas(modifier = Modifier.matchParentSize()) {
             val total = data.sumOf { it.value.toDouble() }.toFloat()
@@ -109,7 +110,7 @@ fun InteractiveDonutChart(
                 }
 
                 canvas.nativeCanvas.drawText(
-                    "₹${String.format("%.1f", total)}",
+                    "${String.format("%.1f", total)}",
                     center.x,
                     center.y + 10,
                     textPaint
@@ -129,7 +130,7 @@ fun InteractiveDonutChart(
     }
 }
 
-private fun calculateAngle(center: Offset, touch: Offset): Float {
+private fun calculateAngle(center: IntOffset, touch: Offset): Float {
     val dx = touch.x - center.x
     val dy = touch.y - center.y
     var angle = Math.toDegrees(atan2(dy.toDouble(), dx.toDouble())).toFloat()

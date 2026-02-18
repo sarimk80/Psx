@@ -13,9 +13,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -334,31 +337,10 @@ private fun ContentLoadedState(
             }
         }
 item{
+
     IndexChartSection(stocks = chartStocks)
 
 }
-//        // Donut chart section
-//        if (chartSampleData.isNotEmpty()) {
-//            item {
-//                Column(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(horizontal = 16.dp)
-//                ) {
-//                    Text(
-//                        text = "Sector Distribution",
-//                        style = MaterialTheme.typography.titleMedium,
-//                        fontWeight = FontWeight.SemiBold,
-//                        modifier = Modifier.padding(bottom = 16.dp)
-//                    )
-//                    DonutChartWithLegend(
-//                        data = chartSampleData,
-//                        isShowCentralContent = false
-//                    )
-//                    Spacer(modifier = Modifier.height(24.dp))
-//                }
-//            }
-//        }
 
         // Stocks list header
         item {
@@ -436,10 +418,19 @@ private fun IndexChartSection(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        DonutChartWithLegend(
-            data = chartData,
-            isShowCentralContent = false
-        )
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(6.dp),
+        ) {
+            DonutChartWithLegend(
+                data = chartData,
+                isShowCentralContent = false,
+                isShowTextInCenter = true
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
     }

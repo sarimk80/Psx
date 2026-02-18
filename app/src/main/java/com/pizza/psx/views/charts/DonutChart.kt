@@ -18,6 +18,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,12 +29,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 fun DonutChartWithLegend(
     data: List<ChartData>,
     modifier: Modifier = Modifier,
-    isShowCentralContent: Boolean = true
+    isShowCentralContent: Boolean = true,
+    isShowTextInCenter: Boolean = false
 ) {
     Column(
         modifier = modifier,
@@ -44,9 +51,9 @@ fun DonutChartWithLegend(
             // Chart
             InteractiveDonutChart(
                 data = data,
-                strokeWidth = 18.dp,
+                strokeWidth = 10.dp,
                 radius = 100.dp,
-                modifier = modifier.padding(16.dp)
+                modifier = modifier.padding(16.dp),
             )
           if(isShowCentralContent) {
               Box(
@@ -58,6 +65,17 @@ fun DonutChartWithLegend(
                   CenterContent(data = data)
               }
           }
+
+            if(isShowTextInCenter){
+                Box(
+                    modifier = modifier
+                        .size((100 * 1.2f).dp)
+                        .background(Color.Transparent),
+                    contentAlignment = Alignment.Center
+                ) {
+                    RotatingCenterLegend(data)
+                }
+            }
         }
 
 
@@ -183,5 +201,57 @@ fun LegendItem(chartData: ChartData, percentage: Float) {
             )
         }
 
+    }
+}
+
+@Composable
+fun RotatingCenterLegend(
+    data: List<ChartData>,
+    modifier: Modifier = Modifier,
+    intervalMillis: Long = 6000L
+) {
+    if (data.isEmpty()) return
+
+    val total = remember(data) {
+        data.sumOf { it.value.toDouble() }
+    }
+
+    var currentIndex by remember { mutableStateOf(0) }
+
+    // Auto change every 6 seconds
+    LaunchedEffect(data) {
+        while (true) {
+            delay(intervalMillis)
+            currentIndex = (currentIndex + 1) % data.size
+        }
+    }
+
+    val item = data[currentIndex]
+    val percentage = (item.value / total * 100).toFloat()
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .size(12.dp)
+                .background(item.color, CircleShape)
+        )
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        Text(
+            text = item.label,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center
+        )
+
+        Text(
+            text = "${String.format("%.1f", percentage)}%",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }

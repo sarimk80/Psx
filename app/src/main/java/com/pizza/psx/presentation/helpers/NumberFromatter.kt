@@ -112,18 +112,18 @@ fun randomColor(alpha:Int=255) = Color(
     alpha = alpha)
 
 val CHART_COLORS = listOf(
-    Color(0xFF4CAF50), // Green
-    Color(0xFF2196F3), // Blue
-    Color(0xFF9C27B0), // Purple
-    Color(0xFFFF9800), // Orange
-    Color(0xFFF44336), // Red
-    Color(0xFF00BCD4), // Cyan
-    Color(0xFFE91E63), // Pink
-    Color(0xFF8BC34A), // Light Green
-    Color(0xFF3F51B5), // Indigo
-    Color(0xFFFF5722), // Deep Orange
-    Color(0xFF009688), // Teal
-    Color(0xFF673AB7), // Deep Purple
+    Color(0xFF32ff7e), // Green
+    Color(0xFF18dcff), // Blue
+    Color(0xFF7d5fff), // Purple
+    Color(0xFFff9f1a), // Orange
+    Color(0xFFff4d4d), // Red
+    Color(0xFF7efff5), // Cyan
+    Color(0xFFef5777), // Pink
+    Color(0xFFB33771), // Light Green
+    Color(0xFF182C61), // Indigo
+    Color(0xFFFD7272), // Deep Orange
+    Color(0xFFfed330), // Teal
+    Color(0xFF2bcbba), // Deep Purple
 )
 
 fun getColorFromIndex(index: Int): Color {
