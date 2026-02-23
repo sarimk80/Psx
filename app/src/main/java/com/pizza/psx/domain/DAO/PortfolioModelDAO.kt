@@ -50,4 +50,7 @@ interface PortfolioModelDAO {
     @Query("SELECT * FROM PortfolioModel")
      fun getAllPortfoliosWithTransactions(): Flow<List<PortfolioWithTransactions>>
 
+    @Query("SELECT * FROM transactions")
+    suspend fun getAllTransactions(): List<com.pizza.psx.domain.model.Transaction>
+
 }

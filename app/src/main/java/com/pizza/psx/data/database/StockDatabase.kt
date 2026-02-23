@@ -1,6 +1,7 @@
 package com.pizza.psx.data.database
 
 import android.content.Context
+import android.util.Log
 import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
@@ -10,6 +11,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.pizza.psx.domain.DAO.PortfolioModelDAO
 import com.pizza.psx.domain.model.PortfolioModel
 import com.pizza.psx.domain.model.Transaction
+import java.util.concurrent.Executors
 
 
 @Database(
@@ -64,11 +66,9 @@ abstract class StockDatabase: RoomDatabase() {
                 database.execSQL("""
             INSERT INTO transactions_new (id, portfolioSymbol, date, price, volume)
             SELECT id, portfolioSymbol, date, price, volume
-            FROM `Transaction`
+            FROM `transactions`
         """.trimIndent())
 
-                // 3️⃣ Drop old table
-                database.execSQL("DROP TABLE `Transaction`")
 
                 // 4️⃣ Rename new table
                 database.execSQL("ALTER TABLE transactions_new RENAME TO transactions")
@@ -89,6 +89,11 @@ abstract class StockDatabase: RoomDatabase() {
                     "stock_database"
                 )
                     .addMigrations(MIGRATION_2_3,MIGRATION_3_4)
+                    .setQueryCallback(RoomDatabase.QueryCallback { sqlQuery, bindArgs ->
+                        println("SQL Query: $sqlQuery SQL Args: $bindArgs")
+                    }, Executors.newSingleThreadExecutor())
+
+
                     .build()
                 INSTANCE = instance
                 instance

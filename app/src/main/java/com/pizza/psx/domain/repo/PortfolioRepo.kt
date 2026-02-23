@@ -31,4 +31,7 @@ class PortfolioRepo @Inject constructor(
 
      fun getAllSymbolTransaction():Flow<List<PortfolioWithTransactions>> =
         portfolioModelDAO.getAllPortfoliosWithTransactions()
+
+    suspend fun getAllTransaction(): List<com.pizza.psx.domain.model.Transaction> =
+        portfolioModelDAO.getAllTransactions()
 }

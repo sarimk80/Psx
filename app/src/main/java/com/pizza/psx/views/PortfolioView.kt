@@ -133,7 +133,8 @@ fun PortfolioView(
         viewModel.addToPortfolioModel(selectedSymbol,
             volume = stockCount.toInt(),
             isFromEditVolume = _isFromVolumeUpdate,
-            transaction = Transaction(portfolioSymbol = selectedSymbol,
+            transaction = Transaction(
+                portfolioSymbol = selectedSymbol,
                 volume = stockCount.toInt(),
                 date = stockDate,
                 price = stockPrice.toDouble()
@@ -407,8 +408,9 @@ fun AddStockBottomSheet(
                 value = formattedDate,
                 onValueChange = { },
                 label = { Text("Purchase Date") },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = false,
+                modifier = Modifier.fillMaxWidth()
+                    .clickable { showDatePicker = true },
+                //enabled = false,
                 readOnly = true,
                 trailingIcon = {
                     IconButton(onClick = { showDatePicker = true }) {

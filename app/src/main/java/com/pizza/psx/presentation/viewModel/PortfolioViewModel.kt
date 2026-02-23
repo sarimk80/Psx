@@ -76,6 +76,8 @@ class PortfolioViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(isLoading = true)
 
         viewModelScope.launch {
+           val temp = repo.getAllTransaction()
+
 
             repo.getAllSymbolTransaction()
                 .first() // This gets the first emission from the Flow
