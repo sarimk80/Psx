@@ -6,13 +6,19 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pizza.psx.domain.model.IndexDetailModel
+import com.pizza.psx.domain.model.IndexPriceModel
+import com.pizza.psx.domain.model.KLineModel
 import com.pizza.psx.domain.model.PortfolioModel
 import com.pizza.psx.domain.model.StockResult
 import com.pizza.psx.domain.model.Ticker
 import com.pizza.psx.domain.usecase.IndexDetailUseCase
+import com.pizza.psx.domain.usecase.IndexPriceUseCase
+import com.pizza.psx.domain.usecase.KLineModelUseCase
 import com.pizza.psx.domain.usecase.TickerUseCase
 import com.pizza.psx.presentation.helpers.stringToIndexString
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,6 +27,7 @@ import javax.inject.Inject
 class IndexDetailViewModel @Inject constructor(
     private val getTickerDetail: TickerUseCase,
     private val indexDetailUseCase: IndexDetailUseCase,
+    private val kLineModel: KLineModelUseCase,
     savedStateHandle: SavedStateHandle
 ):ViewModel() {
 
@@ -66,29 +73,53 @@ class IndexDetailViewModel @Inject constructor(
         }
     }
 
-    fun getChartIndex(indexName: String){
+    fun getChartIndex(indexName: String) {
         viewModelScope.launch {
-            _indexUiState.value = _indexUiState.value.copy(isLoading = true)
+            _indexUiState.value = _indexUiState.value.copy(
+                isLoading = true,
+                error = null
+            )
 
             try {
+                val priceDeferred = async { kLineModel(indexSymbol,"1d") }
+                val sectorDeferred = async { indexDetailUseCase(indexName) }
 
-                when(val result = indexDetailUseCase(indexName = indexName)){
-                    is StockResult.Success -> {
-                        _indexUiState.value = _indexUiState.value.copy(listOfStocks = result.data, isLoading = false)
-                    }
+                val priceResult = priceDeferred.await()
+                val sectorResult = sectorDeferred.await()
+
+                val priceData = when (priceResult) {
+                    is StockResult.Success -> priceResult.data
                     is StockResult.Error -> {
-                        _indexUiState.value = _indexUiState.value.copy(error = result.message)
+                        _indexUiState.value = _indexUiState.value.copy(error = priceResult.message)
+                        null
                     }
-                    StockResult.Loading -> {
-                        _indexUiState.value = _indexUiState.value.copy(isLoading = true)
-                    }
+                    is StockResult.Loading -> null
                 }
 
-            }catch (e:Exception){
-                _indexUiState.value = _indexUiState.value.copy(isLoading = false, error = e.message)
+                val sectorData = when (sectorResult) {
+                    is StockResult.Success -> sectorResult.data
+                    is StockResult.Error -> {
+                        _indexUiState.value = _indexUiState.value.copy(error = sectorResult.message)
+                        null
+                    }
+                    is StockResult.Loading -> null
+                }
+
+                _indexUiState.value = _indexUiState.value.copy(
+                    isLoading = false,
+                    listOfStocks = sectorData,
+                    indexPrice = priceData
+                )
+
+            } catch (e: Exception) {
+                _indexUiState.value = _indexUiState.value.copy(
+                    isLoading = false,
+                    error = e.message
+                )
             }
         }
     }
+
     private suspend fun loadTickersForSymbols(symbols: List<PortfolioModel>, sectorName: List<String>) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
@@ -122,6 +153,7 @@ class IndexDetailViewModel @Inject constructor(
                                 ticker.data.stockCount = symbolToVolumeMap[ticker.data.symbol] ?: 0
                                 symbolToSectorMap[ticker.data.symbol]?.let { sector ->
                                     ticker.data.sectorName = sector
+
                                 }
                                 batchTickers.add(ticker)
                             }
@@ -176,5 +208,6 @@ data class IndexDetailUiState(
 data class IndexChartList(
     val isLoading: Boolean = true,
     val error: String? = null,
-    val listOfStocks:List<IndexDetailModel>?=null
+    val listOfStocks:List<IndexDetailModel>?=null,
+    val indexPrice: KLineModel?= null
 )

@@ -268,11 +268,14 @@ fun FilteredDividendList(
         LazyColumn(
             modifier = Modifier.heightIn(max = 400.dp)
         ) {
-            items(filteredDividends.take(20)) { dividend ->
+            items(filteredDividends.take(filteredDividends.size)) { dividend ->
                 MarketDividendItem(
                     dividend = dividend,
                     selectedTab = selectedTab
                 )
+            }
+            item{
+                Spacer(modifier = Modifier.padding(bottom = 60.dp))
             }
         }
     }

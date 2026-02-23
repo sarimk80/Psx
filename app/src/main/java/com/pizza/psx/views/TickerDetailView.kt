@@ -597,7 +597,6 @@ fun ChartView(
 
         }
 
-
     }
 
     // Format X-axis

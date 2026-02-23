@@ -133,7 +133,8 @@ fun SectorDetailView(
                             onTickerClick("REG", item.data.symbol)
                         },
                         isHideVolume = false,
-                        isHideSector = false
+                        isHideSector = false,
+                        onUpdateTicker = {}
                     )
                 }
             }

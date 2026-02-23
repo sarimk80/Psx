@@ -124,6 +124,10 @@ val CHART_COLORS = listOf(
     Color(0xFFFD7272), // Deep Orange
     Color(0xFFfed330), // Teal
     Color(0xFF2bcbba), // Deep Purple
+    Color(0xFFe67e22),
+    Color(0xFF2c3e50),
+    Color(0xFF1abc9c),
+    Color(0xFF82ccdd)
 )
 
 fun getColorFromIndex(index: Int): Color {

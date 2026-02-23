@@ -110,7 +110,7 @@ fun AppNavHost(
         }
         composable(Destination.Portfolio.route){
             PortfolioView(
-                onTickerClick = {type,symbol ->
+                onTickerClick = {type,symbol,price ->
                     navController.navigate("ticker_detail/$type/$symbol")
                 }
             )

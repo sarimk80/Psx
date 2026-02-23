@@ -50,11 +50,51 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
+import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
+import com.patrykandpatrick.vico.compose.common.fill
+import com.patrykandpatrick.vico.core.cartesian.Scroll
+import com.patrykandpatrick.vico.core.cartesian.Zoom
+import com.patrykandpatrick.vico.core.cartesian.axis.Axis
+import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianLayerRangeProvider
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
+import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
+import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
+import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
+import com.patrykandpatrick.vico.core.cartesian.marker.CartesianMarker
+import com.patrykandpatrick.vico.core.cartesian.marker.CartesianMarkerVisibilityListener
+import com.patrykandpatrick.vico.core.cartesian.marker.ColumnCartesianLayerMarkerTarget
+import com.patrykandpatrick.vico.core.cartesian.marker.DefaultCartesianMarker
+import com.patrykandpatrick.vico.core.cartesian.marker.LineCartesianLayerMarkerTarget
+import com.patrykandpatrick.vico.core.common.component.TextComponent
+import com.patrykandpatrick.vico.core.common.shape.CorneredShape
+import com.pizza.compose.baraRed
+import com.pizza.compose.veryBerry
 import com.pizza.psx.R
+import com.pizza.psx.domain.model.IndexData
 import com.pizza.psx.domain.model.IndexDetailModel
+import com.pizza.psx.domain.model.IndexPriceModel
+import com.pizza.psx.domain.model.KLineModel
 import com.pizza.psx.domain.model.SectorName
+import com.pizza.psx.presentation.helpers.formatShortDate
+import com.pizza.psx.presentation.helpers.formatTimestamp
+import com.pizza.psx.presentation.helpers.formatVolume
 import com.pizza.psx.presentation.helpers.getColorFromIndex
+import com.pizza.psx.presentation.helpers.number_format
 import com.pizza.psx.presentation.helpers.stringToIndexString
 import com.pizza.psx.presentation.viewModel.IndexDetailUiState
 import com.pizza.psx.presentation.viewModel.IndexDetailViewModel
@@ -159,6 +199,7 @@ fun IndexDetailView(
                             onTickerClick = onTickerClick,
                             displayIndexName = displayIndexName,
                             chartStocks = indexUiState.listOfStocks!!,
+                            indexPriceHistory = indexUiState.indexPrice!!,
                             onRefresh = {
                                 isRefreshing = true
                                 coroutineScope.launch {
@@ -292,26 +333,10 @@ private fun ContentLoadedState(
     displayIndexName: String,
     chartStocks: List<IndexDetailModel>,
     onRefresh: () -> Unit,
+    indexPriceHistory: KLineModel,
     isRefreshing: Boolean
 ) {
-//    // Calculate sector data for chart
-//    val sectorCount = remember(uiState.listOfStocks) {
-//        uiState.listOfStocks?.groupBy { it.data.sectorName }
-//            ?.map { (sectorName, tickers) ->
-//                SectorName(sectorName, tickers.size)
-//            } ?: emptyList()
-//    }
-//
-//    val chartSampleData = remember(sectorCount) {
-//        sectorCount.mapIndexed { index, sector ->
-//            ChartData(
-//                label = sector.sectorName.ifEmpty { "Unknown" },
-//                value = sector.sectorCount.toFloat(),
-//                color = getColorFromIndex(index),
-//                price = sectorCount.size.toFloat()
-//            )
-//        }
-//    }
+
 
     // Calculate total stocks count
     val totalStocks = uiState.listOfStocks?.size ?: 0
@@ -335,6 +360,24 @@ private fun ContentLoadedState(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
             }
+        }
+
+        item{
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(6.dp),
+            ) {
+                LineChart(data = indexPriceHistory)
+            }
+
+        }
+
+        item{
+            Spacer(modifier = Modifier.padding(top = 8.dp))
         }
 item{
 
@@ -365,6 +408,7 @@ item{
                 item = item,
                 onRemove = {  }, // Remove functionality not needed for index view
                 onTickerClick = { onTickerClick(item.data.symbol) },
+                onUpdateTicker = {},
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -379,7 +423,212 @@ item{
 
 }
 
+@Composable
+private fun LineChart(data: KLineModel){
 
+    val lineColor = veryBerry
+    val columnColor = baraRed
+
+    if (data.data.isEmpty())  return
+
+    // Sort data chronologically
+    val sortedData = remember(data) {
+        data.data.sortedBy { it.timestamp }
+    }
+
+    val xValues = remember(sortedData) { sortedData.indices.map { it.toFloat() } }
+    val indexPrice = remember(sortedData) { sortedData.map { it.close } }
+    val indexVolume = remember(sortedData) { sortedData.map { it.volume } }
+    val indexDate = remember(sortedData) { sortedData.map { formatShortDate(it.timestamp) } }
+
+    val lineProducer = remember { CartesianChartModelProducer() }
+
+    val minPrice = indexPrice.minOrNull() ?: 0.0
+    val maxPrice = indexPrice.maxOrNull() ?: 0.0
+    val padding = (maxPrice - minPrice) * 0.1
+
+    val rangeProvider = remember(minPrice, maxPrice) {
+        CartesianLayerRangeProvider.fixed(
+            minY = minPrice - padding,
+            maxY = maxPrice + padding
+        )
+    }
+
+    val zoomState = rememberVicoZoomState(
+        initialZoom = Zoom.fixed(3f),
+        minZoom = Zoom.fixed(2f),   // zoom in 2x
+        maxZoom = Zoom.fixed(10f)
+    )
+
+
+    LaunchedEffect(sortedData) {
+        lineProducer.runTransaction {
+            try {
+                lineSeries {
+                    series(xValues,indexPrice)
+                }
+                columnSeries {
+                    series(xValues,indexVolume)
+                }
+            }catch (e: Exception){
+                lineSeries {
+                    series(xValues,indexPrice)
+                }
+                columnSeries {
+                    series(xValues,indexVolume)
+                }
+            }
+
+        }
+
+    }
+
+    // Format X-axis
+    val dateFormatter = remember(indexDate) {
+        CartesianValueFormatter { _, value, _ ->
+            indexDate[value.toInt().coerceIn(0, indexDate.lastIndex)]
+        }
+    }
+
+    // Price formatting
+    val priceFormatter = remember {
+        CartesianValueFormatter { _, value, _ ->
+            number_format(value)
+        }
+    }
+
+    val labelFormatter = remember {
+        CartesianValueFormatter { _, value, _ -> formatVolume(value) }
+    }
+
+    val scrollState = rememberVicoScrollState(initialScroll = Scroll.Absolute.End)
+
+    var selectedXValue by remember { mutableStateOf(0.0) }
+    var selectedYValue by remember { mutableStateOf(0.0) }
+
+    val markerVisibilityListener = remember {
+
+
+        fun List<CartesianMarker.Target>.lastEntry() =
+            lastOrNull()?.let { target ->
+                when (target) {
+                    is LineCartesianLayerMarkerTarget ->
+                        target.points.lastOrNull()?.entry
+
+                    is ColumnCartesianLayerMarkerTarget ->
+                        target.columns.lastOrNull()?.entry
+
+                    else -> null
+                }
+            }
+
+
+
+
+        object : CartesianMarkerVisibilityListener {
+            override fun onShown(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+                targets
+                    .filterIsInstance<LineCartesianLayerMarkerTarget>()
+                    .firstOrNull()
+                    ?.points
+                    ?.firstOrNull()
+                    ?.entry
+                    ?.let {
+                        selectedXValue = it.x
+                        selectedYValue = it.y
+                    }
+            }
+
+            override fun onUpdated(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+
+                targets
+                    .filterIsInstance<LineCartesianLayerMarkerTarget>()
+                    .firstOrNull()
+                    ?.points
+                    ?.firstOrNull()
+                    ?.entry
+                    ?.let {
+                        selectedXValue = it.x
+                        selectedYValue = it.y
+                    }
+            }
+
+            override fun onHidden(marker: CartesianMarker) {
+                selectedXValue = 0.0
+                selectedYValue = 0.0
+            }
+        }
+    }
+
+
+    CartesianChartHost(
+        scrollState = scrollState,
+        chart = rememberCartesianChart(
+            rememberLineCartesianLayer(
+                rangeProvider = rangeProvider,
+                lineProvider = LineCartesianLayer.LineProvider.series(
+
+                    LineCartesianLayer.Line(
+                        pointConnector = LineCartesianLayer.PointConnector.cubic(0.6f),
+                        fill = remember {
+                            LineCartesianLayer.LineFill.single(
+                                fill(lineColor)
+                            )
+                        },
+                        areaFill = LineCartesianLayer.AreaFill.single(
+                            fill(lineColor.copy(alpha = 0.1f))
+                        ),
+                    )
+
+
+                ),
+                verticalAxisPosition = Axis.Position.Vertical.Start
+
+            ),
+            rememberColumnCartesianLayer(
+
+                columnProvider = ColumnCartesianLayer.ColumnProvider.series(
+                    rememberLineComponent(
+                        fill = fill(columnColor.copy(alpha = 0.5f)),
+                        thickness = 10.dp,
+                        shape = CorneredShape.rounded(60)
+                    )
+                ),
+                verticalAxisPosition = Axis.Position.Vertical.End
+            ),
+            startAxis = VerticalAxis.rememberStart(
+                guideline = null,
+                valueFormatter = priceFormatter,
+                label = rememberTextComponent(
+                    color = Color.Black,
+                    textSize = 0.sp
+                )
+            ),
+            bottomAxis = HorizontalAxis.rememberBottom(
+                guideline = null,
+                valueFormatter = dateFormatter,
+                labelRotationDegrees = 45f,
+                label = rememberTextComponent(
+                    color = Color.Black,
+                    textSize = 8.sp
+                ),
+            ),
+            marker = DefaultCartesianMarker(
+                label = TextComponent(
+                    textSizeSp = 0.0f
+                )
+            ),
+            markerVisibilityListener = markerVisibilityListener
+        ),
+        modelProducer = lineProducer,
+        //zoomState = zoomState,
+        modifier = Modifier
+                    .height(350.dp)
+                    .padding(6.dp),
+    )
+
+
+}
 @Composable
 private fun IndexChartSection(
     stocks: List<IndexDetailModel>

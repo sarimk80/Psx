@@ -5,11 +5,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pizza.psx.domain.model.IndexDetailModel
+import com.pizza.psx.domain.model.IndexPriceModel
 import com.pizza.psx.domain.model.PortfolioModel
+import com.pizza.psx.domain.model.PortfolioWithTransactions
 import com.pizza.psx.domain.model.StockResult
 import com.pizza.psx.domain.model.Ticker
+import com.pizza.psx.domain.model.Transaction
 import com.pizza.psx.domain.repo.PortfolioRepo
 import com.pizza.psx.domain.usecase.IndexDetailUseCase
+import com.pizza.psx.domain.usecase.IndexPriceUseCase
 import com.pizza.psx.domain.usecase.TickerUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -34,6 +38,7 @@ class PortfolioViewModel @Inject constructor(
     private val repo:PortfolioRepo,
     private val getTickerDetail: TickerUseCase,
     private val indexDetailUseCase: IndexDetailUseCase,
+    private val indexPrice: IndexPriceUseCase
 ):ViewModel(){
 
 
@@ -71,11 +76,11 @@ class PortfolioViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(isLoading = true)
 
         viewModelScope.launch {
-            repo.getAllSymbols
-                .distinctUntilChanged()
-                .first()
-                .let { symbols ->
-                    loadTickersForSymbols(symbols,emptyList())
+
+            repo.getAllSymbolTransaction()
+                .first() // This gets the first emission from the Flow
+                .let { portfoliosWithTransactions ->
+                    loadTickersForSymbols(portfoliosWithTransactions, emptyList())
                 }
 
         }
@@ -93,7 +98,7 @@ class PortfolioViewModel @Inject constructor(
            ))
        }
         viewModelScope.launch{
-            loadTickersForSymbols(portfolioViewModelList,emptyList())
+            loadTickersForSymbols(emptyList(),emptyList())
         }
     }
 
@@ -112,7 +117,7 @@ class PortfolioViewModel @Inject constructor(
                            ))
                        }
                         var sectorName = result.data.map{it.sector}
-                        loadTickersForSymbols(symbols = portfolioViewModelList,sectorName)
+                        loadTickersForSymbols(symbols = emptyList(),sectorName)
                     }
                     is StockResult.Error -> {
                         print(result.message)
@@ -132,7 +137,7 @@ class PortfolioViewModel @Inject constructor(
 
             try {
 
-                when(val result = indexDetailUseCase(indexName = indexName)){
+                when(val result = indexPrice(indexName = indexName)){
                     is StockResult.Success -> {
                         _indexUiState.value = _indexUiState.value.copy(listOfStocks = result.data, isLoading = false)
                     }
@@ -150,7 +155,7 @@ class PortfolioViewModel @Inject constructor(
         }
     }
 
-    private suspend fun loadTickersForSymbols(symbols: List<PortfolioModel>, sectorName: List<String>) {
+    private suspend fun loadTickersForSymbols(symbols:  List<PortfolioWithTransactions>, sectorName: List<String>) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
 
@@ -161,10 +166,19 @@ class PortfolioViewModel @Inject constructor(
                 )
                 return@launch
             }
+            val symbolToVolumeMap = symbols.associate { portfolioWithTx ->
+                val volume = if (portfolioWithTx.transactions.isEmpty()) {
+                    // No transactions → use the portfolio's own volume
+                    portfolioWithTx.portfolio.volume
+                } else {
+                    // Has transactions → sum their volumes
+                    portfolioWithTx.transactions.sumOf { it.volume ?: 0 }
+                }
+                portfolioWithTx.portfolio.symbol to volume
+            }
 
-            val symbolToVolumeMap = symbols.associate { it.symbol to it.volume }
             val symbolToSectorMap = if (sectorName.isNotEmpty() && symbols.size == sectorName.size) {
-                symbols.mapIndexed { index, model -> model.symbol to sectorName[index] }.toMap()
+                symbols.mapIndexed { index, model -> model.portfolio.symbol to sectorName[index] }.toMap()
             } else emptyMap()
 
             val allTickers = mutableListOf<Ticker>()
@@ -176,7 +190,7 @@ class PortfolioViewModel @Inject constructor(
                     // Process each symbol sequentially within batch
                     for ((index, sym) in batch.withIndex()) {
                         try {
-                            val result = getTickerDetail(type = "REG", symbol = sym.symbol)
+                            val result = getTickerDetail(type = "REG", symbol = sym.portfolio.symbol)
 
                             if (result is StockResult.Success) {
                                 val ticker = result.data
@@ -194,7 +208,7 @@ class PortfolioViewModel @Inject constructor(
 
                         } catch (e: Exception) {
                             // Handle individual API call failure
-                            println("Failed to load ${sym.symbol}: ${e.message}")
+                            println("Failed to load ${sym.portfolio.symbol}: ${e.message}")
                         }
                     }
 
@@ -227,15 +241,18 @@ class PortfolioViewModel @Inject constructor(
         }
     }
 
-    fun addToPortfolioModel(symbol:String,volume: Int){
+    fun addToPortfolioModel(symbol:String,volume: Int,isFromEditVolume: Boolean = false,transaction: Transaction){
         viewModelScope.launch {
             try {
                 val currentList = portfolioModels.value
                 val exist = currentList.any { it.symbol == symbol }
                 if(exist){
-                    repo.deleteSymbol(symbol)
+                    repo.updateSymbol(PortfolioModel(symbol,volume))
+                    repo.insertTransaction(transaction)
                 }else{
                     repo.insertSymbol(PortfolioModel(symbol = symbol, volume = volume))
+                    repo.insertTransaction(transaction)
+
                 }
                 getAllPortfolioTicker()
             }catch (e:Exception){
@@ -265,5 +282,5 @@ data class PortfolioUiState(
 data class IndexList(
     val isLoading: Boolean = true,
     val error: String? = null,
-    val listOfStocks:List<IndexDetailModel>?=null
+    val listOfStocks:IndexPriceModel?=null
 )

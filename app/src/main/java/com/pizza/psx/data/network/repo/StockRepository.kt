@@ -5,6 +5,7 @@ import com.pizza.psx.domain.model.Companies
 import com.pizza.psx.domain.model.Dividend
 import com.pizza.psx.domain.model.Fundamentals
 import com.pizza.psx.domain.model.IndexDetailModel
+import com.pizza.psx.domain.model.IndexPriceModel
 import com.pizza.psx.domain.model.KLineModel
 import com.pizza.psx.domain.model.MarketDividend
 import com.pizza.psx.domain.model.Root
@@ -129,6 +130,15 @@ class StockRepository(
     override suspend fun getSymbolDetail(symbol: String): StockResult<SymbolDetail> = withContext(dispatcher){
         return@withContext try {
             val result = stockApi.getSymbolDetail("https://sarim-pix.hf.space/get_symbol_detail${symbol}")
+            StockResult.Success(result)
+        }catch (e:Exception){
+            StockResult.Error("Failed${e.toString()}")
+        }
+    }
+
+    override suspend fun getIndexPrice(indexName: String): StockResult<IndexPriceModel> = withContext(dispatcher){
+        return@withContext try {
+            val result = stockApi.getIndexPrice("https://sarim-pix.hf.space/get_index_price/${indexName}")
             StockResult.Success(result)
         }catch (e:Exception){
             StockResult.Error("Failed${e.toString()}")

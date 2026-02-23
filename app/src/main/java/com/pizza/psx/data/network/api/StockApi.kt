@@ -4,6 +4,7 @@ import com.pizza.psx.domain.model.Companies
 import com.pizza.psx.domain.model.Dividend
 import com.pizza.psx.domain.model.Fundamentals
 import com.pizza.psx.domain.model.IndexDetailModel
+import com.pizza.psx.domain.model.IndexPriceModel
 import com.pizza.psx.domain.model.KLineModel
 import com.pizza.psx.domain.model.MarketDividend
 import com.pizza.psx.domain.model.Root
@@ -53,4 +54,7 @@ interface StockApi {
 
     @GET
     suspend fun getSymbolDetail(@Url url: String): SymbolDetail
+
+    @GET
+    suspend fun getIndexPrice(@Url url: String): IndexPriceModel
 }

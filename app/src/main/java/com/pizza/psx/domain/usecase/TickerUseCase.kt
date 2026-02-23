@@ -4,6 +4,7 @@ import com.pizza.psx.domain.model.Companies
 import com.pizza.psx.domain.model.Dividend
 import com.pizza.psx.domain.model.Fundamentals
 import com.pizza.psx.domain.model.IndexDetailModel
+import com.pizza.psx.domain.model.IndexPriceModel
 import com.pizza.psx.domain.model.KLineModel
 import com.pizza.psx.domain.model.MarketDividend
 import com.pizza.psx.domain.model.StockResult
@@ -90,6 +91,15 @@ class SymbolDetailUseCase@Inject constructor(
 ) {
     suspend operator fun invoke(symbol: String): StockResult<SymbolDetail> {
         return  repo.getSymbolDetail(symbol)
+    }
+
+}
+
+class IndexPriceUseCase@Inject constructor(
+    private  val repo: StockRepo
+) {
+    suspend operator fun invoke(indexName: String): StockResult<IndexPriceModel> {
+        return  repo.getIndexPrice(indexName = indexName)
     }
 
 }
