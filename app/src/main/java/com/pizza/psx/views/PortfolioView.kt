@@ -211,7 +211,7 @@ fun PortfolioView(
             if(showAddStockDialog){
 
 
-                AddStockDialog(
+                AddStockBottomSheet(
                     symbol = selectedSymbol,
                     stockCount = stockCount,
                     price = stockPrice,
@@ -263,7 +263,7 @@ fun PortfolioView(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddStockDialog(
+fun AddStockBottomSheet(
     symbol: String,
     stockCount: String,
     price: String,
@@ -276,7 +276,7 @@ fun AddStockDialog(
     onConfirm: () -> Unit,
     indexUiState: IndexList
 ) {
-    var priceText by remember { mutableStateOf("") }
+    var priceText by remember { mutableStateOf(price) }
     var userHasTyped by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState(
@@ -295,170 +295,185 @@ fun AddStockDialog(
         } ?: "Select Date"
     }
 
-
-
+    // Update price from API when not typed by user
     LaunchedEffect(indexUiState.listOfStocks) {
         if (!userHasTyped) {
-            priceText = indexUiState.listOfStocks
+            val apiPrice = indexUiState.listOfStocks
                 ?.data
                 ?.firstOrNull()
                 ?.price
-                ?.toString()
-                ?: ""
+                ?.toString() ?: ""
+            if (apiPrice.isNotEmpty()) {
+                priceText = apiPrice
+                onPriceChange(apiPrice)
+            }
         }
     }
 
-    // Main dialog
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = "Add $symbol to Portfolio",
-                style = MaterialTheme.typography.titleLarge
-            )
-        },
-        text = {
-            Column {
-                // Stock count field
-                OutlinedTextField(
-                    value = stockCount,
-                    onValueChange = onStockCountChange,
-                    label = { Text("Number of Stocks") },
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Next
-                    ),
-                    singleLine = true,
-                    isError = errorMessage?.contains("stock", ignoreCase = true) == true,
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Numbers,
-                            contentDescription = null
-                        )
-                    }
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-
-                OutlinedTextField(
-                    value = priceText,
-                    onValueChange = { newValue ->
-                        if (!userHasTyped) {
-                            priceText = ""   // clear once when user starts typing
-                            userHasTyped = true
-                        }
-                        priceText = newValue
-                        onPriceChange(newValue)
-                    },
-                    label = { Text("Price per Stock") },
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Decimal,
-                        imeAction = ImeAction.Next
-                    ),
-                    singleLine = true,
-                    enabled = !indexUiState.isLoading,
-                    isError = errorMessage?.contains("price", ignoreCase = true) == true,
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Money,
-                            contentDescription = null
-                        )
-                    },
-                    trailingIcon = {
-                        when {
-                            indexUiState.isLoading -> {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(18.dp),
-                                    strokeWidth = 2.dp
-                                )
-                            }
-                            indexUiState.error != null -> {
-                                Icon(
-                                    imageVector = Icons.Default.Error,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        }
-                    }
-                )
-
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Date picker field
-                OutlinedTextField(
-                    value = formattedDate,
-                    onValueChange = { }, // Read-only
-                    label = { Text("Purchase Date") },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = false,
-                    readOnly = true,
-                    trailingIcon = {
-                        IconButton(onClick = { showDatePicker = true }) {
-                            Icon(
-                                imageVector = Icons.Default.CalendarToday,
-                                contentDescription = "Select Date"
-                            )
-                        }
-                    },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.CalendarToday,
-                            contentDescription = null
-                        )
-                    }
-                )
-
-                if (errorMessage != null) {
-                    Text(
-                        text = errorMessage,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                }
-
-                // Quick selection buttons
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    listOf("1", "10", "50", "100").forEach { quantity ->
-                        FilterChip(
-                            selected = stockCount == quantity,
-                            onClick = { onStockCountChange(quantity) },
-                            label = { Text(quantity) },
-                            modifier = Modifier.padding(horizontal = 4.dp)
-                        )
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = onConfirm,
-                enabled = stockCount.isNotEmpty() && selectedDate != null && price.isNotEmpty()
-            ) {
-                Text("Add")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        },
-        properties = DialogProperties(
-            dismissOnClickOutside = false
-        )
+    // Bottom sheet state – fully expanded by default
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
     )
 
-    // Date Picker Dialog
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        //dragHandle = { BottomSheetDragHandle() } // optional, but recommended
+    ) {
+        // Content of the bottom sheet
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 24.dp)
+        ) {
+            // Title
+            Text(
+                text = "Add $symbol to Portfolio",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            // Stock count field
+            OutlinedTextField(
+                value = stockCount,
+                onValueChange = onStockCountChange,
+                label = { Text("Number of Stocks") },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                ),
+                singleLine = true,
+                isError = errorMessage?.contains("stock", ignoreCase = true) == true,
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Numbers,
+                        contentDescription = null
+                    )
+                }
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Price field
+            OutlinedTextField(
+                value = priceText,
+                onValueChange = { newValue ->
+                    if (!userHasTyped) {
+                        userHasTyped = true
+                    }
+                    priceText = newValue
+                    onPriceChange(newValue)
+                },
+                label = { Text("Price per Stock") },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal,
+                    imeAction = ImeAction.Next
+                ),
+                singleLine = true,
+                enabled = !indexUiState.isLoading,
+                isError = errorMessage?.contains("price", ignoreCase = true) == true,
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Money,
+                        contentDescription = null
+                    )
+                },
+                trailingIcon = {
+                    when {
+                        indexUiState.isLoading -> {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                strokeWidth = 2.dp
+                            )
+                        }
+                        indexUiState.error != null -> {
+                            Icon(
+                                imageVector = Icons.Default.Error,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                }
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Date picker field
+            OutlinedTextField(
+                value = formattedDate,
+                onValueChange = { },
+                label = { Text("Purchase Date") },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = false,
+                readOnly = true,
+                trailingIcon = {
+                    IconButton(onClick = { showDatePicker = true }) {
+                        Icon(
+                            imageVector = Icons.Default.CalendarToday,
+                            contentDescription = "Select Date"
+                        )
+                    }
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.CalendarToday,
+                        contentDescription = null
+                    )
+                }
+            )
+
+            if (errorMessage != null) {
+                Text(
+                    text = errorMessage,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+
+            // Quick selection buttons
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                listOf("1", "10", "50", "100").forEach { quantity ->
+                    FilterChip(
+                        selected = stockCount == quantity,
+                        onClick = { onStockCountChange(quantity) },
+                        label = { Text(quantity) },
+                        modifier = Modifier.padding(horizontal = 4.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Confirm and Cancel buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(onClick = onDismiss) {
+                    Text("Cancel")
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Button(
+                    onClick = onConfirm,
+                    enabled = stockCount.isNotEmpty() && selectedDate != null && price.isNotEmpty()
+                ) {
+                    Text("Add")
+                }
+            }
+        }
+    }
+
+    // Date Picker Dialog (remains the same)
     if (showDatePicker) {
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
