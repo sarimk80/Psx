@@ -512,7 +512,7 @@ fun AddStockBottomSheet(
                     value = selectedOption,
                     onValueChange = onValueChange,
                     readOnly = true,
-                    label = { Text("Market Type") },
+                    label = { Text("Select symbol") },
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
                     },

@@ -140,6 +140,7 @@ import com.pizza.compose.veryBerry
 import com.pizza.psx.domain.model.Announcement
 import com.pizza.psx.domain.model.SymbolDetail
 import com.pizza.psx.presentation.helpers.number_format
+import kotlin.math.ln
 import kotlin.math.min
 
 
@@ -553,6 +554,28 @@ fun ChartView(
     val highValues = remember(sortedData) { sortedData.map { it.high.toFloat() } }
     val lowValues = remember(sortedData) { sortedData.map { it.low.toFloat() } }
     val volumeValues = remember(sortedData) { sortedData.map { it.volume.toFloat() } }
+    val normalizedVolumeValues = remember(sortedData) {
+        val minPrice = sortedData.minOfOrNull { it.low }?.toFloat() ?: 0f
+        val maxPrice = sortedData.maxOfOrNull { it.high }?.toFloat() ?: 1f
+        val priceRange = (maxPrice - minPrice).takeIf { it > 0f } ?: 1f
+
+        val volumes = sortedData.map { it.volume.toFloat() }
+        val minVol = volumes.minOrNull() ?: 0f
+        val maxVol = volumes.maxOrNull()?.takeIf { it > minVol } ?: 1f
+        val volRange = (maxVol - minVol).takeIf { it > 0f } ?: 1f
+
+        // Normalize 0..1 then scale to bottom 20% of price range, offset by minPrice
+        volumes.map { vol ->
+            minPrice + ((vol - minVol) / volRange) * (priceRange * 0.20f)
+        }
+    }
+
+    val scaledVolumeValues = remember(sortedData) {
+        val minClose = sortedData.minOfOrNull { it.close }?.toFloat()?.takeIf { it > 0f } ?: 1f
+        sortedData.map {
+            (it.volume.toFloat() / minClose) * 0.1f
+        }
+    }
 
     val dateList = remember(sortedData) { sortedData.map { formatShortDate(it.timestamp) } }
 
@@ -584,14 +607,14 @@ fun ChartView(
                     series(xValues,closeValues)
                 }
                 columnSeries {
-                    series(xValues,volumeValues)
+                    series(xValues,normalizedVolumeValues)
                 }
             }catch (e: Exception){
                 lineSeries {
                     series(xValues,openValues)
                 }
                 columnSeries {
-                    series(xValues,volumeValues)
+                    series(xValues,normalizedVolumeValues)
                 }
             }
 
@@ -884,6 +907,12 @@ fun ChartView(
         }
     }
 
+    val rangeProvider = remember(stats) {
+        CartesianLayerRangeProvider.fixed(
+            minY = stats.third.second * 0.98,
+            maxY = stats.third.first * 1.02
+        )
+    }
 
     Column(modifier = Modifier.
     verticalScroll(rememberScrollState())
@@ -916,7 +945,7 @@ fun ChartView(
             //chart = rememberCartesianChart(),
             chart = rememberCartesianChart(
                 rememberLineCartesianLayer(
-
+                    rangeProvider = rangeProvider,
                     lineProvider = LineCartesianLayer.LineProvider.series(
 
                         LineCartesianLayer.Line(
@@ -937,7 +966,7 @@ fun ChartView(
 
                 ),
                 rememberColumnCartesianLayer(
-
+                    rangeProvider = rangeProvider,
                     columnProvider = ColumnCartesianLayer.ColumnProvider.series(
                         rememberLineComponent(
                             fill = fill(columnColor.copy(alpha = 0.5f)),
@@ -971,41 +1000,10 @@ fun ChartView(
             ),
             modelProducer = lineProducer,
 
-            modifier = Modifier.height(400.dp),
+            modifier = Modifier.height(350.dp),
         )
 
-//        CartesianChartHost(
-//            scrollState = scrollState,
-//            chart = rememberCartesianChart(
-//                rememberCandlestickCartesianLayer(rangeProvider = priceRangeProvider),
-//                startAxis = VerticalAxis.rememberStart(
-//                    valueFormatter = priceFormatter,
-//                    label = rememberTextComponent(
-//                        color = Color.Black,
-//                        textSize = 8.sp
-//                    )
-//                ),
-//                bottomAxis = HorizontalAxis.rememberBottom(
-//                    label = rememberTextComponent(
-//                        color = Color.Black,
-//                        textSize = 8.sp
-//                    ),
-//                    guideline = null,
-//                    valueFormatter = dateFormatter,
-//                    labelRotationDegrees = 45f,
-//                ),
-//                marker = DefaultCartesianMarker(
-//                    label = rememberTextComponent(
-//                        padding = Insets(horizontalDp = 12f, verticalDp = 8f),
-//                        color = Color.Black,
-//                        textSize = 12.sp,
-//                    ),
-//                    valueFormatter = markerFormatter,
-//                )
-//            ),
-//            modelProducer = modelProducerPrice,
-//            modifier = Modifier.height(350.dp),
-//        )
+
         Spacer(modifier = Modifier.height(8.dp))
         Spacer(modifier = Modifier.height(8.dp))
 
