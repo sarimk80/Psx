@@ -142,6 +142,7 @@ fun PortfolioView(
     var stockPrice by remember { mutableStateOf("") }
     var stockDate by remember { mutableStateOf(1705334400000) }
     var selectedStockPrice by remember { mutableStateOf<Double?>(null) }
+    var stockStatus by remember { mutableStateOf("") }
 
     val portfolioItems by viewModel.portfolioModels.collectAsStateWithLifecycle()
 
@@ -254,7 +255,9 @@ fun PortfolioView(
                     onValueChange = {symbol ->
                         viewModel.getChartIndex(symbol)
                         selectedSymbol = symbol
-                    }
+                    },
+                    stockStatus = stockStatus,
+                    onStockStatusChange = {}
 
 
                 )
@@ -303,7 +306,10 @@ fun PortfolioView(
                         isFromVolumeUpdate = true
                         showAddStockDialog = true
                     },
-                    onAddTransactionClick = {showAddStockDialog = true}
+                    onAddTransactionClick = {
+                        viewModel.getChartIndex(portfolioItems.first().symbol)
+                        showAddStockDialog = true
+                    }
 
                 )
             }
@@ -437,7 +443,10 @@ fun AddStockBottomSheet(
     onConfirm: () -> Unit,
     indexUiState: IndexList,
     listOfPortfolio: List<PortfolioModel>,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
+    stockStatus: String,
+    onStockStatusChange: (String) -> Unit
+
 ) {
     var priceText by remember { mutableStateOf(price) }
     var userHasTyped by remember { mutableStateOf(false) }
@@ -661,6 +670,31 @@ fun AddStockBottomSheet(
             }
 
             Spacer(modifier = Modifier.height(24.dp))
+
+//            // Buy and sell
+//
+//            listOf("Buy", "Sell").forEach { status ->
+//    val isBuy = status == "Buy"
+//
+//    FilterChip(
+//        selected = stockStatus == status,
+//        onClick = { onStockStatusChange(status) },
+//        label = { Text(status) },
+//        colors = FilterChipDefaults.filterChipColors(
+//            selectedContainerColor = if (isBuy) Color(0xFF4CAF50) else Color(0xFFE53935),
+//            selectedLabelColor = Color.White,
+//            containerColor = if (isBuy) Color(0xFFE8F5E9) else Color(0xFFFFEBEE),
+//            labelColor = if (isBuy) Color(0xFF2E7D32) else Color(0xFFC62828)
+//        ),
+//        border = FilterChipDefaults.filterChipBorder(
+//            borderColor = if (isBuy) Color(0xFF4CAF50) else Color(0xFFE53935),
+//            selectedBorderColor = Color.Transparent
+//        ),
+//        modifier = Modifier.padding(horizontal = 4.dp)
+//    )
+//}
+//
+//            Spacer(modifier = Modifier.height(24.dp))
 
             // Confirm and Cancel buttons
             Row(
