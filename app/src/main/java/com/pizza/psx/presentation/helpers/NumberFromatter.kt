@@ -31,6 +31,12 @@ fun formatTimestamp(ts: Long): String {
     return formatter.format(date)
 }
 
+fun formatDate(timestamp: Long?): String {
+    if (timestamp == null) return "-"
+    val sdf = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+    return sdf.format(Date(timestamp))
+}
+
  fun formatVolume(volume: Double): String {
     return when {
         volume >= 1_000_000 -> "%.1fM".format(volume / 1_000_000)

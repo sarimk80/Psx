@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.OnConflictStrategy.Companion.REPLACE
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import androidx.room.Upsert
 import com.pizza.psx.domain.model.PortfolioModel
 import com.pizza.psx.domain.model.PortfolioWithTransactions
@@ -23,7 +24,7 @@ interface PortfolioModelDAO {
     @Insert()
     suspend fun insertPortfolio(portfolioModel: PortfolioModel)
 
-    @Upsert
+    @Update
     suspend fun upsertPortfolio(portfolioModel: PortfolioModel)
 
     @Query("DELETE FROM portfoliomodel WHERE symbol = :symbol")

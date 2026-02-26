@@ -6,6 +6,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -24,12 +25,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Money
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Search
@@ -44,8 +50,13 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -57,6 +68,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -77,6 +89,7 @@ import com.pizza.psx.presentation.viewModel.PortfolioViewModel
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -111,7 +124,8 @@ import java.util.Locale
 fun PortfolioView(
     onTickerClick: (String, String,Double) -> Unit = { _, _ ,_-> },
     viewModel: PortfolioViewModel = hiltViewModel(),
-    searchViewModel: SearchViewModel = hiltViewModel()
+    searchViewModel: SearchViewModel = hiltViewModel(),
+    onTickerTransactionClick:(String) -> Unit = {_ -> },
 ) {
     val uiState by viewModel.uiState
     val searchUiState by searchViewModel.uiState
@@ -119,6 +133,8 @@ fun PortfolioView(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showBottomSheet by remember { mutableStateOf(false) }
     var showAddStockDialog by remember { mutableStateOf(false) }
+    var showOptionSheet by remember { mutableStateOf(false) }
+    var clickedTickerPrice by remember { mutableStateOf(0.0) }
     var isFromVolumeUpdate by remember { mutableStateOf(false) }
 
     var selectedSymbol by remember { mutableStateOf("") }
@@ -204,7 +220,11 @@ fun PortfolioView(
                         },
                         onDismiss = { showBottomSheet = false },
                         searchUiState = searchUiState,
-                        listOfPortfolio = portfolioItems
+                        listOfPortfolio = portfolioItems,
+                        onDelete = {symbol ->
+                            viewModel.removeFromWatchlist(symbol)
+                            showBottomSheet = false
+                        }
                     )
 
                 }
@@ -229,11 +249,36 @@ fun PortfolioView(
                     onStockCountChange = { stockCount = it },
                     onDateChange = { stockDate = it ?: System.currentTimeMillis() },
                     onPriceChange = {stockPrice = it },
-                    indexUiState = indexUiState
+                    indexUiState = indexUiState,
+                    listOfPortfolio = portfolioItems,
+                    onValueChange = {symbol ->
+                        viewModel.getChartIndex(symbol)
+                        selectedSymbol = symbol
+                    }
 
 
                 )
             }
+
+            if(showOptionSheet){
+                ModalBottomSheet(
+                    onDismissRequest = { showOptionSheet = false },
+                    sheetState = sheetState,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    dragHandle = { BottomSheetDefaults.DragHandle() }
+                ) {
+                    TickerOptions(
+                        tickerName = selectedSymbol,
+                        onHistoryClick = {
+                            onTickerTransactionClick(selectedSymbol)
+                        },
+                        onDetailClick = {
+                            onTickerClick("REG",selectedSymbol,clickedTickerPrice)
+                        }
+                    )
+                }
+            }
+
             when{
                 uiState.isLoading -> LoadingState()
                 uiState.error !=null -> Text(uiState.error!!)
@@ -245,7 +290,11 @@ fun PortfolioView(
                     onEditItem = { item ->
                         // Open edit dialog
                     },
-                    onTickerClick = onTickerClick,
+                    onTickerClick = { type,symbol,price ->
+                        showOptionSheet = true
+                        selectedSymbol = symbol
+                        clickedTickerPrice = price
+                    },
                     onUpdateTicker = { symbol,tickerStockCount,price ->
                         viewModel.getChartIndex(symbol)
                         selectedSymbol = symbol
@@ -253,14 +302,125 @@ fun PortfolioView(
                         stockPrice = price.toString()
                         isFromVolumeUpdate = true
                         showAddStockDialog = true
-                    }
+                    },
+                    onAddTransactionClick = {showAddStockDialog = true}
+
                 )
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TickerOptions(
+    tickerName: String? = null,
+    onHistoryClick: () -> Unit,
+    onDetailClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 32.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
 
+        // Header Section
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(
+                text = tickerName?.let { "Explore $it" } ?: "Explore Ticker",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            Text(
+                text = "Select what you would like to view",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        // Options Section
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+
+            OptionCard(
+                title = "Transaction History",
+                subtitle = "View past trades and activity",
+                icon = Icons.Default.History,
+                onClick = onHistoryClick
+            )
+
+            OptionCard(
+                title = "Ticker Details",
+                subtitle = "View price info, market data and metrics",
+                icon = Icons.Default.Info,
+                onClick = onDetailClick
+            )
+        }
+    }
+}
+
+@Composable
+private fun OptionCard(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    onClick: () -> Unit
+) {
+    ElevatedCard(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            // Icon container
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = title,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium
+                )
+
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -275,7 +435,9 @@ fun AddStockBottomSheet(
     onPriceChange: (String) -> Unit,
     onDateChange: (Long?) -> Unit,
     onConfirm: () -> Unit,
-    indexUiState: IndexList
+    indexUiState: IndexList,
+    listOfPortfolio: List<PortfolioModel>,
+    onValueChange: (String) -> Unit
 ) {
     var priceText by remember { mutableStateOf(price) }
     var userHasTyped by remember { mutableStateOf(false) }
@@ -288,6 +450,12 @@ fun AddStockBottomSheet(
             }
         }
     )
+
+    val options = listOfPortfolio.map { it.symbol }
+    var expanded by remember { mutableStateOf(false) }
+    var selectedOption by remember { mutableStateOf(
+        symbol.ifEmpty { options[0] }
+    ) }
 
     // Format date for display
     val formattedDate = remember(selectedDate) {
@@ -303,7 +471,7 @@ fun AddStockBottomSheet(
                 ?.data
                 ?.firstOrNull()
                 ?.price
-                ?.toString() ?: ""
+                 ?.toString() ?: ""
             if (apiPrice.isNotEmpty()) {
                 priceText = apiPrice
                 onPriceChange(apiPrice)
@@ -334,6 +502,43 @@ fun AddStockBottomSheet(
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
+
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded }
+            ) {
+
+                TextField(
+                    value = selectedOption,
+                    onValueChange = onValueChange,
+                    readOnly = true,
+                    label = { Text("Market Type") },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                    },
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth()
+                )
+
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    options.forEach { option ->
+                        DropdownMenuItem(
+                            text = { Text(option) },
+                            onClick = {
+                                selectedOption = option
+                                expanded = false
+                                onValueChange(option)
+                            }
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Stock count field
             OutlinedTextField(
@@ -408,7 +613,8 @@ fun AddStockBottomSheet(
                 value = formattedDate,
                 onValueChange = { },
                 label = { Text("Purchase Date") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .clickable { showDatePicker = true },
                 //enabled = false,
                 readOnly = true,
@@ -513,7 +719,8 @@ fun AddStockBottomSheetContent(
     searchUiState: SearchUiState,
     onTickerClick: (String, String) -> Unit,
     onDismiss: () -> Unit,
-    listOfPortfolio: List<PortfolioModel>
+    listOfPortfolio: List<PortfolioModel>,
+    onDelete: (String) -> Unit
 ) {
     var query by remember { mutableStateOf("") }
 
@@ -585,7 +792,8 @@ fun AddStockBottomSheetContent(
                     searchQuery = query,
                     modifier = Modifier.weight(1f),
                     onTickerClick = onTickerClick,
-                    listOfPortfolio = listOfPortfolio
+                    listOfPortfolio = listOfPortfolio,
+                    onDelete = onDelete
                 )
             }
         }
@@ -598,7 +806,9 @@ fun PortfolioSymbolList(
     searchQuery: String,
     modifier: Modifier = Modifier,
     onTickerClick: (String, String) -> Unit,
-    listOfPortfolio: List<PortfolioModel>
+    listOfPortfolio: List<PortfolioModel>,
+    onDelete: (String) -> Unit
+
 ) {
     val filtered = remember(symbols, searchQuery) {
         if (searchQuery.isBlank()) symbols
@@ -618,7 +828,8 @@ fun PortfolioSymbolList(
                 SymbolRow(
                     symbol = item,
                     onClick = { onTickerClick(item, item) },
-                    listOfPortfolio = listOfPortfolio
+                    listOfPortfolio = listOfPortfolio,
+                    onDelete = { onDelete(item) }
                 )
             }
         }
@@ -629,7 +840,8 @@ fun PortfolioSymbolList(
 fun SymbolRow(
     symbol: String,
     onClick: () -> Unit,
-    listOfPortfolio:  List<PortfolioModel>
+    listOfPortfolio:  List<PortfolioModel>,
+    onDelete: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -665,7 +877,7 @@ fun SymbolRow(
 
         }
         PortfolioActionButton(symbol = symbol, portfolioItems = listOfPortfolio,
-            onAdd = onClick )
+            onAdd = onClick , onDelete = onDelete)
     }
 }
 
@@ -674,35 +886,41 @@ fun PortfolioActionButton(
     symbol: String,
     portfolioItems: List<PortfolioModel>,
     onAdd: () -> Unit,
-
+    onDelete: () -> Unit,   // new callback for deletion
     modifier: Modifier = Modifier
 ) {
     val isInPortfolio = portfolioItems.any { it.symbol == symbol }
 
     Button(
-        onClick = { onAdd() },
+        onClick = {
+            if (isInPortfolio) {
+                onDelete()   // trigger delete when already in portfolio
+            } else {
+                onAdd()      // trigger add when not in portfolio
+            }
+        },
         modifier = modifier,
         colors = ButtonDefaults.buttonColors(
             containerColor = if (isInPortfolio) {
-                MaterialTheme.colorScheme.secondaryContainer
+                MaterialTheme.colorScheme.errorContainer   // delete uses error color
             } else {
                 MaterialTheme.colorScheme.primary
             },
             contentColor = if (isInPortfolio) {
-                MaterialTheme.colorScheme.onSecondaryContainer
+                MaterialTheme.colorScheme.onErrorContainer
             } else {
                 MaterialTheme.colorScheme.onPrimary
             }
         )
     ) {
         Icon(
-            imageVector = if (isInPortfolio) Icons.Default.Check else Icons.Default.Add,
-            contentDescription = null,
+            imageVector = if (isInPortfolio) Icons.Default.Delete else Icons.Default.Add,
+            contentDescription = if (isInPortfolio) "Delete from portfolio" else "Add to portfolio",
             modifier = Modifier.size(18.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = if (isInPortfolio) "Added" else "Add",
+            text = if (isInPortfolio) "Delete" else "Add",
             style = MaterialTheme.typography.labelLarge
         )
     }
@@ -938,7 +1156,8 @@ fun PortfolioContent(
     onRemoveItem: (String) -> Unit,
     onEditItem: (Ticker) -> Unit,
     onTickerClick: (String, String,Double) -> Unit,
-    onUpdateTicker: (String, Int, Double) -> Unit
+    onUpdateTicker: (String, Int, Double) -> Unit,
+    onAddTransactionClick: () -> Unit
 ) {
 
     val chartSampleData = remember(items) {
@@ -999,12 +1218,34 @@ fun PortfolioContent(
             }
 
             item {
-                Text(
-                    text = "${items.size} stocks",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = 8.dp, top = 2.dp)
-                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+
+                    Text(
+                        text = "${items.size} Transactions",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    FilledTonalButton(
+                        onClick = onAddTransactionClick,
+                        shape = RoundedCornerShape(12.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Add Transaction")
+                    }
+                }
             }
 
             items(items) { item ->

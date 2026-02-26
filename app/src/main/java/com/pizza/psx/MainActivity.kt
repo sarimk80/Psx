@@ -44,6 +44,7 @@ import com.pizza.psx.views.SectorDetailView
 import com.pizza.psx.views.SectorView
 import com.google.gson.Gson
 import com.pizza.psx.views.IndexDetailView
+import com.pizza.psx.views.PortfolioListView
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.HiltAndroidApp
 
@@ -112,6 +113,9 @@ fun AppNavHost(
             PortfolioView(
                 onTickerClick = {type,symbol,price ->
                     navController.navigate("ticker_detail/$type/$symbol")
+                },
+                onTickerTransactionClick = {symbol ->
+                    navController.navigate("ticker_transaction/$symbol")
                 }
             )
         }
@@ -187,6 +191,23 @@ fun AppNavHost(
                 onTickerClick = {symbol ->
                     navController.navigate("ticker_detail/REG/$symbol")
                 },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable  (
+            route = "ticker_transaction/{symbol}",
+            arguments = listOf(
+                navArgument("symbol") {
+                    type = NavType.StringType
+                    defaultValue = "DCR" // Default market type
+                }
+
+            )
+        ){backStackEntry ->
+            val my_symbol = backStackEntry.arguments?.getString("symbol") ?: "DCR"
+            PortfolioListView(
+                symbol =  my_symbol,
                 onBackClick = { navController.popBackStack() }
             )
         }

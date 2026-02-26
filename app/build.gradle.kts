@@ -77,6 +77,7 @@ dependencies {
     implementation(libs.vico.compose)
     implementation(libs.vico.views)
     implementation(libs.vico.compose.m3)
+    implementation(libs.androidx.compose.material3)
     ksp("androidx.room:room-compiler:2.6.1")
     ksp("com.google.dagger:hilt-android-compiler:2.57.1")
     ksp ("androidx.hilt:hilt-compiler:1.0.0")

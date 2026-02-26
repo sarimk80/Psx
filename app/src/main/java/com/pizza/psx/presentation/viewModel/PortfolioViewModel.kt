@@ -1,9 +1,11 @@
 package com.pizza.psx.presentation.viewModel
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.room.RoomDatabase
 import com.pizza.psx.domain.model.IndexDetailModel
 import com.pizza.psx.domain.model.IndexPriceModel
 import com.pizza.psx.domain.model.PortfolioModel
@@ -59,6 +61,13 @@ class PortfolioViewModel @Inject constructor(
             )
 
     init {
+        viewModelScope.launch {
+            val transactions = repo.getAllTransaction()
+            Log.d("DB_CHECK", "Transactions on app start: $transactions")
+
+            val portfolios = repo.getAllSymbols.first()
+            Log.d("DB_CHECK", "Portfolios on app start: $portfolios")
+        }
         startPortfolioPolling()
     }
 
@@ -76,7 +85,6 @@ class PortfolioViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(isLoading = true)
 
         viewModelScope.launch {
-           val temp = repo.getAllTransaction()
 
 
             repo.getAllSymbolTransaction()
@@ -250,10 +258,23 @@ class PortfolioViewModel @Inject constructor(
                 val exist = currentList.any { it.symbol == symbol }
                 if(exist){
                     repo.updateSymbol(PortfolioModel(symbol,volume))
-                    repo.insertTransaction(transaction)
+                    //repo.insertTransaction(transaction)
+                    try {
+                        repo.insertTransaction(transaction)
+                        Log.d("DB_CHECK", "Transaction inserted successfully")
+                    } catch (e: Exception) {
+                        Log.e("DB_CHECK", "Insert failed", e) // SQLiteConstraintException? FK violation?
+                    }
+
                 }else{
                     repo.insertSymbol(PortfolioModel(symbol = symbol, volume = volume))
-                    repo.insertTransaction(transaction)
+                    try {
+                        repo.insertTransaction(transaction)
+                        Log.d("DB_CHECK", "Transaction inserted successfully")
+                    } catch (e: Exception) {
+                        Log.e("DB_CHECK", "Insert failed", e) // SQLiteConstraintException? FK violation?
+                    }
+
 
                 }
                 getAllPortfolioTicker()
@@ -265,11 +286,23 @@ class PortfolioViewModel @Inject constructor(
         }
     }
 
+    fun removeFromWatchlist(symbol: String) {
+        viewModelScope.launch {
+            try {
+                repo.deleteSymbol(symbol)
+            }catch (e: Exception){
+                _uiState.value = _uiState.value.copy(
+                    error = "Failed to delete: ${e.message}"
+                )
+            }
+            getAllPortfolioTicker()
+        }
+    }
+
     fun checkIfSymbolExist(symbol: String): Boolean {
         val currentList = portfolioModels.value
         return currentList.any { it.symbol == symbol }
     }
-
 
 
 }
