@@ -78,7 +78,7 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Home(
-    onIndexClick:(String) -> Unit = { _ -> }
+    onIndexClick:(String, Ticker) -> Unit = { _ ,_ -> }
 ) {
     val viewModel: TickerDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState
@@ -141,7 +141,7 @@ fun HomeContent(
     marketDividends: List<MarketDividend>?,
     isDividendLoading: Boolean,
     modifier: Modifier = Modifier,
-    onIndexClick: (String) -> Unit
+    onIndexClick: (String, Ticker) -> Unit
 ) {
     LazyColumn(modifier = modifier) {
         item {
@@ -166,7 +166,7 @@ fun HomeContent(
 fun TickerHorizontalPager(
     tickers: List<Ticker>,
     modifier: Modifier = Modifier,
-    onIndexClick: (String) -> Unit
+    onIndexClick: (String, Ticker) -> Unit
 ) {
     val pagerState = rememberPagerState { tickers.size }
 
@@ -539,9 +539,9 @@ fun DotsIndicator(
 }
 
 @Composable
-fun TickerPage(ticker: Ticker, onClick: (String) -> Unit) {
+fun TickerPage(ticker: Ticker, onClick: (String, Ticker) -> Unit) {
     Card(
-        onClick = { onClick(ticker.data.symbol) },
+        onClick = { onClick(ticker.data.symbol,ticker) },
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),

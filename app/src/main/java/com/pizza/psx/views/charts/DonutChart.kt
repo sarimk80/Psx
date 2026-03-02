@@ -208,7 +208,7 @@ fun LegendItem(chartData: ChartData, percentage: Float) {
 fun RotatingCenterLegend(
     data: List<ChartData>,
     modifier: Modifier = Modifier,
-    intervalMillis: Long = 6000L
+    intervalMillis: Long = 4000L
 ) {
     if (data.isEmpty()) return
 

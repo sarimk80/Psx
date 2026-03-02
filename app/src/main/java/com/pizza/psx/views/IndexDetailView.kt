@@ -1,31 +1,49 @@
 package com.pizza.psx.views
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ShowChart
+import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.PieChart
+import androidx.compose.material.icons.filled.ShowChart
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ContainedLoadingIndicator
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -34,6 +52,7 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -45,10 +64,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -83,6 +105,8 @@ import com.patrykandpatrick.vico.core.cartesian.marker.LineCartesianLayerMarkerT
 import com.patrykandpatrick.vico.core.common.component.TextComponent
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import com.pizza.compose.baraRed
+import com.pizza.compose.financialGreen
+import com.pizza.compose.financialRed
 import com.pizza.compose.veryBerry
 import com.pizza.psx.R
 import com.pizza.psx.domain.model.IndexData
@@ -90,6 +114,8 @@ import com.pizza.psx.domain.model.IndexDetailModel
 import com.pizza.psx.domain.model.IndexPriceModel
 import com.pizza.psx.domain.model.KLineModel
 import com.pizza.psx.domain.model.SectorName
+import com.pizza.psx.domain.model.Ticker
+import com.pizza.psx.presentation.helpers.formatDate
 import com.pizza.psx.presentation.helpers.formatShortDate
 import com.pizza.psx.presentation.helpers.formatTimestamp
 import com.pizza.psx.presentation.helpers.formatVolume
@@ -112,6 +138,7 @@ fun IndexDetailView(
     onBackClick: () -> Unit,
     onTickerClick: (String) -> Unit,
     viewModel: IndexDetailViewModel = hiltViewModel(),
+    ticker: Ticker
 ) {
     val uiState by viewModel.uiState
     val indexUiState by viewModel.indexUiState
@@ -208,7 +235,8 @@ fun IndexDetailView(
                                     isRefreshing = false
                                 }
                             },
-                            isRefreshing = isRefreshing
+                            isRefreshing = isRefreshing,
+                            ticker = ticker
                         )
                     }
 
@@ -325,6 +353,7 @@ private fun EmptyState(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ContentLoadedState(
     uiState: IndexDetailUiState,
@@ -334,12 +363,126 @@ private fun ContentLoadedState(
     chartStocks: List<IndexDetailModel>,
     onRefresh: () -> Unit,
     indexPriceHistory: KLineModel,
-    isRefreshing: Boolean
+    isRefreshing: Boolean,
+    ticker: Ticker
 ) {
+
+    var showChartBottomSheet by remember { mutableStateOf(false) }
+    var showSectorBottomSheet by remember { mutableStateOf(false) }
+    var showDetailBottomSheet by remember { mutableStateOf(false) }
+
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+
+
 
 
     // Calculate total stocks count
     val totalStocks = uiState.listOfStocks?.size ?: 0
+
+    if (showChartBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showChartBottomSheet = false },
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surface,
+            dragHandle = { BottomSheetDefaults.DragHandle() }
+        ) {
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp)
+            ) {
+
+                // Header
+                Text(
+                    text = "Index Activity",
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 12.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
+
+                Text(
+                    text = "Price movement over time",
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                    LineChart(
+                        data = indexPriceHistory,
+                    )
+
+
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+        }
+    }
+
+    if (showSectorBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showSectorBottomSheet = false },
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surface,
+            dragHandle = { BottomSheetDefaults.DragHandle() }
+        ) {
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 12.dp)
+            ) {
+
+                // Header
+                Text(
+                    text = "Sector Distribution",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 12.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
+
+                Text(
+                    text = "Index weight by industry",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+
+                    IndexChartSection(
+                        stocks = chartStocks,
+
+                    )
+
+
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+        }
+    }
+
+    if(showDetailBottomSheet){
+        ModalBottomSheet(
+            onDismissRequest = { showDetailBottomSheet = false },
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surface,
+            dragHandle = { BottomSheetDefaults.DragHandle() }
+        ){
+            TickerDetails(ticker)
+        }
+    }
 
     LazyColumn(
         state = listState,
@@ -363,27 +506,15 @@ private fun ContentLoadedState(
         }
 
         item{
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(6.dp),
-            ) {
-                LineChart(data = indexPriceHistory)
-            }
-
+            IndexOverviewCards(
+                onOpenChart = {showChartBottomSheet = true},
+                onOpenDetails = {showDetailBottomSheet = true},
+                onOpenSectors = {showSectorBottomSheet = true}
+            )
         }
-
         item{
-            Spacer(modifier = Modifier.padding(top = 8.dp))
+            Spacer(modifier = Modifier.padding(top = 16.dp))
         }
-item{
-
-    IndexChartSection(stocks = chartStocks)
-
-}
 
         // Stocks list header
         item {
@@ -424,6 +555,178 @@ item{
 }
 
 @Composable
+fun TickerDetails(
+    ticker: Ticker,
+    modifier: Modifier = Modifier
+) {
+    val data = ticker.data
+    val changeColor = when {
+        data.change > 0 -> financialGreen // Green
+        data.change < 0 -> financialRed // Red
+        else -> MaterialTheme.colorScheme.onSurface
+    }
+
+    // Format timestamp (from outer ticker)
+    val formattedTime = formatDate(ticker.timestamp)
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Header Card
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = data.symbol,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = data.market,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    Text(
+                        text = number_format(data.price),
+                        style = MaterialTheme.typography.displaySmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "${if (data.change > 0) "+" else ""}%.2f".format(data.change) +
+                                " (${if (data.changePercent > 0) "+" else ""}%.2f%%)".format(data.changePercent),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = changeColor,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = "Last updated: $formattedTime",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        // Stats Grid (two columns)
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Generate list of stats
+            val stats = listOf(
+                "High" to number_format(data.high),
+                "Low" to number_format(data.low),
+
+                "Volume" to formatVolume(data.volume),
+                "Trades" to number_format(data.trades.toDouble()),
+                "Value" to number_format(data.value),
+
+                )
+            items(stats) { stat ->
+                CustomStatItem(label = stat.first, value = stat.second)
+            }
+        }
+    }
+}
+
+@Composable
+fun CustomStatItem(label: String, value: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.small,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+    }
+}
+@Composable
+fun IndexChartStatCard(
+    title: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(2.dp), // Slightly higher elevation for depth
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer, // Use container variant for subtle distinction
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)) // Soft border for definition
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp), // More balanced padding
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelMedium, // Slightly larger for readability
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(8.dp)) // Increased spacing for separation
+
+            Text(
+                text = value,
+                style = MaterialTheme.typography.labelLarge, // More prominent value
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary // Accent color for emphasis
+            )
+        }
+    }
+}
+
+@Composable
 private fun LineChart(data: KLineModel){
 
     val lineColor = veryBerry
@@ -436,10 +739,34 @@ private fun LineChart(data: KLineModel){
         data.data.sortedBy { it.timestamp }
     }
 
+    val latest = sortedData.lastOrNull()
+
+    val latestPrice = latest?.close
+    val latestVolume = latest?.volume
+    val latestDate = latest?.timestamp?.let {
+        formatShortDate(it)
+    } ?: "--"
+
     val xValues = remember(sortedData) { sortedData.indices.map { it.toFloat() } }
     val indexPrice = remember(sortedData) { sortedData.map { it.close } }
     val indexVolume = remember(sortedData) { sortedData.map { it.volume } }
     val indexDate = remember(sortedData) { sortedData.map { formatShortDate(it.timestamp) } }
+
+    val normalizedVolumeValues = remember(sortedData) {
+        val minPrice = sortedData.minOfOrNull { it.low }?.toFloat() ?: 0f
+        val maxPrice = sortedData.maxOfOrNull { it.high }?.toFloat() ?: 1f
+        val priceRange = (maxPrice - minPrice).takeIf { it > 0f } ?: 1f
+
+        val volumes = sortedData.map { it.volume.toFloat() }
+        val minVol = volumes.minOrNull() ?: 0f
+        val maxVol = volumes.maxOrNull()?.takeIf { it > minVol } ?: 1f
+        val volRange = (maxVol - minVol).takeIf { it > 0f } ?: 1f
+
+        // Normalize 0..1 then scale to bottom 20% of price range, offset by minPrice
+        volumes.map { vol ->
+            minPrice + ((vol - minVol) / volRange) * (priceRange * 0.20f)
+        }
+    }
 
     val lineProducer = remember { CartesianChartModelProducer() }
 
@@ -449,10 +776,11 @@ private fun LineChart(data: KLineModel){
 
     val rangeProvider = remember(minPrice, maxPrice) {
         CartesianLayerRangeProvider.fixed(
-            minY = minPrice - padding,
-            maxY = maxPrice + padding
+            minY = minPrice * 0.98,
+            maxY = maxPrice * 1.02
         )
     }
+
 
     val zoomState = rememberVicoZoomState(
         initialZoom = Zoom.fixed(3f),
@@ -468,14 +796,14 @@ private fun LineChart(data: KLineModel){
                     series(xValues,indexPrice)
                 }
                 columnSeries {
-                    series(xValues,indexVolume)
+                    series(xValues,normalizedVolumeValues)
                 }
             }catch (e: Exception){
                 lineSeries {
                     series(xValues,indexPrice)
                 }
                 columnSeries {
-                    series(xValues,indexVolume)
+                    series(xValues,normalizedVolumeValues)
                 }
             }
 
@@ -561,73 +889,102 @@ private fun LineChart(data: KLineModel){
     }
 
 
-    CartesianChartHost(
-        scrollState = scrollState,
-        chart = rememberCartesianChart(
-            rememberLineCartesianLayer(
-                rangeProvider = rangeProvider,
-                lineProvider = LineCartesianLayer.LineProvider.series(
+    Column() {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
 
-                    LineCartesianLayer.Line(
-                        pointConnector = LineCartesianLayer.PointConnector.cubic(0.6f),
-                        fill = remember {
-                            LineCartesianLayer.LineFill.single(
-                                fill(lineColor)
-                            )
-                        },
-                        areaFill = LineCartesianLayer.AreaFill.single(
-                            fill(lineColor.copy(alpha = 0.1f))
-                        ),
+            IndexChartStatCard(
+                title = "Price",
+                value = if(selectedXValue != 0.0 || selectedYValue != 0.0) number_format(selectedYValue)
+                else number_format(latestPrice?:0.0),
+                modifier = Modifier.weight(1f)
+            )
+
+            IndexChartStatCard(
+                title = "Volume",
+                value = if(selectedXValue != 0.0 || selectedYValue != 0.0) formatVolume(indexVolume[selectedXValue.toInt()].toLong())
+                else formatVolume(latestVolume?:1000),
+                modifier = Modifier.weight(1f)
+            )
+
+            IndexChartStatCard(
+                title = "Date",
+                value = if(selectedXValue != 0.0 || selectedYValue != 0.0) indexDate[selectedXValue.toInt()] else latestDate,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        CartesianChartHost(
+            scrollState = scrollState,
+            chart = rememberCartesianChart(
+                rememberLineCartesianLayer(
+                    rangeProvider = rangeProvider,
+                    lineProvider = LineCartesianLayer.LineProvider.series(
+
+                        LineCartesianLayer.Line(
+                            pointConnector = LineCartesianLayer.PointConnector.cubic(0.6f),
+                            fill = remember {
+                                LineCartesianLayer.LineFill.single(
+                                    fill(lineColor)
+                                )
+                            },
+                            areaFill = LineCartesianLayer.AreaFill.single(
+                                fill(lineColor.copy(alpha = 0.1f))
+                            ),
+                        )
+
+
+                    ),
+                    verticalAxisPosition = Axis.Position.Vertical.Start
+
+                ),
+                rememberColumnCartesianLayer(
+                    rangeProvider = rangeProvider,
+                    columnProvider = ColumnCartesianLayer.ColumnProvider.series(
+                        rememberLineComponent(
+                            fill = fill(columnColor.copy(alpha = 0.5f)),
+                            thickness = 10.dp,
+                            shape = CorneredShape.rounded(60)
+                        )
+                    ),
+                    verticalAxisPosition = Axis.Position.Vertical.End
+                ),
+                startAxis = VerticalAxis.rememberStart(
+                    valueFormatter = priceFormatter,
+                    label = rememberTextComponent(
+                        color = Color.Black,
+                        textSize = 8.sp
                     )
-
-
                 ),
-                verticalAxisPosition = Axis.Position.Vertical.Start
-
-            ),
-            rememberColumnCartesianLayer(
-
-                columnProvider = ColumnCartesianLayer.ColumnProvider.series(
-                    rememberLineComponent(
-                        fill = fill(columnColor.copy(alpha = 0.5f)),
-                        thickness = 10.dp,
-                        shape = CorneredShape.rounded(60)
+                bottomAxis = HorizontalAxis.rememberBottom(
+                    valueFormatter = dateFormatter,
+                    labelRotationDegrees = 45f,
+                    label = rememberTextComponent(
+                        color = Color.Black,
+                        textSize = 8.sp
+                    ),
+                ),
+                marker = DefaultCartesianMarker(
+                    label = TextComponent(
+                        textSizeSp = 0.0f
                     )
                 ),
-                verticalAxisPosition = Axis.Position.Vertical.End
+                markerVisibilityListener = markerVisibilityListener
             ),
-            startAxis = VerticalAxis.rememberStart(
-                guideline = null,
-                valueFormatter = priceFormatter,
-                label = rememberTextComponent(
-                    color = Color.Black,
-                    textSize = 0.sp
-                )
-            ),
-            bottomAxis = HorizontalAxis.rememberBottom(
-                guideline = null,
-                valueFormatter = dateFormatter,
-                labelRotationDegrees = 45f,
-                label = rememberTextComponent(
-                    color = Color.Black,
-                    textSize = 8.sp
-                ),
-            ),
-            marker = DefaultCartesianMarker(
-                label = TextComponent(
-                    textSizeSp = 0.0f
-                )
-            ),
-            markerVisibilityListener = markerVisibilityListener
-        ),
-        modelProducer = lineProducer,
-        //zoomState = zoomState,
-        modifier = Modifier
-                    .height(350.dp)
-                    .padding(6.dp),
-    )
+            modelProducer = lineProducer,
+            //zoomState = zoomState,
+            modifier = Modifier
+                .height(350.dp)
+                .padding(6.dp),
+        )
 
-
+    }
 }
 @Composable
 private fun IndexChartSection(
@@ -657,30 +1014,157 @@ private fun IndexChartSection(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
     ) {
 
-        Text(
-            text = "Sector Distribution",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
 
-        Card(
-            modifier = Modifier
-                .fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            elevation = CardDefaults.cardElevation(6.dp),
-        ) {
+//        Card(
+//            modifier = Modifier
+//                .fillMaxWidth(),
+//            shape = RoundedCornerShape(16.dp),
+//            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+//            elevation = CardDefaults.cardElevation(6.dp),
+//        ) {
             DonutChartWithLegend(
                 data = chartData,
                 isShowCentralContent = false,
                 isShowTextInCenter = true
             )
-        }
+        //}
 
         Spacer(modifier = Modifier.height(24.dp))
+    }
+}
+
+
+@Composable
+fun IndexOverviewCards(
+    onOpenChart: () -> Unit,
+    onOpenSectors: () -> Unit,
+    onOpenDetails: () -> Unit
+) {
+
+    Row(
+        modifier = Modifier.fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+
+        // BIG CARD → Chart
+        IndexBigCard(
+            title = "Index Activity",
+            subtitle = "Current Trend",
+            icon = Icons.Default.BarChart,
+            onClick = onOpenChart,
+            modifier = Modifier.weight(1f)
+        )
+
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+
+            IndexSmallCard(
+                title = "Sector Weight",
+                subtitle = "Distribution",
+                icon = Icons.Default.PieChart,
+                onClick = onOpenSectors
+            )
+
+            IndexSmallCard(
+                title = "Index Stats",
+                subtitle = "Market Snapshot",
+                icon = Icons.Default.Analytics,
+                onClick = onOpenDetails
+            )
+        }
+    }
+}
+
+@Composable
+fun IndexBigCard(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    iconSize: Dp = 60.dp
+) {
+    ElevatedCard(
+        onClick = onClick,
+        shape = RoundedCornerShape(24.dp),
+        modifier = modifier.height(180.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            // Box takes all remaining space above the text
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(iconSize),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            // Text section at the bottom
+            Column {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun IndexSmallCard(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    onClick: () -> Unit
+) {
+
+    ElevatedCard(
+        onClick = onClick,
+        shape = RoundedCornerShape(20.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(84.dp)
+    ) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            Icon(icon, null, tint = MaterialTheme.colorScheme.primary)
+
+            Spacer(Modifier.width(12.dp))
+
+            Column {
+                Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                Text(
+                    subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
     }
 }

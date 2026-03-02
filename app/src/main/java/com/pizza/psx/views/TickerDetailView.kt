@@ -139,6 +139,7 @@ import com.pizza.compose.purpleColor
 import com.pizza.compose.veryBerry
 import com.pizza.psx.domain.model.Announcement
 import com.pizza.psx.domain.model.SymbolDetail
+import com.pizza.psx.domain.model.Ticker
 import com.pizza.psx.presentation.helpers.number_format
 import kotlin.math.ln
 import kotlin.math.min
@@ -1142,8 +1143,9 @@ fun CompanyOverviewCard(companyData: CompaniesData) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = "Company Overview",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(16.dp))
             FinancialMetricRow("Market Cap", companyData.financialStats.marketCap.raw)
@@ -1180,8 +1182,9 @@ fun BidAskCard(tickerData: TickerData) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = "Bid & Ask",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(16.dp))
             Row(
@@ -1218,8 +1221,9 @@ fun TradingStatsCard(tickerData: TickerData) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = "Trading Stats",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(16.dp))
             TradingStatRow("Price", "${tickerData.price}")
@@ -1271,8 +1275,9 @@ fun CompanyInfoCard(companyData: CompaniesData) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = "Company Info",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
@@ -1302,8 +1307,9 @@ fun KeyPeopleCard(companyData: CompaniesData) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = "Key People",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(8.dp))
             companyData.keyPeople.forEach { person ->
@@ -1335,8 +1341,9 @@ fun BusinessDescriptionCard(companyData: CompaniesData) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = "Business Description",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
@@ -1365,12 +1372,6 @@ fun MarketInfoCard(tickerData: TickerData) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.BarChart,
-                    contentDescription = "Market Information",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
-                )
                 Text(
                     text = "Market Information",
                     style = MaterialTheme.typography.titleMedium,

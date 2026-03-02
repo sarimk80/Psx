@@ -43,6 +43,7 @@ import com.pizza.psx.views.SearchView
 import com.pizza.psx.views.SectorDetailView
 import com.pizza.psx.views.SectorView
 import com.google.gson.Gson
+import com.pizza.psx.domain.model.TickerNavType
 import com.pizza.psx.views.IndexDetailView
 import com.pizza.psx.views.PortfolioListView
 import dagger.hilt.android.AndroidEntryPoint
@@ -88,8 +89,10 @@ fun AppNavHost(
     ){
         composable(Destination.Home.route){
             Home(
-                onIndexClick = {indexSymbol ->
-                    navController.navigate("indexDetail/$indexSymbol")
+                onIndexClick = {indexSymbol , ticker ->
+                    val datatum = ticker
+                    val json = Uri.encode(Gson().toJson(datatum))
+                    navController.navigate("indexDetail/$indexSymbol/$json")
                 }
             )
         }
@@ -176,22 +179,29 @@ fun AppNavHost(
         }
 
         composable  (
-            route = "indexDetail/{indexSymbol}",
+            route = "indexDetail/{indexSymbol}/{ticker}",
             arguments = listOf(
                 navArgument("indexSymbol") {
                     type = NavType.StringType
                     defaultValue = "KSE100" // Default market type
-                }
+                },
+                navArgument("ticker") {
+                    type = TickerNavType
+                },
 
             )
         ){backStackEntry ->
             val indexSymbol = backStackEntry.arguments?.getString("indexSymbol") ?: "KSE100"
+            val ticker = backStackEntry.arguments?.getString("ticker")?.let {
+                TickerNavType.parseValue(it)
+            }
             IndexDetailView(
                 indexSymbol =  indexSymbol,
                 onTickerClick = {symbol ->
                     navController.navigate("ticker_detail/REG/$symbol")
                 },
-                onBackClick = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() },
+                ticker = ticker!!
             )
         }
 

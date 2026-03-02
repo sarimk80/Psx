@@ -58,6 +58,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -257,7 +258,9 @@ fun PortfolioView(
                         selectedSymbol = symbol
                     },
                     stockStatus = stockStatus,
-                    onStockStatusChange = {}
+                    onStockStatusChange = {
+                        stockStatus = it
+                    }
 
 
                 )
@@ -604,6 +607,7 @@ fun AddStockBottomSheet(
                                 strokeWidth = 2.dp
                             )
                         }
+
                         indexUiState.error != null -> {
                             Icon(
                                 imageVector = Icons.Default.Error,
@@ -671,28 +675,36 @@ fun AddStockBottomSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-//            // Buy and sell
-//
+            // Buy and sell
+//            Row(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(top = 16.dp),
+//                horizontalArrangement = Arrangement.SpaceBetween
+//            ) {
 //            listOf("Buy", "Sell").forEach { status ->
-//    val isBuy = status == "Buy"
+//                val isBuy = status == "Buy"
 //
-//    FilterChip(
-//        selected = stockStatus == status,
-//        onClick = { onStockStatusChange(status) },
-//        label = { Text(status) },
-//        colors = FilterChipDefaults.filterChipColors(
-//            selectedContainerColor = if (isBuy) Color(0xFF4CAF50) else Color(0xFFE53935),
-//            selectedLabelColor = Color.White,
-//            containerColor = if (isBuy) Color(0xFFE8F5E9) else Color(0xFFFFEBEE),
-//            labelColor = if (isBuy) Color(0xFF2E7D32) else Color(0xFFC62828)
-//        ),
-//        border = FilterChipDefaults.filterChipBorder(
-//            borderColor = if (isBuy) Color(0xFF4CAF50) else Color(0xFFE53935),
-//            selectedBorderColor = Color.Transparent
-//        ),
-//        modifier = Modifier.padding(horizontal = 4.dp)
-//    )
-//}
+//                FilterChip(
+//                    selected = stockStatus == status,
+//                    onClick = { onStockStatusChange(status) },
+//                    label = { Text(status) },
+//                    colors = FilterChipDefaults.filterChipColors(
+//                        selectedContainerColor = if (isBuy) financialGreen else financialRed,
+//                        selectedLabelColor = Color.White,
+//                        containerColor = if (isBuy) Color(0xFFE8F5E9) else Color(0xFFFFEBEE),
+//                        labelColor = if (isBuy) financialGreen else financialRed
+//                    ),
+//                    border = FilterChipDefaults.filterChipBorder(
+//                        borderColor = if (isBuy) financialGreen else financialRed,
+//                        selectedBorderColor = Color.Transparent,
+//                        enabled = true,
+//                        selected = true
+//                    ),
+//                    modifier = Modifier.padding(horizontal = 4.dp)
+//                )
+//            }
+//        }
 //
 //            Spacer(modifier = Modifier.height(24.dp))
 
