@@ -140,6 +140,8 @@ import com.pizza.compose.veryBerry
 import com.pizza.psx.domain.model.Announcement
 import com.pizza.psx.domain.model.SymbolDetail
 import com.pizza.psx.domain.model.Ticker
+import com.pizza.psx.presentation.helpers.daysAgoTextToDate
+import com.pizza.psx.presentation.helpers.formatDate
 import com.pizza.psx.presentation.helpers.number_format
 import kotlin.math.ln
 import kotlin.math.min

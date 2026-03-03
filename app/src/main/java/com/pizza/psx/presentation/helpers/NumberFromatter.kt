@@ -11,6 +11,8 @@ import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.atan2
 import  androidx.compose.ui.unit.IntOffset
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import kotlin.random.Random
 
 fun number_format(amount:Double):String{
@@ -52,6 +54,17 @@ fun formatDate(timestamp: Long?): String {
         abs(value) >= 1_000 -> "%.2fK".format(value / 1_000.0)
         else -> "%.2f".format(value)
     }
+}
+
+fun daysAgoToDate(daysAgo: Int): String {
+    val date = LocalDate.now().minusDays(daysAgo.toLong())
+    val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy")
+    return date.format(formatter)
+}
+
+fun daysAgoTextToDate(text: String): String {
+    val days = text.substringBefore("d").trim().toInt()
+    return daysAgoToDate(days)
 }
 
 
