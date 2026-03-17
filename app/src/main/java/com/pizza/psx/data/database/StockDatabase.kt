@@ -18,7 +18,7 @@ import java.util.concurrent.Executors
     entities = [PortfolioModel::class,
                 Transaction:: class
                ],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 abstract class StockDatabase: RoomDatabase() {
@@ -102,6 +102,15 @@ abstract class StockDatabase: RoomDatabase() {
             }
         }
 
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("""
+            ALTER TABLE transactions 
+            ADD COLUMN transactionStatus TEXT
+        """.trimIndent())
+            }
+        }
+
         fun getDatabase(context: Context): StockDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -109,7 +118,11 @@ abstract class StockDatabase: RoomDatabase() {
                     StockDatabase::class.java,
                     "stock_database"
                 )
-                    .addMigrations(MIGRATION_2_3,MIGRATION_3_4,MIGRATION_2_4)
+                    .addMigrations(MIGRATION_2_3,
+                        MIGRATION_3_4,
+                        MIGRATION_2_4,
+                        MIGRATION_4_5
+                        )
                     .addCallback(object : RoomDatabase.Callback() {
                         override fun onCreate(db: SupportSQLiteDatabase) {
                             super.onCreate(db)

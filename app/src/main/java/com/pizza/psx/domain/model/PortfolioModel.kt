@@ -32,7 +32,8 @@ data class Transaction(
     val portfolioSymbol: String, // Foreign key
     val date: Long?,
     val price: Double?,
-    val volume: Int?
+    val volume: Int?,
+    val transactionStatus: String?
 )
 
 data class PortfolioWithTransactions(

@@ -27,6 +27,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Check
@@ -94,6 +96,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import com.pizza.compose.financialGreen
 import com.pizza.compose.financialRed
@@ -155,7 +158,8 @@ fun PortfolioView(
                 portfolioSymbol = selectedSymbol,
                 volume = stockCount.toInt(),
                 date = stockDate,
-                price = stockPrice.toDouble()
+                price = stockPrice.toDouble(),
+                transactionStatus = "Buy"
             )
         )
     }
@@ -311,6 +315,7 @@ fun PortfolioView(
                     },
                     onAddTransactionClick = {
                         viewModel.getChartIndex(portfolioItems.first().symbol)
+                        selectedSymbol = portfolioItems.first().symbol
                         showAddStockDialog = true
                     }
 
@@ -515,6 +520,64 @@ fun AddStockBottomSheet(
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
+            Row(
+                modifier = Modifier,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                listOf("Buy", "Sell").forEach { status ->
+                    val isSelected = stockStatus == status
+                    val isBuy = status == "Buy"
+
+                    FilterChip(
+                        selected = isSelected,
+                        onClick = { onStockStatusChange(status) },
+                        label = {
+                            Text(
+                                text = status,
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 12.sp
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = if (isBuy) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
+                                contentDescription = null
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = if (isBuy)
+                                financialGreen.copy(alpha = 0.6f)  // green
+                            else
+                                financialRed.copy(alpha = 0.6f), // red
+
+                            selectedLabelColor = Color.White,
+
+                            containerColor = if (isBuy)
+                                Color(0xFFE8F5E9)
+                            else
+                                Color(0xFFFFEBEE),
+
+                            labelColor = if (isBuy)
+                                financialGreen
+                            else
+                                financialRed
+                        ),
+                        border = FilterChipDefaults.filterChipBorder(
+                            borderColor = if (isBuy)
+                                financialGreen.copy(alpha = 0.5f)
+                            else
+                                financialRed.copy(alpha = 0.5f),
+
+                            selectedBorderColor = Color.Transparent,
+                            enabled = true,
+                            selected = isSelected
+                        ),
+                        modifier = Modifier.height(40.dp).padding(horizontal = 16.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
             ExposedDropdownMenuBox(
                 expanded = expanded,
                 onExpandedChange = { expanded = !expanded }
@@ -663,7 +726,7 @@ fun AddStockBottomSheet(
                     .padding(top = 16.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                listOf("1", "10", "50", "100").forEach { quantity ->
+                listOf("1", "10", "50", "100","500").forEach { quantity ->
                     FilterChip(
                         selected = stockCount == quantity,
                         onClick = { onStockCountChange(quantity) },
@@ -675,38 +738,6 @@ fun AddStockBottomSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Buy and sell
-//            Row(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(top = 16.dp),
-//                horizontalArrangement = Arrangement.SpaceBetween
-//            ) {
-//            listOf("Buy", "Sell").forEach { status ->
-//                val isBuy = status == "Buy"
-//
-//                FilterChip(
-//                    selected = stockStatus == status,
-//                    onClick = { onStockStatusChange(status) },
-//                    label = { Text(status) },
-//                    colors = FilterChipDefaults.filterChipColors(
-//                        selectedContainerColor = if (isBuy) financialGreen else financialRed,
-//                        selectedLabelColor = Color.White,
-//                        containerColor = if (isBuy) Color(0xFFE8F5E9) else Color(0xFFFFEBEE),
-//                        labelColor = if (isBuy) financialGreen else financialRed
-//                    ),
-//                    border = FilterChipDefaults.filterChipBorder(
-//                        borderColor = if (isBuy) financialGreen else financialRed,
-//                        selectedBorderColor = Color.Transparent,
-//                        enabled = true,
-//                        selected = true
-//                    ),
-//                    modifier = Modifier.padding(horizontal = 4.dp)
-//                )
-//            }
-//        }
-//
-//            Spacer(modifier = Modifier.height(24.dp))
 
             // Confirm and Cancel buttons
             Row(
