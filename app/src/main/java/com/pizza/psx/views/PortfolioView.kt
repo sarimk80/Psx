@@ -146,7 +146,7 @@ fun PortfolioView(
     var stockPrice by remember { mutableStateOf("") }
     var stockDate by remember { mutableStateOf(1705334400000) }
     var selectedStockPrice by remember { mutableStateOf<Double?>(null) }
-    var stockStatus by remember { mutableStateOf("") }
+    var stockStatus by remember { mutableStateOf("Buy") }
 
     val portfolioItems by viewModel.portfolioModels.collectAsStateWithLifecycle()
 
@@ -159,7 +159,7 @@ fun PortfolioView(
                 volume = stockCount.toInt(),
                 date = stockDate,
                 price = stockPrice.toDouble(),
-                transactionStatus = "Buy"
+                transactionStatus = stockStatus
             )
         )
     }
@@ -469,10 +469,22 @@ fun AddStockBottomSheet(
     )
 
     val options = listOfPortfolio.map { it.symbol }
+    //val volumes = listOfPortfolio.map { it.volume }
     var expanded by remember { mutableStateOf(false) }
     var selectedOption by remember { mutableStateOf(
         symbol.ifEmpty { options[0] }
     ) }
+
+    var selectedVolume by remember {
+        mutableStateOf(
+            listOfPortfolio.firstOrNull { it.symbol == symbol }?.volume ?: 0
+        )
+    }
+
+    val enteredVolume = stockCount.toIntOrNull() ?: 0
+
+    val isSellError = stockStatus == "Sell" && enteredVolume > selectedVolume
+
 
     // Format date for display
     val formattedDate = remember(selectedDate) {
@@ -538,17 +550,17 @@ fun AddStockBottomSheet(
                                 fontSize = 12.sp
                             )
                         },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = if (isBuy) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
-                                contentDescription = null
-                            )
-                        },
+//                        leadingIcon = {
+//                            Icon(
+//                                imageVector = if (isBuy) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
+//                                contentDescription = null
+//                            )
+//                        },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = if (isBuy)
-                                financialGreen.copy(alpha = 0.6f)  // green
+                                financialGreen  // green
                             else
-                                financialRed.copy(alpha = 0.6f), // red
+                                financialRed, // red
 
                             selectedLabelColor = Color.White,
 
@@ -572,7 +584,8 @@ fun AddStockBottomSheet(
                             enabled = true,
                             selected = isSelected
                         ),
-                        modifier = Modifier.height(40.dp).padding(horizontal = 16.dp)
+                        modifier = Modifier.height(40.dp)
+                            .padding(end = 8.dp)
                     )
                 }
             }
@@ -607,6 +620,7 @@ fun AddStockBottomSheet(
                                 selectedOption = option
                                 expanded = false
                                 onValueChange(option)
+                                selectedVolume = listOfPortfolio.first { it.symbol == option }.volume
                             }
                         )
                     }
@@ -626,7 +640,7 @@ fun AddStockBottomSheet(
                     imeAction = ImeAction.Next
                 ),
                 singleLine = true,
-                isError = errorMessage?.contains("stock", ignoreCase = true) == true,
+                isError = isSellError,
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Numbers,
@@ -634,6 +648,15 @@ fun AddStockBottomSheet(
                     )
                 }
             )
+
+            if (isSellError) {
+                Text(
+                    text = "You only have $selectedVolume shares",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -750,7 +773,7 @@ fun AddStockBottomSheet(
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(
                     onClick = onConfirm,
-                    enabled = stockCount.isNotEmpty() && selectedDate != null && price.isNotEmpty()
+                    enabled = stockCount.isNotEmpty() && selectedDate != null && price.isNotEmpty() && !isSellError
                 ) {
                     Text("Add")
                 }

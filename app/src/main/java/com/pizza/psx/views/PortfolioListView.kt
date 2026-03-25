@@ -16,14 +16,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.TrendingDown
+import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -108,9 +113,30 @@ fun PortfolioListView(
 
 @Composable
 private fun TransactionList(portfolio: PortfolioWithTransactions) {
-    val totalVolume = portfolio.transactions.sumOf { it.volume ?: 0 }
-    val totalInvestment = portfolio.transactions.sumOf {
-        (it.price ?: 0.0) * (it.volume ?: 0)
+    val totalVolume = portfolio.transactions.sumOf { tx ->
+        val vol = tx.volume ?: 0
+
+        when (tx.transactionStatus) {
+            "Buy" -> vol
+            "Sell" -> -vol
+            else -> portfolio.portfolio.volume
+        }
+    }
+    val totalInvestment = portfolio.transactions.sumOf { tx ->
+        val price = tx.price ?: 0.0
+        val volume = tx.volume ?: 0
+
+        when(tx.transactionStatus){
+            "Buy" -> price * volume
+            "Sell" -> 0.0
+            else -> portfolio.portfolio.volume.toDouble()
+        }
+
+//        if (tx.transactionStatus == "Buy") {
+//            price * volume
+//        } else {
+//            0.0
+//        }
     }
     val avgPrice = if (totalVolume > 0) totalInvestment / totalVolume else 0.0
 
@@ -120,6 +146,9 @@ private fun TransactionList(portfolio: PortfolioWithTransactions) {
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        item{
+            Spacer(modifier = Modifier.padding(start = 8.dp))
+        }
         item {
             SummaryCard(
                 totalVolume = totalVolume,
@@ -150,8 +179,9 @@ private fun SummaryCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
         Column(
@@ -177,7 +207,7 @@ private fun SummaryCard(
                 )
                 MetricItem(
                     label = "Avg. Price",
-                    value = "%.2f".format(avgPrice),
+                    value = number_format(avgPrice),
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -222,7 +252,7 @@ private fun MetricItem(
 @Composable
 private fun TransactionItem(transaction: Transaction) {
     // Determine if buy or sell based on volume sign (assuming positive = buy, negative = sell)
-    val isBuy = (transaction.volume ?: 0) > 0
+    val isBuy = (transaction.transactionStatus ==  "Buy")
     val volume = transaction.volume ?: 0
     val price = transaction.price ?: 0.0
     val total = volume * price
@@ -230,7 +260,8 @@ private fun TransactionItem(transaction: Transaction) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(
             modifier = Modifier
@@ -248,7 +279,7 @@ private fun TransactionItem(transaction: Transaction) {
                     else MaterialTheme.colorScheme.errorContainer
                 ) {
                     Icon(
-                        imageVector = if (isBuy) Icons.Outlined.ShoppingCart else Icons.Default.ShoppingCart,
+                        imageVector = if (isBuy) Icons.Default.TrendingUp else Icons.Default.TrendingDown,
                         contentDescription = if (isBuy) "Buy" else "Sell",
                         modifier = Modifier.padding(8.dp),
                         tint = if (isBuy) MaterialTheme.colorScheme.primary
@@ -311,17 +342,14 @@ private fun SectionHeader(title: String) {
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun LoadingPortfolioState() {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        CircularProgressIndicator(
-            modifier = Modifier.size(48.dp),
-            color = MaterialTheme.colorScheme.primary,
-            trackColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+        ContainedLoadingIndicator()
     }
 }
 

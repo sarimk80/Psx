@@ -177,13 +177,22 @@ class PortfolioViewModel @Inject constructor(
                 return@launch
             }
             val symbolToVolumeMap = symbols.associate { portfolioWithTx ->
+
                 val volume = if (portfolioWithTx.transactions.isEmpty()) {
-                    // No transactions → use the portfolio's own volume
+                    // No transactions → fallback to base portfolio volume
                     portfolioWithTx.portfolio.volume
                 } else {
-                    // Has transactions → sum their volumes
-                    portfolioWithTx.transactions.sumOf { it.volume ?: 0 }
+                    portfolioWithTx.transactions.sumOf { tx ->
+                        val vol = tx.volume ?: portfolioWithTx.portfolio.volume
+
+                        when (tx.transactionStatus) {
+                            "Buy" -> vol
+                            "Sell" -> -vol
+                            else -> portfolioWithTx.portfolio.volume
+                        }
+                    }
                 }
+
                 portfolioWithTx.portfolio.symbol to volume
             }
 
