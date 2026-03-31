@@ -18,8 +18,8 @@ android {
         applicationId = "com.pizza.psx"
         minSdk = 33
         targetSdk = 35
-        versionCode = 14
-        versionName = "2.3"
+        versionCode = 17
+        versionName = "2.6"
 
 
 

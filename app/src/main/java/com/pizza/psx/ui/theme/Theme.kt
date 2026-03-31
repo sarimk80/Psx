@@ -1,6 +1,7 @@
 package com.pizza.psx.ui.theme
 
 import android.os.Build
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
@@ -472,7 +473,7 @@ val unspecified_scheme = ColorFamily(
 
 @Composable
 fun PsxTheme(
-    darkTheme: Boolean = false,
+    darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,
     content: @Composable() () -> Unit
@@ -483,7 +484,7 @@ fun PsxTheme(
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
-        darkTheme -> lightScheme
+        darkTheme -> darkScheme
         else -> lightScheme
     }
 

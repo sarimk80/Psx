@@ -958,7 +958,7 @@ private fun LineChart(data: KLineModel){
                 startAxis = VerticalAxis.rememberStart(
                     valueFormatter = priceFormatter,
                     label = rememberTextComponent(
-                        color = Color.Black,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textSize = 8.sp
                     )
                 ),
@@ -966,7 +966,7 @@ private fun LineChart(data: KLineModel){
                     valueFormatter = dateFormatter,
                     labelRotationDegrees = 45f,
                     label = rememberTextComponent(
-                        color = Color.Black,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textSize = 8.sp
                     ),
                 ),
@@ -1092,7 +1092,11 @@ fun IndexBigCard(
     ElevatedCard(
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
-        modifier = modifier.height(180.dp)
+        modifier = modifier.height(180.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceBright,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     ) {
         Column(
             modifier = Modifier
@@ -1141,6 +1145,10 @@ fun IndexSmallCard(
     ElevatedCard(
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceBright,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ),
         modifier = Modifier
             .fillMaxWidth()
             .height(84.dp)

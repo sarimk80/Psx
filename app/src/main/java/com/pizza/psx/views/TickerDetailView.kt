@@ -136,6 +136,7 @@ import com.patrykandpatrick.vico.core.common.shape.Shape
 import com.pizza.compose.baraRed
 import com.pizza.compose.green
 import com.pizza.compose.purpleColor
+import com.pizza.compose.surfaceContainerLight
 import com.pizza.compose.veryBerry
 import com.pizza.psx.domain.model.Announcement
 import com.pizza.psx.domain.model.SymbolDetail
@@ -454,17 +455,15 @@ fun ColumnChart(
                 startAxis = VerticalAxis.rememberStart(
                     valueFormatter = formatter,
                     label = rememberTextComponent(
-                        color = Color.Black,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textSize = 8.sp
                     ),
-                    guideline = null,
                     itemPlacer = VerticalAxis.ItemPlacer.step(step = { 5.0 })
                 ),
                 bottomAxis = HorizontalAxis.rememberBottom(
-                    guideline = null,
                     itemPlacer = HorizontalAxis.ItemPlacer.aligned(),
                     label = rememberTextComponent(
-                        color = Color.Black,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textSize = 8.sp
                     )
                 ),
@@ -512,11 +511,9 @@ fun LineChart(
             ),
             marker = marker,
             startAxis = VerticalAxis.rememberStart(
-                guideline = null,
                 itemPlacer = VerticalAxis.ItemPlacer.step(step = { 5.0 })
             ),
             bottomAxis = HorizontalAxis.rememberBottom(
-                guideline = null,
                 itemPlacer = HorizontalAxis.ItemPlacer.aligned()
             ),
         ),
@@ -982,7 +979,7 @@ fun ChartView(
                 startAxis = VerticalAxis.rememberStart(
                     valueFormatter = priceFormatter,
                     label = rememberTextComponent(
-                        color = Color.Black,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textSize = 8.sp
                     )
                 ),
@@ -990,7 +987,7 @@ fun ChartView(
                     valueFormatter = dateFormatter,
                     labelRotationDegrees = 45f,
                     label = rememberTextComponent(
-                        color = Color.Black,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textSize = 8.sp
                     ),
                 ),
@@ -1052,8 +1049,8 @@ fun QuickStatsHeader(tickerData: TickerData, fundamentalData: FundamentalData) {
             .padding(16.dp),
         elevation = CardDefaults.cardElevation(4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurface
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            //contentColor = MaterialTheme.colorScheme.onSurface
         )
     ) {
         Row(
@@ -1138,7 +1135,7 @@ fun CompanyOverviewCard(companyData: CompaniesData) {
             .fillMaxWidth(),
         elevation = CardDefaults.cardElevation(4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.surfaceBright,
             contentColor = MaterialTheme.colorScheme.onSurface
         )
     ) {
@@ -1177,7 +1174,7 @@ fun BidAskCard(tickerData: TickerData) {
             .fillMaxWidth(),
         elevation = CardDefaults.cardElevation(4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.surfaceBright,
             contentColor = MaterialTheme.colorScheme.onSurface
         )
     ) {
@@ -1216,7 +1213,7 @@ fun TradingStatsCard(tickerData: TickerData) {
 
         elevation = CardDefaults.cardElevation(4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.surfaceBright,
             contentColor = MaterialTheme.colorScheme.onSurface
         )
     ) {
@@ -1270,7 +1267,7 @@ fun CompanyInfoCard(companyData: CompaniesData) {
             .padding(8.dp),
         elevation = CardDefaults.cardElevation(4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.surfaceBright,
             contentColor = MaterialTheme.colorScheme.onSurface
         )
     ) {
@@ -1302,7 +1299,7 @@ fun KeyPeopleCard(companyData: CompaniesData) {
             .padding(8.dp),
         elevation = CardDefaults.cardElevation(4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.surfaceBright,
             contentColor = MaterialTheme.colorScheme.onSurface
         )
     ) {
@@ -1336,7 +1333,7 @@ fun BusinessDescriptionCard(companyData: CompaniesData) {
             .padding(8.dp),
         elevation = CardDefaults.cardElevation(4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.surfaceBright,
             contentColor = MaterialTheme.colorScheme.onSurface
         )
     ) {
@@ -1362,7 +1359,7 @@ fun MarketInfoCard(tickerData: TickerData) {
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.surfaceBright,
             contentColor = MaterialTheme.colorScheme.onSurface
         )
     ) {
@@ -1698,7 +1695,7 @@ fun AnnouncementCard(
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(1.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surfaceBright
         )
     ) {
 
@@ -1816,7 +1813,7 @@ fun FundamentalOverviewCard(fundamentalData: FundamentalData) {
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.surfaceBright,
             contentColor = MaterialTheme.colorScheme.onSurface
         )
     ) {
@@ -1863,7 +1860,7 @@ fun ValuationMetricsCard(fundamentalData: FundamentalData) {
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.surfaceBright,
             contentColor = MaterialTheme.colorScheme.onSurface
         )
     ) {
@@ -1905,7 +1902,7 @@ fun PerformanceMetricsCard(fundamentalData: FundamentalData) {
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.surfaceBright,
             contentColor = MaterialTheme.colorScheme.onSurface
         )
     ) {

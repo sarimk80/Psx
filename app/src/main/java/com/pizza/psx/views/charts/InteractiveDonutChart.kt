@@ -101,21 +101,21 @@ fun InteractiveDonutChart(
             }
 
             // Draw center text
-            drawIntoCanvas { canvas ->
-                val textPaint = Paint().asFrameworkPaint().apply {
-                    isAntiAlias = true
-                    textSize = 32f
-                    color = android.graphics.Color.WHITE
-                    textAlign = android.graphics.Paint.Align.CENTER
-                }
-
-                canvas.nativeCanvas.drawText(
-                    "${String.format("%.1f", total)}",
-                    center.x,
-                    center.y + 10,
-                    textPaint
-                )
-            }
+//            drawIntoCanvas { canvas ->
+//                val textPaint = Paint().asFrameworkPaint().apply {
+//                    isAntiAlias = true
+//                    textSize = 32f
+//                    color = android.graphics.Color.WHITE
+//                    textAlign = android.graphics.Paint.Align.CENTER
+//                }
+//
+//                canvas.nativeCanvas.drawText(
+//                    "${String.format("%.1f", total)}",
+//                    center.x,
+//                    center.y + 10,
+//                    textPaint
+//                )
+//            }
         }
 
         // Tooltip

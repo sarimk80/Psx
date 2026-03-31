@@ -381,10 +381,13 @@ private fun OptionCard(
     icon: ImageVector,
     onClick: () -> Unit
 ) {
+    //surfaceBright
     ElevatedCard(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp)
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceBright)
+
     ) {
         Row(
             modifier = Modifier
@@ -947,7 +950,9 @@ fun SymbolRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
+            //.background(MaterialTheme.colorScheme.surfaceBright)
             .padding(vertical = 12.dp, horizontal = 4.dp),
+
         verticalAlignment = Alignment.CenterVertically
     ) {
 
@@ -1103,7 +1108,7 @@ fun CompactWatchlistItemCard(
 
             .fillMaxWidth(),
         elevation = CardDefaults.cardElevation(2.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceBright)
 
     ) {
         Row(
@@ -1298,7 +1303,7 @@ fun PortfolioContent(
                     modifier = Modifier
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceBright),
                     elevation = CardDefaults.cardElevation(6.dp),
                 ) {
                     DonutChartWithLegend(
