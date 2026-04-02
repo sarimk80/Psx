@@ -231,5 +231,5 @@ var veryBerry = Color(0xFFB53471)
 var baraRed = Color(0xFFED4C67)
 
 
-
+var lightSplashBackgroundColor = Color(0xFFEBDEE5)
 

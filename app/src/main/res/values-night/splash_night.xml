@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.Psx" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#FF1A110F</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_icon_night_round</item>
+        <item name="windowSplashScreenAnimationDuration">400</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="postSplashScreenTheme">@style/Theme.Psx.Main</item>
+    </style>
+
+</resources>

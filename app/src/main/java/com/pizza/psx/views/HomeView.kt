@@ -71,6 +71,7 @@ import com.pizza.compose.financialGrey
 import com.pizza.compose.financialRed
 import com.pizza.compose.financialWarning
 import com.pizza.psx.domain.model.MarketDividend
+import com.pizza.psx.presentation.helpers.marketStatus
 import com.pizza.psx.presentation.helpers.number_format
 import kotlinx.coroutines.delay
 
@@ -83,6 +84,8 @@ fun Home(
     val viewModel: TickerDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState
 
+    var currentMarketStatus by remember { mutableStateOf("OPN") }
+
     LaunchedEffect(Unit) {
         viewModel.getMarketDividend()
         while (true){
@@ -91,13 +94,32 @@ fun Home(
         }
     }
 
+    LaunchedEffect(uiState.listOfTicker) {
+        uiState.listOfTicker?.firstOrNull()?.let { ticker ->
+            currentMarketStatus = ticker.data.st
+        }
+    }
+
+    val todayDate = remember {
+        java.time.LocalDate.now()
+            .format(java.time.format.DateTimeFormatter.ofPattern("EEE, dd MMM yyyy"))
+    }
+
     Scaffold(topBar = { TopAppBar(
         title = {
-            Text(
-                "Market Indices",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold
-            )
+            Column {
+                Text(
+                    text = "Market Indices",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = "${marketStatus(currentMarketStatus)} • $todayDate",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         },
 
     )

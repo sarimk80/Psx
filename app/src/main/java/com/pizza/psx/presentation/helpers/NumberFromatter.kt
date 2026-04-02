@@ -161,3 +161,11 @@ fun stringToIndexString(index: String): String = when(index) {
     "MII30" -> "mii_30"
     else -> "kse_100" // default case
 }
+
+fun marketStatus(status:String):String = when(status) {
+    "PRE" -> 	"Pre-market"
+            "OPN" -> 	"Open"
+            "SUS"	-> "Suspended"
+            "CLS" -> 	"Closed"
+    else -> "Closed"
+}
