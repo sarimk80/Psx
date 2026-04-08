@@ -13,8 +13,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Factory
 import androidx.compose.material.icons.filled.FilterAlt
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.PieChart
+import androidx.compose.material.icons.filled.StackedBarChart
+import androidx.compose.material.icons.filled.Wallet
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
@@ -26,6 +31,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavHostController
@@ -45,6 +51,7 @@ import com.pizza.psx.views.SectorView
 import com.google.gson.Gson
 import com.pizza.psx.domain.model.TickerNavType
 import com.pizza.psx.views.IndexDetailView
+import com.pizza.psx.views.MoreView
 import com.pizza.psx.views.PortfolioListView
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.HiltAndroidApp
@@ -61,11 +68,11 @@ enum class Destination(
     val icon: ImageVector,
     val contentDescription: String
 ){
-    Home("home","Home", Icons.Filled.BarChart,"Home"),
-    Portfolio("portfolio","Holdings",Icons.Default.AccountBalanceWallet,"Portfolio"),
-    HotStocks("hot stocks","Movers",Icons.AutoMirrored.Filled.TrendingUp,"Hot stocks"),
-    Sectors("sector","Industries",Icons.Default.PieChart,"Sectors"),
-    Search("Search","Screener",Icons.Filled.FilterAlt,"Search");
+    Home("home","Home", Icons.Filled.Home,"Home"),
+    Portfolio("portfolio","Holdings",Icons.Default.Wallet,"Portfolio"),
+    HotStocks("hot stocks","Movers",Icons.Filled.StackedBarChart,"Hot stocks"),
+    Sectors("sector","Industries",Icons.Default.Factory,"Sectors"),
+    More("More","More",Icons.Filled.Menu,"More");
 
     companion object {
         const val TICKER_DETAIL_ROUTE = "ticker_detail/{type}/{symbol}"
@@ -83,6 +90,9 @@ fun AppNavHost(
     startDestination: Destination,
     modifier: Modifier = Modifier
 ){
+
+    val uriHandler = LocalUriHandler.current
+
     NavHost(
         navController,
         startDestination = startDestination.route
@@ -122,11 +132,15 @@ fun AppNavHost(
                 }
             )
         }
-        composable(Destination.Search.route){
-            SearchView(
-                onTickerClick = {type,symbol ->
-                    navController.navigate("ticker_detail/$type/$symbol")
+        composable(Destination.More.route){
+            MoreView(
+                onSearchClick = {
+                    navController.navigate("search_view")
+                },
+                onPrivacyPolicyClick = {
+                    uriHandler.openUri("https://sarim-pix.hf.space/PrivacyPolicy")
                 }
+
             )
         }
 
@@ -219,6 +233,17 @@ fun AppNavHost(
             PortfolioListView(
                 symbol =  my_symbol,
                 onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = "search_view",
+        ){
+            SearchView(
+                onTickerClick = {type,symbol ->
+                    navController.navigate("ticker_detail/$type/$symbol")
+                },
+                onBack = { navController.popBackStack() }
             )
         }
 

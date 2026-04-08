@@ -34,4 +34,10 @@ class PortfolioRepo @Inject constructor(
 
     suspend fun getAllTransaction(): List<com.pizza.psx.domain.model.Transaction> =
         portfolioModelDAO.getAllTransactions()
+
+    suspend fun clearAllData() {
+        portfolioModelDAO.deleteAllPortfolios()
+        portfolioModelDAO.deleteAllTransactions()
+    }
+
 }

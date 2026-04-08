@@ -54,4 +54,10 @@ interface PortfolioModelDAO {
     @Query("SELECT * FROM transactions")
     suspend fun getAllTransactions(): List<com.pizza.psx.domain.model.Transaction>
 
+    @Query("DELETE FROM portfoliomodel")
+    suspend fun deleteAllPortfolios()
+
+    @Query("DELETE FROM `transactions`")
+    suspend fun deleteAllTransactions()
+
 }

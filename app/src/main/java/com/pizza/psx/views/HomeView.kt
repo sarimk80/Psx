@@ -198,7 +198,7 @@ fun TickerHorizontalPager(
             state = pagerState,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(280.dp) // Fixed height instead of weight
+                .height(270.dp) // Fixed height instead of weight
         ) { page ->
             TickerPage(ticker = tickers[page], onClick = onIndexClick)
         }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Search
@@ -49,7 +50,8 @@ import androidx.compose.ui.text.font.FontWeight
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchView(
-    onTickerClick: (String, String) -> Unit = { _, _ -> }
+    onTickerClick: (String, String) -> Unit = { _, _ -> },
+    onBack: () -> Unit
 ) {
     val viewModel: SearchViewModel = hiltViewModel()
     val uiState by viewModel.uiState
@@ -65,6 +67,12 @@ fun SearchView(
                 title = { Text("Search Symbols",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold) },
+
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, null)
+                    }
+                }
 
             )
         }
