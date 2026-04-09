@@ -25,8 +25,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.pizza.compose.financialGreen
 import com.pizza.compose.financialRed
 import com.pizza.compose.financialWarning
+import com.pizza.psx.BuildConfig
 import com.pizza.psx.presentation.viewModel.MoreViewModel
-import com.pizza.psx.presentation.viewModel.SearchViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,7 +40,8 @@ fun MoreView(
 
     val showClearDialog = remember { mutableStateOf(false) }
 
-
+    val versionCode = BuildConfig.VERSION_CODE
+    val versionName = BuildConfig.VERSION_NAME
 
 
     Scaffold(
@@ -170,7 +171,6 @@ fun MoreView(
             }
 
             item {
-                // ✅ uses BuildConfig instead of hardcoded strings
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -183,7 +183,7 @@ fun MoreView(
                     )
                     Spacer(modifier = Modifier.padding(top = 4.dp))
                     Text(
-                        text = "v-19 (build 2.8)",
+                        text = "version-$versionCode (build $versionName)",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                         textAlign = TextAlign.Center

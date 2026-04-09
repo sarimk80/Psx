@@ -356,19 +356,17 @@ fun TickerOptions(
 
         // Options Section
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-
-            OptionCard(
-                title = "Transaction History",
-                subtitle = "View past trades and activity",
-                icon = Icons.Default.History,
-                onClick = onHistoryClick
-            )
-
             OptionCard(
                 title = "Ticker Details",
                 subtitle = "View price info, market data and metrics",
                 icon = Icons.Default.Info,
                 onClick = onDetailClick
+            )
+            OptionCard(
+                title = "Transaction History",
+                subtitle = "View past trades and activity",
+                icon = Icons.Default.History,
+                onClick = onHistoryClick
             )
         }
     }

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -43,7 +42,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -122,7 +120,7 @@ fun Home(
             }
         },
 
-    )
+        )
     }) { padding ->
         Column(
             modifier = Modifier
@@ -157,6 +155,11 @@ fun Home(
     }
 }
 
+// ─── KEY CHANGE ──────────────────────────────────────────────────────────────
+// HomeContent is now a single LazyColumn that owns the whole scroll.
+// The tab row is hoisted as a stickyHeader so it pins when scrolled past the pager.
+// ─────────────────────────────────────────────────────────────────────────────
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeContent(
     tickers: List<Ticker>,
@@ -165,23 +168,98 @@ fun HomeContent(
     modifier: Modifier = Modifier,
     onIndexClick: (String, Ticker) -> Unit
 ) {
-    LazyColumn(modifier = modifier) {
+    var selectedTab by remember { mutableStateOf(0) }
+    val tabs = listOf("Dividend", "EPS", "Meeting", "Profits")
+
+    // Pre-compute filtered list so stickyHeader and items stay in sync
+    val filteredDividends = remember(marketDividends, selectedTab) {
+        marketDividends?.let { list ->
+            when (selectedTab) {
+                0 -> list.filter { it.Dividend != "-" && it.Dividend.isNotEmpty() }
+                1 -> list.filter { it.Eps != "-" && it.Eps.isNotEmpty() }
+                2 -> list.filter { it.BoardMeeting != "-" && it.BoardMeeting.isNotEmpty() }
+                3 -> list.filter {
+                    it.profitLossBeforeTax != "-" && it.profitLossBeforeTax.isNotEmpty() &&
+                            it.profitLossAfterTax != "-" && it.profitLossAfterTax.isNotEmpty()
+                }
+                else -> list
+            }
+        }
+    }
+
+    LazyColumn(modifier = modifier.fillMaxSize()) {
+
+        // ── 1. Horizontal pager with dot indicators ──────────────────────────
         item {
             TickerHorizontalPager(tickers = tickers, onIndexClick = onIndexClick)
         }
 
-        item {
-            MarketDividendSection(
-                marketDividends = marketDividends,
-                isLoading = isDividendLoading
-            )
+        // ── 2. Sticky tab row ────────────────────────────────────────────────
+        stickyHeader {
+            PrimaryTabRow(
+                selectedTabIndex = selectedTab,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    // Give it a solid background so content doesn't bleed through
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(horizontal = 16.dp),
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.primary,
+                indicator = {
+                    TabRowDefaults.PrimaryIndicator(
+                        modifier = Modifier.tabIndicatorOffset(selectedTab),
+                        width = 32.dp,
+                        height = 3.dp
+                    )
+                },
+            ) {
+                tabs.forEachIndexed { index, title ->
+                    Tab(
+                        text = { Text(title) },
+                        selected = selectedTab == index,
+                        onClick = { selectedTab = index }
+                    )
+                }
+            }
         }
 
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
+        // ── 3. Dividend / tab content items ─────────────────────────────────
+        item { Spacer(modifier = Modifier.height(12.dp)) }
+
+        when {
+            isDividendLoading -> item {
+                Box(modifier = Modifier.padding(horizontal = 16.dp)) { DividendLoadingState() }
+            }
+
+            marketDividends.isNullOrEmpty() -> item {
+                Box(modifier = Modifier.padding(horizontal = 16.dp)) { DividendEmptyState() }
+            }
+
+            filteredDividends.isNullOrEmpty() -> item {
+                Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    NoDataForTabState(selectedTab = selectedTab)
+                }
+            }
+
+            else -> {
+                items(filteredDividends) { dividend ->
+                    Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                        MarketDividendItem(
+                            dividend = dividend,
+                            selectedTab = selectedTab
+                        )
+                    }
+                }
+            }
         }
+
+        item { Spacer(modifier = Modifier.height(80.dp)) }
     }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Everything below is unchanged from the original
+// ─────────────────────────────────────────────────────────────────────────────
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -193,113 +271,21 @@ fun TickerHorizontalPager(
     val pagerState = rememberPagerState { tickers.size }
 
     Column(modifier = modifier) {
-        // Pager takes fixed height (approximately half screen)
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(270.dp) // Fixed height instead of weight
+                .height(270.dp)
         ) { page ->
             TickerPage(ticker = tickers[page], onClick = onIndexClick)
         }
 
-        // Page indicators
         DotsIndicator(
             pagerState = pagerState,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(16.dp)
         )
-
-    }
-}
-
-@Composable
-fun MarketDividendSection(
-    marketDividends: List<MarketDividend>?,
-    isLoading: Boolean
-) {
-
-    var selectedTab by remember { mutableStateOf(0) }
-    val tabs = listOf("Dividend", "EPS", "Meeting", "Profits")
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-    ) {
-
-
-        // Tabs
-        PrimaryTabRow(
-            selectedTabIndex = selectedTab,
-            modifier = Modifier.fillMaxWidth(),
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.primary,
-            indicator = {
-                TabRowDefaults.PrimaryIndicator(
-                    modifier = Modifier.tabIndicatorOffset(selectedTab),
-                    width = 32.dp,      // shorter = more modern
-                    height = 3.dp
-                )
-            },
-        ) {
-            tabs.forEachIndexed { index, title ->
-                Tab(
-                    text = { Text(title) },
-                    selected = selectedTab == index,
-                    onClick = { selectedTab = index }
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        when {
-            isLoading -> DividendLoadingState()
-            marketDividends.isNullOrEmpty() -> DividendEmptyState()
-            else -> FilteredDividendList(
-                dividends = marketDividends,
-                selectedTab = selectedTab
-            )
-        }
-    }
-}
-
-@Composable
-fun FilteredDividendList(
-    dividends: List<MarketDividend>,
-    selectedTab: Int
-) {
-    val filteredDividends = remember(dividends, selectedTab) {
-        when (selectedTab) {
-            0 -> dividends.filter { it.Dividend != "-" && it.Dividend.isNotEmpty() }
-            1 -> dividends.filter { it.Eps != "-" && it.Eps.isNotEmpty() }
-            2 -> dividends.filter { it.BoardMeeting != "-" && it.BoardMeeting.isNotEmpty() }
-            3 -> dividends.filter {
-                it.profitLossBeforeTax != "-" && it.profitLossBeforeTax.isNotEmpty() &&
-                        it.profitLossAfterTax != "-" && it.profitLossAfterTax.isNotEmpty()
-            }
-            else -> dividends
-        }
-    }
-
-    if (filteredDividends.isEmpty()) {
-        NoDataForTabState(selectedTab = selectedTab)
-    } else {
-        LazyColumn(
-            modifier = Modifier.heightIn(max = 400.dp)
-        ) {
-            items(filteredDividends.take(filteredDividends.size)) { dividend ->
-                MarketDividendItem(
-                    dividend = dividend,
-                    selectedTab = selectedTab
-                )
-            }
-            item{
-                Spacer(modifier = Modifier.padding(bottom = 60.dp))
-            }
-        }
     }
 }
 
@@ -372,7 +358,6 @@ fun MarketDividendItem(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // Header with Company and Icon
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -406,7 +391,6 @@ fun MarketDividendItem(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Tab-specific content
             when (selectedTab) {
                 0 -> DividendTabContent(dividend)
                 1 -> EpsTabContent(dividend)
@@ -429,8 +413,7 @@ fun DividendTabContent(dividend: MarketDividend) {
 fun EpsTabContent(dividend: MarketDividend) {
     Column {
         InfoRow("EPS", dividend.Eps, isPositive = isPositiveValue(dividend.Eps))
-        InfoRow("Year Ended", dividend.yearEnded,)
-
+        InfoRow("Year Ended", dividend.yearEnded)
     }
 }
 
@@ -438,7 +421,6 @@ fun EpsTabContent(dividend: MarketDividend) {
 fun MeetingTabContent(dividend: MarketDividend) {
     Column {
         InfoRow("Board Meeting", dividend.BoardMeeting, isMeeting = true)
-
     }
 }
 
@@ -447,12 +429,11 @@ fun ProfitsTabContent(dividend: MarketDividend) {
     Column {
         InfoRow("Profit Before Tax", dividend.profitLossBeforeTax, isPositive = isPositiveValue(dividend.profitLossBeforeTax))
         InfoRow("Profit After Tax", dividend.profitLossAfterTax, isPositive = isPositiveValue(dividend.profitLossAfterTax))
-
     }
 }
 
 @Composable
-fun InfoRow(label: String, value: String, isPositive: Boolean? = null,isMeeting: Boolean? = null) {
+fun InfoRow(label: String, value: String, isPositive: Boolean? = null, isMeeting: Boolean? = null) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -512,21 +493,16 @@ fun NoDataForTabState(selectedTab: Int) {
     }
 }
 
-// Helper function to check if a value is positive or negative
 private fun isPositiveValue(value: String): Boolean? {
     if (value == "-" || value.isEmpty()) return null
-
     return try {
-        // Check if value contains parentheses - indicates negative value
         val isNegative = value.contains("(") && value.contains(")")
-
         if (isNegative) {
-            false // Parentheses indicate loss/negative value
+            false
         } else {
-            // Remove commas and spaces, then check if positive
             val cleanValue = value.replace(",", "").replace(" ", "")
             val numericValue = cleanValue.toDoubleOrNull()
-            numericValue?.let { it > 0 } ?: true // Assume positive if can't parse but no parentheses
+            numericValue?.let { it > 0 } ?: true
         }
     } catch (e: Exception) {
         null
@@ -549,7 +525,6 @@ fun DotsIndicator(
             } else {
                 MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
             }
-
             Box(
                 modifier = Modifier
                     .size(8.dp)
@@ -563,7 +538,7 @@ fun DotsIndicator(
 @Composable
 fun TickerPage(ticker: Ticker, onClick: (String, Ticker) -> Unit) {
     Card(
-        onClick = { onClick(ticker.data.symbol,ticker) },
+        onClick = { onClick(ticker.data.symbol, ticker) },
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
@@ -579,23 +554,16 @@ fun TickerPage(ticker: Ticker, onClick: (String, Ticker) -> Unit) {
                 .fillMaxWidth()
                 .padding(20.dp)
         ) {
-
-            // =====================
-            // Header Section
-            // =====================
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
-                // Symbol + Tag
                 Column {
                     Text(
                         text = ticker.data.symbol,
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
-                        //color = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
@@ -605,19 +573,14 @@ fun TickerPage(ticker: Ticker, onClick: (String, Ticker) -> Unit) {
                     )
                 }
 
-                // Price + Change
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
                         text = number_format(ticker.data.price),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
                     )
-
                     Spacer(modifier = Modifier.height(4.dp))
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         val isUp = ticker.data.change >= 0
                         Icon(
                             imageVector = if (isUp) Icons.Default.TrendingUp else Icons.Default.TrendingDown,
@@ -625,9 +588,7 @@ fun TickerPage(ticker: Ticker, onClick: (String, Ticker) -> Unit) {
                             tint = if (isUp) financialGreen else financialRed,
                             modifier = Modifier.size(18.dp)
                         )
-
                         Spacer(modifier = Modifier.width(4.dp))
-
                         Text(
                             text = "${"%.2f".format(ticker.data.change)} (${"%.2f".format(ticker.data.changePercent)}%)",
                             style = MaterialTheme.typography.bodyMedium,
@@ -639,9 +600,6 @@ fun TickerPage(ticker: Ticker, onClick: (String, Ticker) -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // =====================
-            // Stats Grid
-            // =====================
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
@@ -649,43 +607,20 @@ fun TickerPage(ticker: Ticker, onClick: (String, Ticker) -> Unit) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 item {
-                    StatItem(
-                        label = "High",
-                        value = number_format(ticker.data.high),
-                        icon = Icons.Default.TrendingUp,
-                        color = financialGreen
-                    )
+                    StatItem(label = "High", value = number_format(ticker.data.high), icon = Icons.Default.TrendingUp, color = financialGreen)
                 }
                 item {
-                    StatItem(
-                        label = "Low",
-                        value = number_format(ticker.data.low),
-                        icon = Icons.Default.TrendingDown,
-                        color = financialRed
-                    )
+                    StatItem(label = "Low", value = number_format(ticker.data.low), icon = Icons.Default.TrendingDown, color = financialRed)
                 }
                 item {
-                    StatItem(
-                        label = "Volume",
-                        value = formatVolume(ticker.data.volume),
-                        icon = Icons.Default.BarChart,
-                        color = financialGrey
-                    )
+                    StatItem(label = "Volume", value = formatVolume(ticker.data.volume), icon = Icons.Default.BarChart, color = financialGrey)
                 }
                 item {
-                    StatItem(
-                        label = "Trades",
-                        value = formatNumber(ticker.data.trades),
-                        icon = Icons.Default.SwapHoriz,
-                        color = financialWarning
-                    )
+                    StatItem(label = "Trades", value = formatNumber(ticker.data.trades), icon = Icons.Default.SwapHoriz, color = financialWarning)
                 }
             }
-
-            //Spacer(modifier = Modifier.height(8.dp))
         }
     }
-
 }
 
 @Composable
@@ -705,24 +640,11 @@ fun StatItem(
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = label,
-                tint = color,
-                modifier = Modifier.size(20.dp)
-            )
+            Icon(imageVector = icon, contentDescription = label, tint = color, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.width(8.dp))
             Column {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium
-                )
+                Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
             }
         }
     }
@@ -731,56 +653,29 @@ fun StatItem(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomeLoadingState(modifier: Modifier = Modifier) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             ContainedLoadingIndicator()
-            Text(
-                "Loading...",
-                modifier = Modifier.padding(top = 16.dp),
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Text("Loading...", modifier = Modifier.padding(top = 16.dp), style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
 
 @Composable
-fun HomeErrorState(
-    error: String,
-    onRetry: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
+fun HomeErrorState(error: String, onRetry: () -> Unit, modifier: Modifier = Modifier) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(32.dp)
         ) {
-            Icon(
-                Icons.Default.ErrorOutline,
-                contentDescription = "Error",
-                modifier = Modifier.size(64.dp),
-                tint = MaterialTheme.colorScheme.error
-            )
-            Text(
-                text = error,
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(vertical = 16.dp)
-            )
-            Button(onClick = onRetry) {
-                Text("Retry")
-            }
+            Icon(Icons.Default.ErrorOutline, contentDescription = "Error", modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.error)
+            Text(text = error, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, modifier = Modifier.padding(vertical = 16.dp))
+            Button(onClick = onRetry) { Text("Retry") }
         }
     }
 }
 
-// Helper functions for formatting
- fun formatVolume(volume: Long): String {
+fun formatVolume(volume: Long): String {
     return when {
         volume >= 1_000_000 -> "%.2fM".format(volume / 1_000_000.0)
         volume >= 1_000 -> "%.2fK".format(volume / 1_000.0)

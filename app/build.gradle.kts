@@ -6,6 +6,7 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("kotlin-parcelize")
     id("androidx.room")
+    id("com.google.gms.google-services")
 }
 room {
     schemaDirectory("$projectDir/schemas")
@@ -18,8 +19,8 @@ android {
         applicationId = "com.pizza.psx"
         minSdk = 33
         targetSdk = 35
-        versionCode = 19
-        versionName = "2.8"
+        versionCode = 20
+        versionName = "2.9"
 
 
 
@@ -74,6 +75,8 @@ dependencies {
     implementation ("androidx.core:core-splashscreen:1.0.1")
     implementation ("io.github.ehsannarmani:compose-charts:0.1.10")
     implementation("androidx.browser:browser:1.8.0")
+    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
+    implementation("com.google.firebase:firebase-analytics")
 
     implementation(libs.vico.compose)
     implementation(libs.vico.views)

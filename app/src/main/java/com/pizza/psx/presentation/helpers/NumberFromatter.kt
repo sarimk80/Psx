@@ -1,7 +1,5 @@
 package com.pizza.psx.presentation.helpers
 
-import androidx.compose.material3.Switch
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import com.pizza.psx.views.charts.ChartData
 import java.text.DecimalFormat
@@ -9,8 +7,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.math.abs
-import kotlin.math.atan2
-import  androidx.compose.ui.unit.IntOffset
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.random.Random
