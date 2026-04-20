@@ -803,7 +803,7 @@ fun CompactStockItem(
 
                     // Price range
                     Text(
-                        text = "${stock.low} - ${stock.high}",
+                        text = "${number_format(stock.low.toDouble())} - ${number_format(stock.high.toDouble())}",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -816,7 +816,7 @@ fun CompactStockItem(
             ) {
                 // Current Price
                 Text(
-                    text = stock.current,
+                    text = number_format(stock.current.toDouble()),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -827,7 +827,7 @@ fun CompactStockItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = stock.change,
+                        text = "${stock.change}%",
                         style = MaterialTheme.typography.bodyMedium,
                         color = priceColor,
                         fontWeight = FontWeight.Medium
@@ -843,7 +843,7 @@ fun CompactStockItem(
                             .padding(horizontal = 6.dp, vertical = 2.dp)
                     ) {
                         Text(
-                            text = "O:${stock.open}",
+                            text = "O:${number_format(stock.open.toDouble())}",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

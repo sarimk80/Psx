@@ -230,6 +230,8 @@ val green = Color(0xFF22a6b3)
 var veryBerry = Color(0xFFB53471)
 var baraRed = Color(0xFFED4C67)
 
+var veryBlue = Color(0xFF00a8ff)
+
 
 var lightSplashBackgroundColor = Color(0xFFEBDEE5)
 

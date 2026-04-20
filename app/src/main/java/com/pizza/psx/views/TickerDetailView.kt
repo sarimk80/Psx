@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ShowChart
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Calculate
@@ -39,6 +40,13 @@ import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material.icons.filled.TrendingDown
 import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.outlined.BarChart
+import androidx.compose.material.icons.outlined.Business
+import androidx.compose.material.icons.outlined.Dashboard
+import androidx.compose.material.icons.rounded.MonetizationOn
+import androidx.compose.material.icons.outlined.ShowChart
+import androidx.compose.material.icons.rounded.Business
+import androidx.compose.material.icons.rounded.Dashboard
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -310,6 +318,14 @@ fun CombinedTickerDetailContent(
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Overview", "Company", "Financials", "Dividends","Chart")
 
+    val iconTabs = listOf(
+        Pair("Overview", Icons.Rounded.Dashboard),
+        Pair("Company", Icons.Rounded.Business),
+        Pair("Financials", Icons.Outlined.BarChart),
+        Pair("Dividends", Icons.Rounded.MonetizationOn),
+        Pair("Chart", Icons.Outlined.ShowChart)
+    )
+
     Column(modifier = Modifier.fillMaxSize()) {
         // Quick Stats Header - Always visible
         QuickStatsHeader(tickerData, fundamentalData)
@@ -329,8 +345,15 @@ fun CombinedTickerDetailContent(
             },
             minTabWidth = 72.dp
         ) {
-            tabs.forEachIndexed { index, title ->
+            iconTabs.forEachIndexed { index, (title,icon) ->
                 Tab(
+                    icon = {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = title,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    },
                     text = {
                         Text(
                             text = title,
@@ -1882,7 +1905,7 @@ fun ValuationMetricsCard(fundamentalData: FundamentalData) {
             )
             ValuationMetricRow(
                 title = "Price-to-Earnings (P/E)",
-                value = fundamentalData.peRatio.toString()
+                value = number_format(fundamentalData.peRatio)
             )
             ValuationMetricRow(
                 title = "Free Float",
@@ -1925,7 +1948,7 @@ fun PerformanceMetricsCard(fundamentalData: FundamentalData) {
             )
             PerformanceMetricRow(
                 title = "Dividend Yield",
-                value = "${fundamentalData.dividendYield}%",
+                value = "${number_format(fundamentalData.dividendYield)}%",
                 isPositive = fundamentalData.dividendYield > 0
             )
             PerformanceMetricRow(

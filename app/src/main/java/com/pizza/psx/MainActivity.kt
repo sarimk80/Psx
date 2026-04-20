@@ -10,16 +10,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.TrendingUp
-import androidx.compose.material.icons.filled.AccountBalanceWallet
-import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled.Factory
-import androidx.compose.material.icons.filled.FilterAlt
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.PieChart
-import androidx.compose.material.icons.filled.StackedBarChart
-import androidx.compose.material.icons.filled.Wallet
+import androidx.compose.material.icons.rounded.Factory
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Menu
+import androidx.compose.material.icons.rounded.StackedBarChart
+import androidx.compose.material.icons.rounded.Wallet
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
@@ -68,11 +63,11 @@ enum class Destination(
     val icon: ImageVector,
     val contentDescription: String
 ){
-    Home("home","Home", Icons.Filled.Home,"Home"),
-    Portfolio("portfolio","Holdings",Icons.Default.Wallet,"Portfolio"),
-    HotStocks("hot stocks","Movers",Icons.Filled.StackedBarChart,"Hot stocks"),
-    Sectors("sector","Industries",Icons.Default.Factory,"Sectors"),
-    More("More","More",Icons.Filled.Menu,"More");
+    Home("home","Home", Icons.Rounded.Home,"Home"),
+    Portfolio("portfolio","Holdings",Icons.Rounded.Wallet,"Portfolio"),
+    HotStocks("hot stocks","Movers",Icons.Rounded.StackedBarChart,"Hot stocks"),
+    Sectors("sector","Industries",Icons.Rounded.Factory,"Sectors"),
+    More("More","More",Icons.Rounded.Menu,"More");
 
     companion object {
         const val TICKER_DETAIL_ROUTE = "ticker_detail/{type}/{symbol}"

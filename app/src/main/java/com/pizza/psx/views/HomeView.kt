@@ -590,7 +590,7 @@ fun TickerPage(ticker: Ticker, onClick: (String, Ticker) -> Unit) {
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = "${"%.2f".format(ticker.data.change)} (${"%.2f".format(ticker.data.changePercent)}%)",
+                            text = "${number_format(ticker.data.change)} (${"%.2f".format(ticker.data.changePercent)}%)",
                             style = MaterialTheme.typography.bodyMedium,
                             color = if (isUp) financialGreen else financialRed
                         )

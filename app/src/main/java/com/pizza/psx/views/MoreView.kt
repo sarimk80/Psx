@@ -22,9 +22,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pizza.compose.baraRed
 import com.pizza.compose.financialGreen
 import com.pizza.compose.financialRed
 import com.pizza.compose.financialWarning
+import com.pizza.compose.green
+import com.pizza.compose.purpleColor
+import com.pizza.compose.veryBerry
+import com.pizza.compose.veryBlue
 import com.pizza.psx.BuildConfig
 import com.pizza.psx.presentation.viewModel.MoreViewModel
 
@@ -156,6 +161,15 @@ fun MoreView(
                         label = "Privacy Policy",
                         onClick = onPrivacyPolicyClick
                     )
+//                    HorizontalDivider(
+//                        color = MaterialTheme.colorScheme.outlineVariant
+//                    )
+//                    SettingsRow(
+//                        icon = Icons.Outlined.Translate,
+//                        iconTint = veryBlue,
+//                        label = "Change Language",
+//                        onClick = { showClearDialog.value = true },
+//                    )
                     HorizontalDivider(
                         color = MaterialTheme.colorScheme.outlineVariant
                     )
