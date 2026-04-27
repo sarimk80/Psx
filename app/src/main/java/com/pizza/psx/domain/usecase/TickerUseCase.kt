@@ -2,6 +2,7 @@ package com.pizza.psx.domain.usecase
 
 import com.pizza.psx.domain.model.Companies
 import com.pizza.psx.domain.model.Dividend
+import com.pizza.psx.domain.model.EtfModel
 import com.pizza.psx.domain.model.Fundamentals
 import com.pizza.psx.domain.model.IndexDetailModel
 import com.pizza.psx.domain.model.IndexPriceModel
@@ -102,4 +103,12 @@ class IndexPriceUseCase@Inject constructor(
         return  repo.getIndexPrice(indexName = indexName)
     }
 
+}
+
+class EtfUseCase@Inject constructor(
+    private  val repo: StockRepo
+) {
+    suspend operator fun invoke(): StockResult<EtfModel> {
+        return repo.getAllEtf()
+    }
 }

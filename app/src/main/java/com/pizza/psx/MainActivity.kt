@@ -45,6 +45,7 @@ import com.pizza.psx.views.SectorDetailView
 import com.pizza.psx.views.SectorView
 import com.google.gson.Gson
 import com.pizza.psx.domain.model.TickerNavType
+import com.pizza.psx.views.EtfView
 import com.pizza.psx.views.IndexDetailView
 import com.pizza.psx.views.MoreView
 import com.pizza.psx.views.PortfolioListView
@@ -134,6 +135,9 @@ fun AppNavHost(
                 },
                 onPrivacyPolicyClick = {
                     uriHandler.openUri("https://sarim-pix.hf.space/PrivacyPolicy")
+                },
+                etfClick = {
+                    navController.navigate("etf_view")
                 }
 
             )
@@ -239,6 +243,14 @@ fun AppNavHost(
                     navController.navigate("ticker_detail/$type/$symbol")
                 },
                 onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = "etf_view",
+        ){
+            EtfView(
+                onBackClick = { navController.popBackStack() }
             )
         }
 

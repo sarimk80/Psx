@@ -3,6 +3,7 @@ package com.pizza.psx.data.network.repo
 import com.pizza.psx.data.network.dot.api.StockApi
 import com.pizza.psx.domain.model.Companies
 import com.pizza.psx.domain.model.Dividend
+import com.pizza.psx.domain.model.EtfModel
 import com.pizza.psx.domain.model.Fundamentals
 import com.pizza.psx.domain.model.IndexDetailModel
 import com.pizza.psx.domain.model.IndexPriceModel
@@ -141,6 +142,15 @@ class StockRepository(
             val result = stockApi.getIndexPrice("https://sarim-pix.hf.space/get_index_price/${indexName}")
             StockResult.Success(result)
         }catch (e:Exception){
+            StockResult.Error("Failed${e.toString()}")
+        }
+    }
+
+    override suspend fun getAllEtf(): StockResult<EtfModel>  = withContext(dispatcher){
+        return@withContext try {
+            val result = stockApi.getAllEtf("https://sarim-pix.hf.space/get_all_etfs")
+            StockResult.Success(result)
+        }catch (e: Exception){
             StockResult.Error("Failed${e.toString()}")
         }
     }

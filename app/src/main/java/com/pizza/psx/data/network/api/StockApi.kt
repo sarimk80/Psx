@@ -2,6 +2,7 @@ package com.pizza.psx.data.network.dot.api
 
 import com.pizza.psx.domain.model.Companies
 import com.pizza.psx.domain.model.Dividend
+import com.pizza.psx.domain.model.EtfModel
 import com.pizza.psx.domain.model.Fundamentals
 import com.pizza.psx.domain.model.IndexDetailModel
 import com.pizza.psx.domain.model.IndexPriceModel
@@ -57,4 +58,7 @@ interface StockApi {
 
     @GET
     suspend fun getIndexPrice(@Url url: String): IndexPriceModel
+
+    @GET
+    suspend fun getAllEtf(@Url url: String): EtfModel
 }

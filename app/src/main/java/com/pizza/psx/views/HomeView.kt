@@ -496,14 +496,21 @@ fun NoDataForTabState(selectedTab: Int) {
 private fun isPositiveValue(value: String): Boolean? {
     if (value == "-" || value.isEmpty()) return null
     return try {
-        val isNegative = value.contains("(") && value.contains(")")
-        if (isNegative) {
-            false
-        } else {
-            val cleanValue = value.replace(",", "").replace(" ", "")
-            val numericValue = cleanValue.toDoubleOrNull()
-            numericValue?.let { it > 0 } ?: true
-        }
+        val numericPart = value
+            .replace(",", "")
+            .replace("standalone", "")
+            .replace("consolidated", "")
+            .replace("unconsolidated", "")
+            .trim()
+
+        if (numericPart == "-" || numericPart.isEmpty()) return null
+
+        // handle bracket notation like (10.19) meaning negative
+        val isBracketNegative = numericPart.startsWith("(") && numericPart.endsWith(")")
+        if (isBracketNegative) return false
+
+        val numericValue = numericPart.toDoubleOrNull()
+        numericValue?.let { it > 0 }
     } catch (e: Exception) {
         null
     }

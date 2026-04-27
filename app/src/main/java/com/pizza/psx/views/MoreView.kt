@@ -39,6 +39,7 @@ fun MoreView(
     onSearchClick: () -> Unit = {},
     onPrivacyPolicyClick: () -> Unit = {},
     onClearDataClick: () -> Unit = {},
+    etfClick: () -> Unit = {}
 
 ) {
     val viewModel: MoreViewModel = hiltViewModel()
@@ -116,6 +117,17 @@ fun MoreView(
                         label = "Search",
                         onClick = onSearchClick
                     )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
+
+                    SettingsRow(
+                        icon = Icons.Outlined.ShoppingBasket,
+                        iconTint = purpleColor,
+                        label = "ETF",
+                        onClick = etfClick
+                    )
 
 //                    HorizontalDivider(
 //                        color = MaterialTheme.colorScheme.outlineVariant
@@ -171,6 +183,7 @@ fun MoreView(
 //                        onClick = { showClearDialog.value = true },
 //                    )
                     HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
                         color = MaterialTheme.colorScheme.outlineVariant
                     )
                     SettingsRow(

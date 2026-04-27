@@ -2,6 +2,7 @@ package com.pizza.psx.domain.repo
 
 import com.pizza.psx.domain.model.Companies
 import com.pizza.psx.domain.model.Dividend
+import com.pizza.psx.domain.model.EtfModel
 import com.pizza.psx.domain.model.Fundamentals
 import com.pizza.psx.domain.model.IndexDetailModel
 import com.pizza.psx.domain.model.IndexPriceModel
@@ -40,4 +41,6 @@ interface StockRepo {
     suspend fun getSymbolDetail(symbol: String): StockResult<SymbolDetail>
 
     suspend fun getIndexPrice(indexName: String): StockResult<IndexPriceModel>
+
+    suspend fun getAllEtf(): StockResult<EtfModel>
 }
