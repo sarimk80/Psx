@@ -13,6 +13,7 @@ import com.pizza.psx.domain.model.KLineModel
 import com.pizza.psx.domain.model.StockResult
 import com.pizza.psx.domain.model.Ticker
 import com.pizza.psx.domain.usecase.CompanyUseCase
+import com.pizza.psx.domain.usecase.EtfUseCase
 import com.pizza.psx.domain.usecase.KLineModelUseCase
 import com.pizza.psx.domain.usecase.TickerUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,14 +28,15 @@ class EtfDetailViewModel @Inject constructor(
     private val companyUseCase: CompanyUseCase,
     private val kLineModelUseCase: KLineModelUseCase,
     private val tickerUseCase: TickerUseCase,
-    savedStateHandle: SavedStateHandle
+    private val etfUseCase: EtfUseCase,
+    savedStateHandle: SavedStateHandle,
 ): ViewModel() {
 
     private val symbol: String = checkNotNull(savedStateHandle["symbol"])
-    private val etfModel: Etf = run {
-        val json = checkNotNull(savedStateHandle.get<String>("etf_model"))
-        Gson().fromJson(json, Etf::class.java)
-    }
+//    private val etfModel: Etf = run {
+//        val json = checkNotNull(savedStateHandle.get<String>("etf_model"))
+//        Gson().fromJson(json, Etf::class.java)
+//    }
 
     private val _uiState = mutableStateOf(EtfDetailUiState())
     val uiState: State<EtfDetailUiState> = _uiState
@@ -47,12 +49,14 @@ class EtfDetailViewModel @Inject constructor(
                 val companyDetail = async { companyUseCase(symbol) }
                 val kLine = async { kLineModelUseCase(symbol,"1d") }
                 val ticker = async { tickerUseCase("REG",symbol) }
+                val etfDetail = async { etfUseCase() }
 
-                val results = awaitAll(kLine, companyDetail,ticker)
+                val results = awaitAll(kLine, companyDetail,ticker,etfDetail)
 
                 val kLineResult = results[0] as StockResult<KLineModel>
                 val companyResult = results[1] as StockResult<Companies>
                 val tickerResult = results[2] as StockResult<Ticker>
+                val etfResult = results[3] as StockResult<EtfModel>
 
                 val company = when(companyResult){
                     is StockResult.Success -> companyResult.data
@@ -77,6 +81,17 @@ class EtfDetailViewModel @Inject constructor(
                         _uiState.value = _uiState.value.copy(error = tickerResult.message)
                     }
                 }
+                val resultEtf = when(etfResult){
+                    is StockResult.Success -> etfResult.data
+                    is StockResult.Loading -> null
+                    is StockResult.Error ->{
+                        _uiState.value = _uiState.value.copy(error = etfResult.message)
+                    }
+                }
+
+                val response = resultEtf as EtfModel
+                val etfModel = response.etfs.find { it.etfName == symbol }
+
 
                 _uiState.value = _uiState.value.copy(
                     etfModel = etfModel,

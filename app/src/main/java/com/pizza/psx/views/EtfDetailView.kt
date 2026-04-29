@@ -126,7 +126,6 @@ import com.pizza.psx.presentation.helpers.number_format
 @Composable
 fun EtfDetailView(etfSymbol: String,
                   onBackClick: () -> Unit,
-                  etfModel: Etf,
                   onTickerDetail: (ticker: String) -> Unit){
 
     var selectedTabIndex by remember { mutableStateOf(0) }
@@ -144,7 +143,7 @@ fun EtfDetailView(etfSymbol: String,
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(etfModel.etfName) },
+                title = { Text(etfSymbol) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(

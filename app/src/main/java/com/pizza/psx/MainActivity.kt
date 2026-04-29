@@ -44,6 +44,7 @@ import com.pizza.psx.views.SearchView
 import com.pizza.psx.views.SectorDetailView
 import com.pizza.psx.views.SectorView
 import com.google.gson.Gson
+import com.pizza.psx.domain.model.EtfModel
 import com.pizza.psx.domain.model.EtfNavType
 import com.pizza.psx.domain.model.TickerNavType
 import com.pizza.psx.views.EtfDetailView
@@ -123,7 +124,11 @@ fun AppNavHost(
         composable(Destination.Portfolio.route){
             PortfolioView(
                 onTickerClick = {type,symbol,price ->
-                    navController.navigate("ticker_detail/$type/$symbol")
+                    if(symbol.contains("ETF")){
+                        navController.navigate("etf_detail_view/$symbol")
+                    }else{
+                        navController.navigate("ticker_detail/$type/$symbol")
+                    }
                 },
                 onTickerTransactionClick = {symbol ->
                     navController.navigate("ticker_transaction/$symbol")
@@ -242,7 +247,12 @@ fun AppNavHost(
         ){
             SearchView(
                 onTickerClick = {type,symbol ->
-                    navController.navigate("ticker_detail/$type/$symbol")
+                    if(symbol.contains("ETF")){
+                        navController.navigate("etf_detail_view/$symbol")
+                    }else{
+                        navController.navigate("ticker_detail/$type/$symbol")
+                    }
+
                 },
                 onBack = { navController.popBackStack() }
             )
@@ -253,36 +263,29 @@ fun AppNavHost(
         ){
             EtfView(
                 onBackClick = { navController.popBackStack() },
-                onClick = {symbol,etf ->
-
-                    val json = Uri.encode(Gson().toJson(etf))
-                    navController.navigate("etf_detail_view/$symbol/$json")
+                onClick = {symbol ->
+                    navController.navigate("etf_detail_view/$symbol")
                 }
             )
         }
         //EtfDetailView
 
         composable(
-            route = "etf_detail_view/{symbol}/{etf_model}",
+            route = "etf_detail_view/{symbol}",
             arguments = listOf(
                 navArgument("symbol") {
                     type = NavType.StringType
                     defaultValue = "MIIETF" // Default market type
                 },
-                navArgument("etf_model") {
-                    type = EtfNavType()
-                }
+
 
             )
         ){ backStackEntry ->
             val my_symbol = backStackEntry.arguments?.getString("symbol") ?: "MIIETF"
-            val etf_model = backStackEntry.arguments?.getString("etf_model")?.let {
-                EtfNavType().parseValue(it)
-            }
+
             EtfDetailView(
                 etfSymbol = my_symbol,
                 onBackClick = { navController.popBackStack() },
-                etfModel = etf_model!!,
                 onTickerDetail = {ticker ->
                     navController.navigate("ticker_detail/REG/$ticker")
                 }

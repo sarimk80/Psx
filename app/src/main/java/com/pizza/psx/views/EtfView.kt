@@ -55,7 +55,7 @@ import com.pizza.psx.presentation.viewModel.EtfViewModel
 @Composable
 fun EtfView(
     onBackClick: () -> Unit,
-    onClick: (symbol: String,etf: Etf) -> Unit
+    onClick: (symbol: String) -> Unit
 ) {
     val viewModel: EtfViewModel = hiltViewModel()
     val uiState by viewModel.uiState
@@ -109,7 +109,7 @@ fun EtfView(
 }
 
 @Composable
-private fun EtfContentWithHeader(etfModel: EtfModel,onClick: (symbol: String,etf: Etf) -> Unit) {
+private fun EtfContentWithHeader(etfModel: EtfModel,onClick: (symbol: String) -> Unit) {
     val etfs = etfModel.etfs
     val totalAum = etfs.sumOf { etf ->
         etf.fundSize.replace(",", "").toDoubleOrNull() ?: 0.0
@@ -244,7 +244,7 @@ private fun StatChip(value: String, label: String, modifier: Modifier = Modifier
 }
 
 @Composable
-private fun EtfListTile(etf: Etf,onClick: (symbol: String,etf: Etf) -> Unit) {
+private fun EtfListTile(etf: Etf,onClick: (symbol: String) -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
@@ -252,7 +252,7 @@ private fun EtfListTile(etf: Etf,onClick: (symbol: String,etf: Etf) -> Unit) {
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceBright
         ),
-        onClick = { onClick(etf.etfName,etf) }
+        onClick = { onClick(etf.etfName) }
     ) {
         Row(
             modifier = Modifier
