@@ -466,11 +466,14 @@ fun SectorLoadingState() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            ContainedLoadingIndicator()
+            ContainedLoadingIndicator(
+                modifier = Modifier.size(80.dp)
+            )
             Text(
                 text = "Loading sector data...",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.SemiBold
             )
         }
     }

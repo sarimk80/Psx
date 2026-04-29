@@ -44,7 +44,9 @@ import com.pizza.psx.views.SearchView
 import com.pizza.psx.views.SectorDetailView
 import com.pizza.psx.views.SectorView
 import com.google.gson.Gson
+import com.pizza.psx.domain.model.EtfNavType
 import com.pizza.psx.domain.model.TickerNavType
+import com.pizza.psx.views.EtfDetailView
 import com.pizza.psx.views.EtfView
 import com.pizza.psx.views.IndexDetailView
 import com.pizza.psx.views.MoreView
@@ -250,7 +252,40 @@ fun AppNavHost(
             route = "etf_view",
         ){
             EtfView(
-                onBackClick = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() },
+                onClick = {symbol,etf ->
+
+                    val json = Uri.encode(Gson().toJson(etf))
+                    navController.navigate("etf_detail_view/$symbol/$json")
+                }
+            )
+        }
+        //EtfDetailView
+
+        composable(
+            route = "etf_detail_view/{symbol}/{etf_model}",
+            arguments = listOf(
+                navArgument("symbol") {
+                    type = NavType.StringType
+                    defaultValue = "MIIETF" // Default market type
+                },
+                navArgument("etf_model") {
+                    type = EtfNavType()
+                }
+
+            )
+        ){ backStackEntry ->
+            val my_symbol = backStackEntry.arguments?.getString("symbol") ?: "MIIETF"
+            val etf_model = backStackEntry.arguments?.getString("etf_model")?.let {
+                EtfNavType().parseValue(it)
+            }
+            EtfDetailView(
+                etfSymbol = my_symbol,
+                onBackClick = { navController.popBackStack() },
+                etfModel = etf_model!!,
+                onTickerDetail = {ticker ->
+                    navController.navigate("ticker_detail/REG/$ticker")
+                }
             )
         }
 

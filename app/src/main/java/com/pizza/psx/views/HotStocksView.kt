@@ -197,7 +197,8 @@ fun MarketMoversContent(
                         activeContentColor = MaterialTheme.colorScheme.onPrimary,
                         inactiveContainerColor = MaterialTheme.colorScheme.surface,
                         inactiveContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    ),
+                    icon = {}
                 ) {
                     Text(
                         text = title,
@@ -1028,12 +1029,15 @@ fun LoadingState() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            ContainedLoadingIndicator()
+            ContainedLoadingIndicator(
+                modifier = Modifier.size(80.dp)
+            )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "Loading market data...",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.SemiBold
             )
         }
     }

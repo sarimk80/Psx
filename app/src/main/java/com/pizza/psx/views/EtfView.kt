@@ -45,7 +45,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.pizza.compose.purpleColor
+import com.pizza.compose.rust
 import com.pizza.psx.R
 import com.pizza.psx.domain.model.Etf
 import com.pizza.psx.domain.model.EtfModel
@@ -55,6 +55,7 @@ import com.pizza.psx.presentation.viewModel.EtfViewModel
 @Composable
 fun EtfView(
     onBackClick: () -> Unit,
+    onClick: (symbol: String,etf: Etf) -> Unit
 ) {
     val viewModel: EtfViewModel = hiltViewModel()
     val uiState by viewModel.uiState
@@ -78,12 +79,16 @@ fun EtfView(
             )
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
+        Box(modifier = Modifier
+            .padding(paddingValues)
+            .fillMaxSize()) {
             when {
                 uiState.isLoading && uiState.etfModel == null -> {
                     // Full-screen loading indicator
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        ContainedLoadingIndicator()
+                        ContainedLoadingIndicator(
+                            modifier = Modifier.size(80.dp)
+                        )
                     }
                 }
                 uiState.error != null -> {
@@ -93,7 +98,7 @@ fun EtfView(
                     )
                 }
                 uiState.etfModel != null -> {
-                    EtfContentWithHeader(etfModel = uiState.etfModel!!)
+                    EtfContentWithHeader(etfModel = uiState.etfModel!!, onClick = onClick)
                 }
                 else -> {
                     EmptyState()
@@ -104,7 +109,7 @@ fun EtfView(
 }
 
 @Composable
-private fun EtfContentWithHeader(etfModel: EtfModel) {
+private fun EtfContentWithHeader(etfModel: EtfModel,onClick: (symbol: String,etf: Etf) -> Unit) {
     val etfs = etfModel.etfs
     val totalAum = etfs.sumOf { etf ->
         etf.fundSize.replace(",", "").toDoubleOrNull() ?: 0.0
@@ -138,7 +143,7 @@ private fun EtfContentWithHeader(etfModel: EtfModel) {
 
         // ETF list items
         items(etfs, key = { it.id }) { etf ->
-            EtfListTile(etf = etf)
+            EtfListTile(etf = etf, onClick = onClick)
         }
 
         // Bottom padding
@@ -161,7 +166,7 @@ private fun HeaderSection(totalEtfs: Int, totalFundSize: Double, avgHoldings: In
             Icon(
                 imageVector = Icons.Default.Info,
                 contentDescription = null,
-                tint = purpleColor,
+                tint = rust,
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -227,7 +232,7 @@ private fun StatChip(value: String, label: String, modifier: Modifier = Modifier
                 text = value,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = purpleColor
+                color = rust
             )
             Text(
                 text = label,
@@ -239,7 +244,7 @@ private fun StatChip(value: String, label: String, modifier: Modifier = Modifier
 }
 
 @Composable
-private fun EtfListTile(etf: Etf) {
+private fun EtfListTile(etf: Etf,onClick: (symbol: String,etf: Etf) -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
@@ -247,7 +252,7 @@ private fun EtfListTile(etf: Etf) {
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceBright
         ),
-        onClick = { /* Navigate to ETF detail */ }
+        onClick = { onClick(etf.etfName,etf) }
     ) {
         Row(
             modifier = Modifier
@@ -260,14 +265,14 @@ private fun EtfListTile(etf: Etf) {
                 modifier = Modifier
                     .size(44.dp)
                     .clip(CircleShape)
-                    .background(purpleColor.copy(alpha = 0.15f)),
+                    .background(rust.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = etf.etfName.take(2).uppercase(),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold,
-                    color = purpleColor
+                    color = rust
                 )
             }
 
@@ -310,7 +315,7 @@ private fun EtfListTile(etf: Etf) {
 }
 
 @Composable
-private fun EtfErrorState(error: String, onRetry: () -> Unit) {
+ fun EtfErrorState(error: String, onRetry: () -> Unit) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Card(
             modifier = Modifier

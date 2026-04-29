@@ -407,7 +407,9 @@ private fun LoadingCard() {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ContainedLoadingIndicator()
+            ContainedLoadingIndicator(
+                modifier = Modifier.size(80.dp)
+            )
 
         }
     }

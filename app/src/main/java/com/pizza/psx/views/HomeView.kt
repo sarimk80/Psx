@@ -662,8 +662,13 @@ fun StatItem(
 fun HomeLoadingState(modifier: Modifier = Modifier) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            ContainedLoadingIndicator()
-            Text("Loading...", modifier = Modifier.padding(top = 16.dp), style = MaterialTheme.typography.bodyMedium)
+            ContainedLoadingIndicator(
+                modifier = Modifier.size(80.dp),
+            )
+            Text("Loading...",
+                modifier = Modifier.padding(top = 16.dp),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold)
         }
     }
 }

@@ -1,5 +1,9 @@
 package com.pizza.psx.domain.model
 
+import android.os.Bundle
+import androidx.navigation.NavType
+import com.google.gson.Gson
+
 data class EtfModel(
     val etfs: List<Etf>,
 )
@@ -28,3 +32,19 @@ data class Symbol(
     val weight: Double,
 )
 
+class EtfNavType : NavType<Etf>(isNullableAllowed = false) {
+
+    override fun get(bundle: Bundle, key: String): Etf? {
+        return bundle.getString(key)?.let {
+            Gson().fromJson(it, Etf::class.java)
+        }
+    }
+
+    override fun parseValue(value: String): Etf {
+        return Gson().fromJson(value, Etf::class.java)
+    }
+
+    override fun put(bundle: Bundle, key: String, value: Etf) {
+        bundle.putString(key, Gson().toJson(value))
+    }
+}

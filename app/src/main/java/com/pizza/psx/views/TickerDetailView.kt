@@ -212,11 +212,14 @@ fun TickerLoadingState() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            ContainedLoadingIndicator()
+            ContainedLoadingIndicator(
+                modifier = Modifier.size(80.dp)
+            )
             Text(
                 text = "Loading sector data...",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.SemiBold
             )
         }
     }
@@ -1147,7 +1150,7 @@ fun OverviewTab(tickerData: TickerData, companyData: CompaniesData, fundamentalD
         item { BidAskCard(tickerData) }
         item { FundamentalOverviewCard(fundamentalData) }
         item { CompanyOverviewCard(companyData) }
-        item { Spacer(modifier = Modifier.height(50.dp)) }
+        item { Spacer(modifier = Modifier.height(60.dp)) }
     }
 }
 

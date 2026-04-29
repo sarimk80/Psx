@@ -265,12 +265,15 @@ private fun FullScreenLoading() {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ContainedLoadingIndicator()
+            ContainedLoadingIndicator(
+                modifier = Modifier.size(80.dp)
+            )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = stringResource(R.string.loading_index_data),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.SemiBold
             )
         }
     }

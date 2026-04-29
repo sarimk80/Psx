@@ -28,6 +28,7 @@ import com.pizza.compose.financialRed
 import com.pizza.compose.financialWarning
 import com.pizza.compose.green
 import com.pizza.compose.purpleColor
+import com.pizza.compose.rust
 import com.pizza.compose.veryBerry
 import com.pizza.compose.veryBlue
 import com.pizza.psx.BuildConfig
@@ -124,7 +125,7 @@ fun MoreView(
 
                     SettingsRow(
                         icon = Icons.Outlined.ShoppingBasket,
-                        iconTint = purpleColor,
+                        iconTint = rust,
                         label = "ETF",
                         onClick = etfClick
                     )

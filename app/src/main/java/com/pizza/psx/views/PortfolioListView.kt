@@ -349,7 +349,9 @@ private fun LoadingPortfolioState() {
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        ContainedLoadingIndicator()
+        ContainedLoadingIndicator(
+            modifier = Modifier.size(80.dp)
+        )
     }
 }
 

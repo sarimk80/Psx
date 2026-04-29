@@ -257,11 +257,14 @@ fun SearchLoadingState() {
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-           ContainedLoadingIndicator()
+            ContainedLoadingIndicator(
+               modifier = Modifier.size(80.dp)
+           )
             Text(
                 "Loading symbols...",
                 modifier = Modifier.padding(top = 16.dp),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold
             )
         }
     }
