@@ -112,3 +112,11 @@ class EtfUseCase@Inject constructor(
         return repo.getAllEtf()
     }
 }
+
+class AllIndicesUseCase@Inject constructor(
+    private  val repo: StockRepo
+) {
+    suspend operator fun invoke(): StockResult<List<Ticker>> {
+        return repo.getAllIndices()
+    }
+}

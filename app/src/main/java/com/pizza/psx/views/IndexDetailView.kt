@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -25,12 +26,17 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ShowChart
+import androidx.compose.material.icons.automirrored.filled.TrendingDown
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material.icons.filled.ShowChart
+import androidx.compose.material.icons.filled.TrendingDown
+import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -49,6 +55,7 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -107,6 +114,7 @@ import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import com.pizza.compose.baraRed
 import com.pizza.compose.financialGreen
 import com.pizza.compose.financialRed
+import com.pizza.compose.financialWarning
 import com.pizza.compose.veryBerry
 import com.pizza.psx.R
 import com.pizza.psx.domain.model.IndexData
@@ -564,12 +572,11 @@ fun TickerDetails(
 ) {
     val data = ticker.data
     val changeColor = when {
-        data.change > 0 -> financialGreen // Green
-        data.change < 0 -> financialRed // Red
+        data.change > 0 -> financialGreen
+        data.change < 0 -> financialRed
         else -> MaterialTheme.colorScheme.onSurface
     }
 
-    // Format timestamp (from outer ticker)
     val formattedTime = formatDate(ticker.timestamp)
 
     Column(
@@ -578,7 +585,7 @@ fun TickerDetails(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Header Card
+        // ── Header Card ──────────────────────────────────────────────
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.medium
@@ -588,71 +595,274 @@ fun TickerDetails(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
+                // Symbol + Market + Type badge
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = data.symbol,
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = data.market,
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Column {
+                        Text(
+                            text = data.symbol,
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+//                        if (data.sectorName.isNotBlank()) {
+//                            Text(
+//                                text = data.sectorName,
+//                                style = MaterialTheme.typography.labelMedium,
+//                                color = MaterialTheme.colorScheme.onSurfaceVariant
+//                            )
+//                        }
+                    }
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            shape = RoundedCornerShape(6.dp)
+                        ) {
+                            Text(
+                                text = data.st,
+                                style = MaterialTheme.typography.labelSmall,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                color = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                        }
+                        Text(
+                            text = data.market,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
-                Row(
-                    verticalAlignment = Alignment.Bottom
-                ) {
+                // Price + Change
+                Row(verticalAlignment = Alignment.Bottom) {
                     Text(
                         text = number_format(data.price),
                         style = MaterialTheme.typography.displaySmall,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "${if (data.change > 0) "+" else ""}%.2f".format(data.change) +
-                                " (${if (data.changePercent > 0) "+" else ""}%.2f%%)".format(data.changePercent),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = changeColor,
-                        fontWeight = FontWeight.Medium
-                    )
+                    Column(horizontalAlignment = Alignment.Start) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = if (data.change >= 0) Icons.Default.TrendingUp else Icons.Default.TrendingDown,
+                                contentDescription = null,
+                                tint = changeColor,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "${if (data.change > 0) "+" else ""}${"%.2f".format(data.change)}",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = changeColor,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                        Text(
+                            text = "${if (data.changePercent > 0) "+" else ""}${"%.2f".format(data.changePercent)}%",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = changeColor
+                        )
+                    }
                 }
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(6.dp))
+
+                // LDCP
+                Text(
+                    text = "LDCP: ${number_format(data.ldcp)}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Spacer(modifier = Modifier.height(2.dp))
 
                 Text(
                     text = "Last updated: $formattedTime",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+
+                // Circuit Breaker
+                if (data.circuit_breaker.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Surface(
+                        color = financialWarning.copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = null,
+                                tint = financialWarning,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Circuit Breaker: ${data.circuit_breaker}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = financialWarning
+                            )
+                        }
+                    }
+                }
             }
         }
 
-        // Stats Grid (two columns)
+        // ── Range Card ───────────────────────────────────────────────
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = "Ranges",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                RangeRow(label = "Day Range", value = data.day_range)
+                RangeRow(label = "52-Week Range", value = data.week_range_52)
+            }
+        }
+
+        // ── Performance Card ─────────────────────────────────────────
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = "Performance",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    PerformanceChip(
+                        label = "YTD",
+                        value = data.ytd_change,
+                        modifier = Modifier.weight(1f)
+                    )
+                    PerformanceChip(
+                        label = "1-Year",
+                        value = data.year_1_change,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+
+        // ── Stats Grid ───────────────────────────────────────────────
+        val stats = buildList {
+            add("High" to number_format(data.high))
+            add("Low" to number_format(data.low))
+            add("Volume" to formatVolume(data.volume))
+            if (data.trades > 0) add("Trades" to formatVolume(data.trades))
+            if (data.value > 0) add("Value" to formatVolume(data.value.toLong()))
+            if (data.bid > 0) add("Bid" to number_format(data.bid))
+            if (data.ask > 0) add("Ask" to number_format(data.ask))
+            if (data.bidVol > 0) add("Bid Vol" to formatVolume(data.bidVol))
+            if (data.askVol > 0) add("Ask Vol" to formatVolume(data.askVol))
+            if (data.price_earning > 0) add("P/E Ratio" to "%.2f".format(data.price_earning))
+            if (data.haircut > 0) add("Haircut" to "%.2f%%".format(data.haircut))
+        }
+
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.heightIn(max = 800.dp)
         ) {
-            // Generate list of stats
-            val stats = listOf(
-                "High" to number_format(data.high),
-                "Low" to number_format(data.low),
-
-                "Volume" to formatVolume(data.volume),
-                "Trades" to number_format(data.trades.toDouble()),
-                "Value" to number_format(data.value),
-
-                )
             items(stats) { stat ->
                 CustomStatItem(label = stat.first, value = stat.second)
+            }
+        }
+    }
+}
+
+// ── Helper Composables ────────────────────────────────────────────────────────
+
+@Composable
+private fun RangeRow(label: String, value: String) {
+    if (value.isBlank()) return
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+private fun PerformanceChip(
+    label: String,
+    value: Double,
+    modifier: Modifier = Modifier
+) {
+    val isUp = value >= 0
+    val color = if (isUp) financialGreen else financialRed
+    Surface(
+        color = color.copy(alpha = 0.1f),
+        shape = RoundedCornerShape(10.dp),
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = if (isUp) Icons.Default.TrendingUp else Icons.Default.TrendingDown,
+                    contentDescription = null,
+                    tint = color,
+                    modifier = Modifier.size(14.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "${if (isUp) "+" else ""}${"%.2f".format(value)}%",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = color
+                )
             }
         }
     }

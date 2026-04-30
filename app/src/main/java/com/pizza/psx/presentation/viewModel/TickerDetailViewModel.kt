@@ -12,6 +12,7 @@ import com.pizza.psx.domain.model.MarketDividend
 import com.pizza.psx.domain.model.StockResult
 import com.pizza.psx.domain.model.SymbolDetail
 import com.pizza.psx.domain.model.Ticker
+import com.pizza.psx.domain.usecase.AllIndicesUseCase
 import com.pizza.psx.domain.usecase.CompanyDividendUseCase
 import com.pizza.psx.domain.usecase.CompanyFundamentalUseCase
 import com.pizza.psx.domain.usecase.CompanyUseCase
@@ -34,7 +35,8 @@ class TickerDetailViewModel@Inject constructor(
     private val getCompanyDividend: CompanyDividendUseCase,
     private val marketDividendUseCase: MarketDividendUseCase,
     private val getKLineModelUseCase: KLineModelUseCase,
-    private val getSymbolDetailUseCase: SymbolDetailUseCase
+    private val getSymbolDetailUseCase: SymbolDetailUseCase,
+    private val getAllIndicesUseCase: AllIndicesUseCase
 
 ): ViewModel() {
 
@@ -141,22 +143,56 @@ class TickerDetailViewModel@Inject constructor(
        viewModelScope.launch {
            _uiState.value = _uiState.value.copy(isLoading = true)
            try {
+               when (val result = getAllIndicesUseCase()) {
 
-               val ticketResult = symbol.map { sym ->
+                   is StockResult.Success -> {
 
-                   async { getTickerDetail(type = "IDX", symbol = sym) }
-               }.awaitAll()
+                       val requiredSymbols = setOf(
+                           "KSE100",
+                           "KSE30",
+                           "PSXDIV20",
+                           "MII30",
+                           "KMI30"
+                       )
 
+                       val filteredList = result.data.filter {
+                           it.data.symbol in requiredSymbols
+                       }
 
-            val tickerResponse = ticketResult.mapNotNull { result ->
-                if (result is StockResult.Success) result.data else null
-            }
+                       _uiState.value = _uiState.value.copy(
+                           listOfTicker = filteredList,
+                           isLoading = false,
+                           error = null
+                       )
+                   }
 
-               _uiState.value = _uiState.value.copy(
-                   listOfTicker = tickerResponse,
-                   isLoading = false,
-                   error = null
-               )
+                   is StockResult.Error -> {
+                       _uiState.value = _uiState.value.copy(
+                           isLoading = false,
+                           error = result.message
+                       )
+                   }
+
+                   is StockResult.Loading -> {
+                       _uiState.value = _uiState.value.copy(isLoading = true)
+                   }
+               }
+
+//               val ticketResult = symbol.map { sym ->
+//
+//                   async { getTickerDetail(type = "IDX", symbol = sym) }
+//               }.awaitAll()
+//
+//
+//            val tickerResponse = ticketResult.mapNotNull { result ->
+//                if (result is StockResult.Success) result.data else null
+//            }
+//
+//               _uiState.value = _uiState.value.copy(
+//                   listOfTicker = tickerResponse,
+//                   isLoading = false,
+//                   error = null
+//               )
 
            }catch (e:Exception){
                _uiState.value = _uiState.value.copy(

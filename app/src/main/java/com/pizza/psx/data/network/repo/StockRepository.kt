@@ -1,5 +1,6 @@
 package com.pizza.psx.data.network.repo
 
+import androidx.compose.ui.text.toUpperCase
 import com.pizza.psx.data.network.dot.api.StockApi
 import com.pizza.psx.domain.model.Companies
 import com.pizza.psx.domain.model.Dividend
@@ -43,9 +44,10 @@ class StockRepository(
         }
     }
 
+
     override suspend fun getTickerDetail(type:String,symbol:String): StockResult<Ticker> = withContext(dispatcher){
         return@withContext try {
-            val result = stockApi.getTickerDetail(type = type, symbol = symbol)
+            val result = stockApi.getTickerDetail("https://sarim-pix.hf.space/ticker/${symbol}")
             StockResult.Success(result)
 
         }catch (e:Exception){
@@ -149,6 +151,15 @@ class StockRepository(
     override suspend fun getAllEtf(): StockResult<EtfModel>  = withContext(dispatcher){
         return@withContext try {
             val result = stockApi.getAllEtf("https://sarim-pix.hf.space/get_all_etfs")
+            StockResult.Success(result)
+        }catch (e: Exception){
+            StockResult.Error("Failed${e.toString()}")
+        }
+    }
+
+    override suspend fun getAllIndices(): StockResult<List<Ticker>> = withContext(dispatcher){
+        return@withContext try {
+            val result = stockApi.getAllIndices("https://sarim-pix.hf.space/indices")
             StockResult.Success(result)
         }catch (e: Exception){
             StockResult.Error("Failed${e.toString()}")

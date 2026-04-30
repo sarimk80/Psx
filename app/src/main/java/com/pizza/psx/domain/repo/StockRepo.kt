@@ -43,4 +43,6 @@ interface StockRepo {
     suspend fun getIndexPrice(indexName: String): StockResult<IndexPriceModel>
 
     suspend fun getAllEtf(): StockResult<EtfModel>
+
+    suspend fun getAllIndices(): StockResult<List<Ticker>>
 }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,24 +24,33 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.ContentCut
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Payments
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.filled.TrendingDown
 import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
@@ -68,6 +78,7 @@ import com.pizza.compose.financialGreen
 import com.pizza.compose.financialGrey
 import com.pizza.compose.financialRed
 import com.pizza.compose.financialWarning
+import com.pizza.compose.veryBlue
 import com.pizza.psx.domain.model.MarketDividend
 import com.pizza.psx.presentation.helpers.marketStatus
 import com.pizza.psx.presentation.helpers.number_format
@@ -113,7 +124,7 @@ fun Home(
                 )
 
                 Text(
-                    text = "${marketStatus(currentMarketStatus)} • $todayDate",
+                    text = "$todayDate",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -275,7 +286,7 @@ fun TickerHorizontalPager(
             state = pagerState,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(270.dp)
+                .height(400.dp)
         ) { page ->
             TickerPage(ticker = tickers[page], onClick = onIndexClick)
         }
@@ -561,6 +572,7 @@ fun TickerPage(ticker: Ticker, onClick: (String, Ticker) -> Unit) {
                 .fillMaxWidth()
                 .padding(20.dp)
         ) {
+            // Header Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -572,11 +584,18 @@ fun TickerPage(ticker: Ticker, onClick: (String, Ticker) -> Unit) {
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
+
+                        Text(
+                            text = ticker.data.market,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = Color.Transparent
+                        )
+
                     Text(
-                        text = "Market Data",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.outline
+                        text = ticker.data.st,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.Transparent
                     )
                 }
 
@@ -602,16 +621,69 @@ fun TickerPage(ticker: Ticker, onClick: (String, Ticker) -> Unit) {
                             color = if (isUp) financialGreen else financialRed
                         )
                     }
+//                    Spacer(modifier = Modifier.height(2.dp))
+//                    Text(
+//                        text = "LDCP: ${number_format(ticker.data.ldcp)}",
+//                        style = MaterialTheme.typography.labelSmall,
+//                        color = MaterialTheme.colorScheme.outline
+//                    )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            Spacer(modifier = Modifier.height(12.dp))
 
+            // Day Range
+            if (ticker.data.day_range.isNotBlank()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Day Range",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                    Text(
+                        text = ticker.data.day_range,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                Spacer(modifier = Modifier.height(6.dp))
+            }
+
+            // 52-Week Range
+            if (ticker.data.week_range_52.isNotBlank()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "52-Week Range",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                    Text(
+                        text = ticker.data.week_range_52,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            // Main Stats Grid
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 400.dp)
             ) {
                 item {
                     StatItem(label = "High", value = number_format(ticker.data.high), icon = Icons.Default.TrendingUp, color = financialGreen)
@@ -620,12 +692,103 @@ fun TickerPage(ticker: Ticker, onClick: (String, Ticker) -> Unit) {
                     StatItem(label = "Low", value = number_format(ticker.data.low), icon = Icons.Default.TrendingDown, color = financialRed)
                 }
                 item {
-                    StatItem(label = "Volume", value = formatVolume(ticker.data.volume), icon = Icons.Default.BarChart, color = financialGrey)
+                    StatItem(label = "Close", value = number_format(ticker.data.ldcp), icon = Icons.Default.PlayArrow, color = veryBlue)
                 }
                 item {
-                    StatItem(label = "Trades", value = formatNumber(ticker.data.trades), icon = Icons.Default.SwapHoriz, color = financialWarning)
+                    StatItem(label = "Volume", value = formatVolume(ticker.data.volume), icon = Icons.Default.BarChart, color = financialWarning)
+                }
+                if (ticker.data.value > 0) {
+                    item {
+                        StatItem(label = "Value", value = formatVolume(ticker.data.value.toLong()), icon = Icons.Default.Payments, color = financialWarning)
+                    }
+                }
+                if (ticker.data.trades > 0) {
+                    item {
+                        StatItem(label = "Trades", value = formatNumber(ticker.data.trades), icon = Icons.Default.SwapHoriz, color = financialWarning)
+                    }
+                }
+                if (ticker.data.bid > 0) {
+                    item {
+                        StatItem(label = "Bid", value = number_format(ticker.data.bid), icon = Icons.Default.ArrowDownward, color = financialRed)
+                    }
+                }
+                if (ticker.data.ask > 0) {
+                    item {
+                        StatItem(label = "Ask", value = number_format(ticker.data.ask), icon = Icons.Default.ArrowUpward, color = financialGreen)
+                    }
+                }
+                if (ticker.data.year_1_change != 0.0) {
+                    item {
+                        val isUp = ticker.data.year_1_change >= 0
+                        StatItem(
+                            label = "1Y Change",
+                            value = "${"%.2f".format(ticker.data.year_1_change)}%",
+                            icon = if (isUp) Icons.Default.TrendingUp else Icons.Default.TrendingDown,
+                            color = if (isUp) financialGreen else financialRed
+                        )
+                    }
+                }
+                if (ticker.data.ytd_change != 0.0) {
+                    item {
+                        val isUp = ticker.data.ytd_change >= 0
+                        StatItem(
+                            label = "YTD Change",
+                            value = "${"%.2f".format(ticker.data.ytd_change)}%",
+                            icon = if (isUp) Icons.Default.TrendingUp else Icons.Default.TrendingDown,
+                            color = if (isUp) financialGreen else financialRed
+                        )
+                    }
+                }
+                if (ticker.data.price_earning > 0) {
+                    item {
+                        StatItem(label = "P/E Ratio", value = "${"%.2f".format(ticker.data.price_earning)}", icon = Icons.Default.Analytics, color = financialGrey)
+                    }
+                }
+                if (ticker.data.haircut > 0) {
+                    item {
+                        StatItem(label = "Haircut", value = "${"%.2f".format(ticker.data.haircut)}%", icon = Icons.Default.ContentCut, color = financialWarning)
+                    }
                 }
             }
+
+            // Circuit Breaker Badge
+            if (ticker.data.circuit_breaker.isNotBlank()) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Surface(
+                    color = financialWarning.copy(alpha = 0.15f),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = null,
+                            tint = financialWarning,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Circuit Breaker: ${ticker.data.circuit_breaker}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = financialWarning
+                        )
+                    }
+                }
+            }
+
+            // Timestamp
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = "Updated: ${
+                    java.text.SimpleDateFormat("dd MMM yyyy, HH:mm", java.util.Locale.getDefault())
+                        .format(java.util.Date(ticker.data.timestamp * 1000L))
+                }",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
+                modifier = Modifier.align(Alignment.End)
+            )
         }
     }
 }

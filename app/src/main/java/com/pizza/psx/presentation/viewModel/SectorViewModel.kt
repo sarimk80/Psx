@@ -85,7 +85,7 @@ class SectorViewModel @Inject constructor(
             val allTickers = mutableListOf<Ticker>()
 
             try {
-                symbols.chunked(15).forEachIndexed { batchIndex, batch ->
+                symbols.chunked(5).forEachIndexed { batchIndex, batch ->
                     val batchTickers = mutableListOf<Ticker>()
 
                     // Process each symbol sequentially within batch

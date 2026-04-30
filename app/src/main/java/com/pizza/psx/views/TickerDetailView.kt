@@ -1518,7 +1518,9 @@ fun VolumeTradesSection(tickerData: TickerData) {
 
 @Composable
 fun AdditionalMarketData(tickerData: TickerData) {
+
     Column {
+
         Text(
             text = "Market Details",
             style = MaterialTheme.typography.labelMedium,
@@ -1527,49 +1529,96 @@ fun AdditionalMarketData(tickerData: TickerData) {
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        // Market and Status
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            InfoChip(
-                label = tickerData.market,
-                backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                textColor = MaterialTheme.colorScheme.primary
-            )
+        TwoColumnRow(
+            "1Y Change",
+            "${tickerData.year_1_change}%",
+            "YTD Change",
+            "${tickerData.ytd_change}%"
+        )
 
-            InfoChip(
-                label = tickerData.st,
-                backgroundColor = when (tickerData.st.uppercase()) {
-                    "OPEN" -> financialGreen.copy(alpha = 0.1f)
-                    "CLOSED" -> financialRed.copy(alpha = 0.1f)
-                    "HALTED" -> financialWarning.copy(alpha = 0.1f)
-                    else -> financialGrey.copy(alpha = 0.1f)
-                },
-                textColor = when (tickerData.st.uppercase()) {
-                    "OPEN" -> financialGreen
-                    "CLOSED" -> financialRed
-                    "HALTED" -> financialWarning
-                    else -> financialGrey
+        TwoColumnRow(
+            "52W Range",
+            tickerData.week_range_52,
+            "Day Range",
+            tickerData.day_range
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // ---------------- RISK METRICS ----------------
+        //SectionTitle("Risk Metrics")
+
+        TwoColumnRow(
+            "Circuit Breaker",
+            tickerData.circuit_breaker,
+            "LDCP",
+            tickerData.ldcp.toString()
+                )
+
+                TwoColumnRow(
+                    "Haircut",
+                    "${tickerData.haircut}%",
+                    "Value Traded",
+                    formatLargeNumber(tickerData.value.toLong())
+                )
+
+
+//                        Spacer(modifier = Modifier.height(12.dp))
+//
+//                        AdditionalMetricItem(
+//                        title = "Last Update",
+//                value = formatRelativeTime(tickerData.timestamp)
+//                )
                 }
+}
+
+@Composable
+fun SectionTitle(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.labelMedium,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(bottom = 6.dp)
+    )
+}
+
+@Composable
+fun TwoColumnRow(
+    leftTitle: String,
+    leftValue: String,
+    rightTitle: String,
+    rightValue: String
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column {
+            Text(
+                text = leftTitle,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = leftValue,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium
             )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Additional metrics
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            AdditionalMetricItem(
-                title = "Value Traded",
-                value = "${formatLargeNumber(tickerData.value.toLong())}"
+        Column(horizontalAlignment = Alignment.End) {
+            Text(
+                text = rightTitle,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-
-            AdditionalMetricItem(
-                title = "Last Update",
-                value = formatRelativeTime(tickerData.timestamp)
+            Text(
+                text = rightValue,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium
             )
         }
     }

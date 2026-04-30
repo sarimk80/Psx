@@ -31,8 +31,17 @@ data class TickerData (
     val bidVol: Long,
     val askVol: Long,
     val timestamp: Long,
+    val circuit_breaker:String,
+    val day_range:String,
+    val week_range_52:String,
+    val ldcp: Double,
+    val haircut:Double,
+    val price_earning: Double,
+    val year_1_change:Double,
+    val ytd_change:Double,
     var stockCount: Int = 0,
     var sectorName: String = ""
+
 ): Parcelable
 
 

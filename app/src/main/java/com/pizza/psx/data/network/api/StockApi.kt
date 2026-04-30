@@ -26,8 +26,8 @@ interface StockApi {
     @GET("api/stats/sectors")
     suspend fun getSector():Sector
 
-    @GET("api/ticks/{type}/{symbol}")
-    suspend fun getTickerDetail(@Path("type") type:String, @Path("symbol") symbol:String):Ticker
+    @GET
+    suspend fun getTickerDetail(@Url url: String):Ticker
 
     @GET("/api/companies/{symbol}")
     suspend fun getCompanyDetail(@Path("symbol") symbol:String):Companies
@@ -61,4 +61,7 @@ interface StockApi {
 
     @GET
     suspend fun getAllEtf(@Url url: String): EtfModel
+
+    @GET
+    suspend fun getAllIndices(@Url url: String):List<Ticker>
 }
