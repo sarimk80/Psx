@@ -4,6 +4,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pizza.psx.domain.model.Etf
 import com.pizza.psx.domain.model.EtfModel
 import com.pizza.psx.domain.model.PortfolioModel
 import com.pizza.psx.domain.model.StockResult
@@ -26,8 +27,10 @@ class EtfViewModel @Inject constructor(
 
             when(val result = etfUseCase()){
                 is StockResult.Success -> {
+                    val groupEtf =  result.data.etfs.groupBy { it.type }
                     _uiState.value = _uiState.value.copy(
                         etfModel = result.data,
+                        groupEtf = groupEtf,
                         isLoading = false,
                         error = null
                     )
@@ -49,6 +52,7 @@ class EtfViewModel @Inject constructor(
 
 data class EtfUiState(
     val etfModel: EtfModel? = null,
+    val groupEtf: Map<String, List<Etf>>? = null,
     val isLoading: Boolean = false,
     val error: String? = null
 )

@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -98,7 +97,7 @@ fun EtfView(
                     )
                 }
                 uiState.etfModel != null -> {
-                    EtfContentWithHeader(etfModel = uiState.etfModel!!, onClick = onClick)
+                    EtfContentWithHeader(etfModel = uiState.etfModel!!, onClick = onClick, groupEtf = uiState.groupEtf!!)
                 }
                 else -> {
                     EmptyState()
@@ -109,7 +108,7 @@ fun EtfView(
 }
 
 @Composable
-private fun EtfContentWithHeader(etfModel: EtfModel,onClick: (symbol: String) -> Unit) {
+private fun EtfContentWithHeader(etfModel: EtfModel,onClick: (symbol: String) -> Unit,groupEtf: Map<String, List<Etf>>) {
     val etfs = etfModel.etfs
     val totalAum = etfs.sumOf { etf ->
         etf.fundSize.replace(",", "").toDoubleOrNull() ?: 0.0
@@ -142,8 +141,29 @@ private fun EtfContentWithHeader(etfModel: EtfModel,onClick: (symbol: String) ->
         }
 
         // ETF list items
-        items(etfs, key = { it.id }) { etf ->
-            EtfListTile(etf = etf, onClick = onClick)
+        groupEtf.forEach { (groupTitle, etfList) ->
+
+            // Section Header
+            item {
+                Text(
+                    text = groupTitle,
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                )
+            }
+
+            // Items inside section
+            items(
+                items = etfList,
+                key = { it.id }
+            ) { etf ->
+                EtfListTile(
+                    etf = etf,
+                    onClick = onClick
+                )
+            }
         }
 
         // Bottom padding

@@ -159,9 +159,9 @@ fun stringToIndexString(index: String): String = when(index) {
 }
 
 fun marketStatus(status:String):String = when(status) {
-    "PRE" -> 	"Pre-market"
-            "OPN" -> 	"Open"
-            "SUS"	-> "Suspended"
-            "CLS" -> 	"Closed"
+    "Pre-Open Session" -> "Pre-market"
+    "Normal Trading Session" -> "Open"
+    "Post-Close Session" -> "Closed"
+    "Order Matching" -> "Order Matching"
     else -> "Closed"
 }

@@ -124,7 +124,7 @@ fun Home(
                 )
 
                 Text(
-                    text = "$todayDate",
+                    text = "${marketStatus(currentMarketStatus)} . $todayDate",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -586,16 +586,10 @@ fun TickerPage(ticker: Ticker, onClick: (String, Ticker) -> Unit) {
                     )
                     Spacer(modifier = Modifier.height(2.dp))
 
-                        Text(
-                            text = ticker.data.market,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color.Transparent
-                        )
 
                     Text(
-                        text = ticker.data.st,
+                        text = marketStatus(ticker.data.st),
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color.Transparent
                     )
                 }
 
