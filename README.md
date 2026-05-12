@@ -1,99 +1,168 @@
 # 📈 PSX – Pakistan Stock Exchange App
 
-A modern Android application providing **real-time PSX market data**, **company insights**, **portfolio tracking**, and a clean UI for Pakistani stock market investors. Stay updated with market movements, price changes, and live charts — all in one beautifully designed app.
+A modern Android application delivering **real-time market data from the Pakistan Stock Exchange**, detailed company insights, smart portfolio tracking, and an elegant Material 3 user experience.
+
+Built for investors who want speed, clarity, and powerful analytics — all in one place.
 
 ---
 
 ## 🚀 Features
 
-### 📊 **Market Overview**  
-- **Live PSX Indices**: KSE-100, KSE-30, and All Share Index  
-- **Real-time Market Data**: Daily highs, lows, and complete market summary  
-- **Price Updates**: Live ticker with percentage changes  
-- **Sector-wise Performance**: Detailed sector distribution charts
+### 📊 Market Overview
+- Live PSX indices (KSE-100, KSE-30, All Share)
+- Real-time price updates with % change
+- Market summary (high, low, volume)
+- Sector-wise performance breakdown
+- Interactive distribution charts
 
-### 🔍 **Company Intelligence**  
-- **Comprehensive Company Data**: EPS, dividends, and financial ratios  
-- **Interactive Price Charts**: Historical and intraday charts  
-- **Corporate Actions**: AGM dates, bonus issues, and rights shares  
-- **Fundamental Analysis**: P/E ratios, market capitalization, and volume analysis
+### 🔎 Company Intelligence
+- Detailed company profiles
+- EPS, P/E ratio, market cap
+- Dividend & corporate action tracking
+- Intraday & historical charts
+- Volume & liquidity insights
 
-### 📅 **Portfolio & Watchlist**  
-- **Personal Portfolio Management**: Track your investments with real-time P&L  
-- **Smart Watchlist**: Add stocks for quick monitoring  
-- **Price Alerts**: Set custom triggers for price movements  
-- **Sector Allocation**: Visual breakdown of your portfolio by sector
+### 💼 Portfolio & Watchlist
+- Real-time portfolio tracking
+- Profit & Loss calculation
+- Smart watchlist management
+- Sector allocation visualization
+- Custom price alerts
 
-### 📱 **User Experience**  
-- **Dark/Light Theme**: Full Material 3 theming support  
-- **Offline Access**: View cached data when offline  
-- **Push Notifications**: Breaking news and market alerts  
-- **Intuitive Navigation**: Easy access to all market segments
-
----
-
-## 📱 Screenshots
-
-### **Market & Indices**
-| Home Screen | Market Indices | Sector Distribution |
-|-------------|----------------|---------------------|
-| <img src="https://github.com/user-attachments/assets/9abb5444-b3b0-4921-94ff-2c87c16b0bb7" width="250" alt="Detailed View 4"/>| <img src="https://github.com/user-attachments/assets/08e376f8-03a0-413d-83bf-d785d61450ba" width="250" alt="Market Indices"/> | <img src="https://github.com/user-attachments/assets/fcddca11-3417-4bae-b5ef-3385a4b7eb83" width="250" alt="Sector Distribution"/> |
-
-### **Stock Details & Analysis**
-| Stock Details | Price Charts | Company Financials |
-|---------------|--------------|-------------------|
-| <img src="https://github.com/user-attachments/assets/942a936a-f48c-4266-8e0a-c59eed01dcdb" width="250" alt="Stock Details"/> | <img src="https://github.com/user-attachments/assets/d5361f86-f62a-4959-b112-9861df628cb1" width="250" alt="Price Charts"/> | <img src="https://github.com/user-attachments/assets/6ca4a30e-3266-433c-8bcb-c15d3f386832" width="250" alt="Company Financials"/> |
-
-### **Portfolio & Watchlist**
-| Portfolio Overview | Watchlist | News & Alerts |
-|--------------------|-----------|---------------|
-| <img src="https://github.com/user-attachments/assets/9a6dc8c0-3b68-4efe-baaa-894c54a6596a" width="250" alt="Portfolio Overview"/> | <img src="https://github.com/user-attachments/assets/4418524a-c727-4835-ad7f-f3112ec3fac6" width="250" alt="Watchlist"/> | <img src="https://github.com/user-attachments/assets/118fc31a-9b46-423d-823e-bb89a1d025a2" width="250" alt="News & Alerts"/> |
-
-### **Detailed Views**
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/082564e8-35ed-4cb8-acfb-a0509905fdd1" width="200" alt="Detailed View 1"/>
-  <img src="https://github.com/user-attachments/assets/8ee14fe8-c4d2-4e7c-8bde-25a8b9cd66f2" width="200" alt="Detailed View 2"/>
-  <img src="https://github.com/user-attachments/assets/978bac76-1fb3-41d2-8bb8-e078462509e1" width="200" alt="Detailed View 3"/>
-</div>
-
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/d88af2e8-d532-4560-931e-bb276a743b37" width="200" alt="Detailed View 5"/>
-  <img src="https://github.com/user-attachments/assets/e621d9f8-5996-4745-9428-a877c4f122e7" width="200" alt="Detailed View 6"/>
-  <img src="https://github.com/user-attachments/assets/4133951d-9bd4-4d7b-b338-36ff1b129580" width="200" alt="Detailed View 7"/>
-  <img src="https://github.com/user-attachments/assets/c9e4ef79-07de-49ed-98a7-0467a3a15a67" width="200" alt="Detailed View 8"/>
-</div>
-
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/49ba5a86-e045-4be0-a63d-bef4c7d1da07" width="200" alt="Detailed View 9"/>
-  <img src="https://github.com/user-attachments/assets/3f4e2f35-8551-4b96-9c17-408c3888fde6" width="200" alt="Detailed View 10"/>
-  <img src="https://github.com/user-attachments/assets/39eeeecf-1477-41f1-a46d-8e92cc452bbc" width="200" alt="Detailed View 11"/>
-  <img src="https://github.com/user-attachments/assets/9021c8f0-6700-4f08-8732-3ac729a13dd1" width="200" alt="Detailed View 12"/>
-</div>
-
----
-## 🏗️ Architecture
-
-This project follows **Clean Architecture + MVVM** to ensure separation of concerns and testability.
-
-
-
-**Key Benefits:**
-- Easier maintenance  
-- Scalable codebase  
-- Test-friendly structure  
-- Industry-aligned patterns  
+### 🎨 User Experience
+- Material 3 UI (Dark / Light theme)
+- Clean & intuitive navigation
+- Offline cached data support
+- Push notifications for market updates
+- Smooth animations & Compose UI
 
 ---
 
-## 🛠️ Tech Stack
+# 📱 Screenshots
 
-**Language:** Kotlin  
-**Architecture:** MVVM + Clean Architecture  
+---
 
-### Android
+## 📑 More Screens
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/acd70274-9af1-4d31-a665-d4d4664bfbef" width="250"/>
+  <img src="https://github.com/user-attachments/assets/2dd38af9-5442-4ae6-aaa8-7070b0139656" width="250"/>
+  <img src="https://github.com/user-attachments/assets/e6c1c845-6698-40f7-bd92-683efc3b2841" width="250"/>
+  <img src="https://github.com/user-attachments/assets/301c9d62-ed97-4a42-b05e-7d937a37810b" width="250"/>
+  <img src="https://github.com/user-attachments/assets/c0a13045-588b-479a-9dcd-7532924045f6" width="250"/>
+</div>
+
+## 📊 Advanced Views
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/08025685-df1f-4714-9885-41fcb8f52e7a" width="250"/>
+  <img src="https://github.com/user-attachments/assets/a0d6e872-e256-435e-8e80-5db86c4f6c22" width="250"/>
+  <img src="https://github.com/user-attachments/assets/54e896fc-4711-4771-9af5-7701574427a6" width="250"/>
+  <img src="https://github.com/user-attachments/assets/23aedb73-8e27-4ee4-a21e-f4d657a6f807" width="250"/>
+</div>
+
+## 🏢 Company Financials & Analysis
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/fc544fa5-17c6-4faa-a157-9fbb9e4d5b0b" width="250"/>
+  <img src="https://github.com/user-attachments/assets/d2db37b6-36c3-4076-bbe1-33d49ccc2905" width="250"/>
+  <img src="https://github.com/user-attachments/assets/5c76a553-4479-400c-8059-624df9f2a176" width="250"/>
+  <img src="https://github.com/user-attachments/assets/af0ab38d-67d1-4e94-9cdd-267a7fd50ac4" width="250"/>
+</div>
+
+## 📊 Indices & Sector Distribution
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/22858437-7720-46a8-a8d0-c98a018cac22" width="250"/>
+  <img src="https://github.com/user-attachments/assets/fdc147b3-559d-4d31-b253-b0a1c617c4cb" width="250"/>
+  <img src="https://github.com/user-attachments/assets/9ba8c52d-9738-48e4-ac95-0d775c45a948" width="250"/>
+  <img src="https://github.com/user-attachments/assets/0cd9a746-fb66-4366-8ec2-8692a75c7bdb" width="250"/>
+</div>
+
+## 🏠 Home & Market Overview
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/13a6ed86-7ae0-4b21-8f97-d32bc1fbbcad" width="250"/>
+  <img src="https://github.com/user-attachments/assets/0cb55da4-ecd7-4421-9375-2c72582ce0c0" width="250"/>
+  <img src="https://github.com/user-attachments/assets/922ea4f7-1de1-46a2-a68d-b09b1ae850dd" width="250"/>
+  <img src="https://github.com/user-attachments/assets/b2b580b7-7f90-4acd-a174-ae750db3db12" width="250"/>
+</div>
+
+---
+
+
+
+---
+
+## 📈 Stock Details & Charts
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/93f9fccc-2c85-45c2-9c0b-7e5eeb697cf7" width="250"/>
+  <img src="https://github.com/user-attachments/assets/a0aaba90-a9a9-4bd2-a870-1c0ff691dee9" width="250"/>
+  <img src="https://github.com/user-attachments/assets/a38f06df-1d32-4611-a674-d42b1dacffbf" width="250"/>
+  <img src="https://github.com/user-attachments/assets/21949f5d-7522-4bd7-8dc2-f16deb7ab6a0" width="250"/>
+</div>
+
+---
+
+
+
+---
+
+## 💼 Portfolio & Watchlist
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/f6147e52-f23e-4d59-bd85-db91d5201ae6" width="250"/>
+  <img src="https://github.com/user-attachments/assets/9fbd993b-964a-430e-8253-86b3540f864c" width="250"/>
+  <img src="https://github.com/user-attachments/assets/7ba86e2e-93fa-42ab-802c-7263a57856ef" width="250"/>
+  <img src="https://github.com/user-attachments/assets/e1235cd1-fb46-43d5-bacf-cddd504a9427" width="250"/>
+</div>
+
+---
+
+## 🔔 News & Alerts
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/71873f28-1a7d-45fa-baef-4e767637bf45" width="250"/>
+  <img src="https://github.com/user-attachments/assets/5b06805d-0510-4a03-8fe8-858e907a0550" width="250"/>
+  <img src="https://github.com/user-attachments/assets/4356a02d-8eb0-4977-bcb7-7e1f7cc630f2" width="250"/>
+  <img src="https://github.com/user-attachments/assets/116e577d-e299-4994-8a6c-5086024b843e" width="250"/>
+</div>
+
+---
+
+
+
+---
+
+
+
+---
+
+# 🏗️ Architecture
+
+**Clean Architecture + MVVM**
+
+### Benefits
+- Clear separation of concerns
+- Scalable structure
+- Highly testable
+- Industry-standard best practices
+
+---
+
+# 🛠️ Tech Stack
+
+### Language
+- Kotlin
+
+### UI
 - Jetpack Compose  
 - Material 3  
-- Navigation Component  
+
+### Architecture
+- MVVM  
+- Clean Architecture  
 
 ### Async & State
 - Coroutines  
@@ -111,45 +180,18 @@ This project follows **Clean Architecture + MVVM** to ensure separation of conce
 
 ---
 
-## 📦 Getting Started
+# 📦 Installation & Setup
 
-### Prerequisites
-- Android Studio (latest recommended)
-- Kotlin support
-- Minimum SDK: *(add yours here)*
+## Prerequisites
+- Android Studio Hedgehog or later  
+- JDK 17+  
+- Android SDK 34  
+- Git  
 
 ---
 
-### Installation
+## Clone the Repository
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-repo/psx-app.git
-
-# Open in Android Studio
-# Sync Gradle
-# Run the app
-
-
-## 📦 Installation & Setup
-
-### **Prerequisites**
-- Android Studio Hedgehog or later
-- JDK 17 or higher
-- Android SDK 34 (Android 14)
-- Git
-
-### **Clone & Build**
-```bash
-# Clone the repository
 git clone https://github.com/your-username/psx-app.git
-
-# Navigate to project directory
 cd psx-app
-
-# Open in Android Studio
-# OR build from command line
-./gradlew build
-
-# Run on connected device
-./gradlew installDebug
