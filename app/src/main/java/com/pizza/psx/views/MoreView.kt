@@ -40,9 +40,10 @@ fun MoreView(
     onSearchClick: () -> Unit = {},
     onPrivacyPolicyClick: () -> Unit = {},
     onClearDataClick: () -> Unit = {},
-    etfClick: () -> Unit = {}
-
-) {
+    etfClick: () -> Unit = {},
+    onComingSoonView:() -> Unit = {},
+    onCircuitBreaker:() -> Unit = {},
+    ) {
     val viewModel: MoreViewModel = hiltViewModel()
 
     val showClearDialog = remember { mutableStateOf(false) }
@@ -129,39 +130,43 @@ fun MoreView(
                         label = "ETF",
                         onClick = etfClick
                     )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
 
-//                    HorizontalDivider(
-//                        color = MaterialTheme.colorScheme.outlineVariant
-//                    )
-//
-//                    SettingsRow(
-//                        icon = Icons.Outlined.SwitchLeft,
-//                        iconTint = purpleColor,
-//                        label = "Metals",
-//                        onClick = onSearchClick
-//                    )
-//
-//                    HorizontalDivider(
-//                        color = MaterialTheme.colorScheme.outlineVariant
-//                    )
-//
-//                    SettingsRow(
-//                        icon = Icons.Outlined.CurrencyExchange,
-//                        iconTint = green,
-//                        label = "Currency Exchange",
-//                        onClick = onSearchClick
-//                    )
-//
-//                    HorizontalDivider(
-//                        color = MaterialTheme.colorScheme.outlineVariant
-//                    )
-//
-//                    SettingsRow(
-//                        icon = Icons.Outlined.Bolt,
-//                        iconTint = veryBerry,
-//                        label = "Circuit Breaker",
-//                        onClick = onSearchClick
-//                    )
+                    SettingsRow(
+                        icon = Icons.Outlined.Bolt,
+                        iconTint = veryBerry,
+                        label = "Circuit Breaker",
+                        onClick = onCircuitBreaker
+                    )
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
+
+                    SettingsRow(
+                        icon = Icons.Outlined.SwitchLeft,
+                        iconTint = purpleColor,
+                        label = "Metals",
+                        onClick = onComingSoonView
+                    )
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
+
+                    SettingsRow(
+                        icon = Icons.Outlined.CurrencyExchange,
+                        iconTint = green,
+                        label = "Currency Exchange",
+                        onClick = onComingSoonView
+                    )
+
+
 
                 }
             }
@@ -174,15 +179,16 @@ fun MoreView(
                         label = "Privacy Policy",
                         onClick = onPrivacyPolicyClick
                     )
-//                    HorizontalDivider(
-//                        color = MaterialTheme.colorScheme.outlineVariant
-//                    )
-//                    SettingsRow(
-//                        icon = Icons.Outlined.Translate,
-//                        iconTint = veryBlue,
-//                        label = "Change Language",
-//                        onClick = { showClearDialog.value = true },
-//                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
+                    SettingsRow(
+                        icon = Icons.Outlined.Translate,
+                        iconTint = veryBlue,
+                        label = "Change Language",
+                        onClick = onComingSoonView,
+                    )
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         color = MaterialTheme.colorScheme.outlineVariant

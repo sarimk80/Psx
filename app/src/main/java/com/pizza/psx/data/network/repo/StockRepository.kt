@@ -2,6 +2,7 @@ package com.pizza.psx.data.network.repo
 
 import androidx.compose.ui.text.toUpperCase
 import com.pizza.psx.data.network.dot.api.StockApi
+import com.pizza.psx.domain.model.CircuitBreakerModel
 import com.pizza.psx.domain.model.Companies
 import com.pizza.psx.domain.model.Dividend
 import com.pizza.psx.domain.model.EtfModel
@@ -160,6 +161,15 @@ class StockRepository(
     override suspend fun getAllIndices(): StockResult<List<Ticker>> = withContext(dispatcher){
         return@withContext try {
             val result = stockApi.getAllIndices("https://sarim-pix.hf.space/indices")
+            StockResult.Success(result)
+        }catch (e: Exception){
+            StockResult.Error("Failed${e.toString()}")
+        }
+    }
+
+    override suspend fun getAllCicuirBreaker(): StockResult<CircuitBreakerModel> = withContext(dispatcher){
+        return@withContext try {
+            val result = stockApi.getAllCircuitBreaker("https://sarim-pix.hf.space/circuit-breakers/all")
             StockResult.Success(result)
         }catch (e: Exception){
             StockResult.Error("Failed${e.toString()}")

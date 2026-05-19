@@ -1,5 +1,6 @@
 package com.pizza.psx.domain.usecase
 
+import com.pizza.psx.domain.model.CircuitBreakerModel
 import com.pizza.psx.domain.model.Companies
 import com.pizza.psx.domain.model.Dividend
 import com.pizza.psx.domain.model.EtfModel
@@ -118,5 +119,13 @@ class AllIndicesUseCase@Inject constructor(
 ) {
     suspend operator fun invoke(): StockResult<List<Ticker>> {
         return repo.getAllIndices()
+    }
+}
+
+class AllCircuitBreakerUseCase@Inject constructor(
+    private  val repo: StockRepo
+) {
+    suspend operator fun invoke(): StockResult<CircuitBreakerModel> {
+        return repo.getAllCicuirBreaker()
     }
 }

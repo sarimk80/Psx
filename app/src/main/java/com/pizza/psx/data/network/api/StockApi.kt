@@ -1,5 +1,6 @@
 package com.pizza.psx.data.network.dot.api
 
+import com.pizza.psx.domain.model.CircuitBreakerModel
 import com.pizza.psx.domain.model.Companies
 import com.pizza.psx.domain.model.Dividend
 import com.pizza.psx.domain.model.EtfModel
@@ -64,4 +65,7 @@ interface StockApi {
 
     @GET
     suspend fun getAllIndices(@Url url: String):List<Ticker>
+
+    @GET
+    suspend fun getAllCircuitBreaker(@Url url: String): CircuitBreakerModel
 }

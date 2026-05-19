@@ -1,5 +1,6 @@
 package com.pizza.psx.domain.repo
 
+import com.pizza.psx.domain.model.CircuitBreakerModel
 import com.pizza.psx.domain.model.Companies
 import com.pizza.psx.domain.model.Dividend
 import com.pizza.psx.domain.model.EtfModel
@@ -45,4 +46,6 @@ interface StockRepo {
     suspend fun getAllEtf(): StockResult<EtfModel>
 
     suspend fun getAllIndices(): StockResult<List<Ticker>>
+
+    suspend fun getAllCicuirBreaker() : StockResult<CircuitBreakerModel>
 }

@@ -47,6 +47,8 @@ import com.google.gson.Gson
 import com.pizza.psx.domain.model.EtfModel
 import com.pizza.psx.domain.model.EtfNavType
 import com.pizza.psx.domain.model.TickerNavType
+import com.pizza.psx.views.CircuitBreaker
+import com.pizza.psx.views.ComingSoonView
 import com.pizza.psx.views.EtfDetailView
 import com.pizza.psx.views.EtfView
 import com.pizza.psx.views.IndexDetailView
@@ -145,6 +147,12 @@ fun AppNavHost(
                 },
                 etfClick = {
                     navController.navigate("etf_view")
+                },
+                onComingSoonView = {
+                    navController.navigate("coming_soon_view")
+                },
+                onCircuitBreaker = {
+                    navController.navigate("circuit_breaker_view")
                 }
 
             )
@@ -254,7 +262,7 @@ fun AppNavHost(
                     }
 
                 },
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
             )
         }
 
@@ -287,6 +295,29 @@ fun AppNavHost(
                 etfSymbol = my_symbol,
                 onBackClick = { navController.popBackStack() },
                 onTickerDetail = {ticker ->
+                    navController.navigate("ticker_detail/REG/$ticker")
+                }
+            )
+        }
+
+        composable(
+            route = "coming_soon_view",
+        ){
+            ComingSoonView(
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(
+            route = "circuit_breaker_view",
+        ){
+            CircuitBreaker(
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onClick = {ticker ->
                     navController.navigate("ticker_detail/REG/$ticker")
                 }
             )
