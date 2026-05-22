@@ -6,6 +6,11 @@ Built for investors who want speed, clarity, and powerful analytics — all in o
 
 ---
 
+## Play Store
+
+[Download the app on Google Play](https://play.google.com/store/apps/details?id=com.pizza.psx)
+
+
 ## 🚀 Features
 
 ### 📊 Market Overview
