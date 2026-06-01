@@ -43,6 +43,7 @@ fun MoreView(
     etfClick: () -> Unit = {},
     onComingSoonView:() -> Unit = {},
     onCircuitBreaker:() -> Unit = {},
+    onCurrencyExchange:() -> Unit = {},
     ) {
     val viewModel: MoreViewModel = hiltViewModel()
 
@@ -148,10 +149,10 @@ fun MoreView(
                     )
 
                     SettingsRow(
-                        icon = Icons.Outlined.SwitchLeft,
-                        iconTint = purpleColor,
-                        label = "Metals",
-                        onClick = onComingSoonView
+                        icon = Icons.Outlined.CurrencyExchange,
+                        iconTint = green,
+                        label = "Currency Exchange",
+                        onClick = onCurrencyExchange
                     )
 
                     HorizontalDivider(
@@ -160,11 +161,13 @@ fun MoreView(
                     )
 
                     SettingsRow(
-                        icon = Icons.Outlined.CurrencyExchange,
-                        iconTint = green,
-                        label = "Currency Exchange",
+                        icon = Icons.Outlined.SwitchLeft,
+                        iconTint = purpleColor,
+                        label = "Metals",
                         onClick = onComingSoonView
                     )
+
+
 
 
 

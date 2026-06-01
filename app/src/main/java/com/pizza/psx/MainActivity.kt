@@ -49,6 +49,7 @@ import com.pizza.psx.domain.model.EtfNavType
 import com.pizza.psx.domain.model.TickerNavType
 import com.pizza.psx.views.CircuitBreaker
 import com.pizza.psx.views.ComingSoonView
+import com.pizza.psx.views.CurrencyChangeView
 import com.pizza.psx.views.EtfDetailView
 import com.pizza.psx.views.EtfView
 import com.pizza.psx.views.IndexDetailView
@@ -153,6 +154,9 @@ fun AppNavHost(
                 },
                 onCircuitBreaker = {
                     navController.navigate("circuit_breaker_view")
+                },
+                onCurrencyExchange = {
+                    navController.navigate("currency_change_view")
                 }
 
             )
@@ -323,6 +327,18 @@ fun AppNavHost(
             )
         }
 
+        //CurrencyChangeView
+
+        composable(
+            route = "currency_change_view",
+        ){
+            CurrencyChangeView(
+                onBackClick = {
+                    navController.popBackStack()
+                },
+
+            )
+        }
 
     }
 }
