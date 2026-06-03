@@ -2,6 +2,7 @@ package com.pizza.psx.domain.repo
 
 import com.pizza.psx.domain.model.CircuitBreakerModel
 import com.pizza.psx.domain.model.Companies
+import com.pizza.psx.domain.model.CurrencyExchangeModel
 import com.pizza.psx.domain.model.Dividend
 import com.pizza.psx.domain.model.EtfModel
 import com.pizza.psx.domain.model.Fundamentals
@@ -48,4 +49,6 @@ interface StockRepo {
     suspend fun getAllIndices(): StockResult<List<Ticker>>
 
     suspend fun getAllCicuirBreaker() : StockResult<CircuitBreakerModel>
+
+    suspend fun getAllCurrencyExchange(): StockResult<CurrencyExchangeModel>
 }

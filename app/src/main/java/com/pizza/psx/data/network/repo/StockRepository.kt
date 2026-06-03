@@ -4,6 +4,7 @@ import androidx.compose.ui.text.toUpperCase
 import com.pizza.psx.data.network.dot.api.StockApi
 import com.pizza.psx.domain.model.CircuitBreakerModel
 import com.pizza.psx.domain.model.Companies
+import com.pizza.psx.domain.model.CurrencyExchangeModel
 import com.pizza.psx.domain.model.Dividend
 import com.pizza.psx.domain.model.EtfModel
 import com.pizza.psx.domain.model.Fundamentals
@@ -170,6 +171,15 @@ class StockRepository(
     override suspend fun getAllCicuirBreaker(): StockResult<CircuitBreakerModel> = withContext(dispatcher){
         return@withContext try {
             val result = stockApi.getAllCircuitBreaker("https://sarim-pix.hf.space/circuit-breakers/all")
+            StockResult.Success(result)
+        }catch (e: Exception){
+            StockResult.Error("Failed${e.toString()}")
+        }
+    }
+
+    override suspend fun getAllCurrencyExchange(): StockResult<CurrencyExchangeModel> = withContext(dispatcher){
+        return@withContext try {
+            val result = stockApi.getAllCurrencyExchange("https://sarim-pix.hf.space/get_all_currency")
             StockResult.Success(result)
         }catch (e: Exception){
             StockResult.Error("Failed${e.toString()}")

@@ -91,7 +91,6 @@ fun BreakerLoadingState() {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         ContainedLoadingIndicator()
-        Text("Fetching circuit breakers…", fontSize = 13.sp)
     }
 }
 
