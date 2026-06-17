@@ -51,4 +51,6 @@ interface StockRepo {
     suspend fun getAllCicuirBreaker() : StockResult<CircuitBreakerModel>
 
     suspend fun getAllCurrencyExchange(): StockResult<CurrencyExchangeModel>
+
+    suspend fun cacheTickerList(): StockResult<List<Ticker>>
 }

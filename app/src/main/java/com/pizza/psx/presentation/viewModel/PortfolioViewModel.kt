@@ -14,6 +14,7 @@ import com.pizza.psx.domain.model.StockResult
 import com.pizza.psx.domain.model.Ticker
 import com.pizza.psx.domain.model.Transaction
 import com.pizza.psx.domain.repo.PortfolioRepo
+import com.pizza.psx.domain.usecase.CacheTickerUseCase
 import com.pizza.psx.domain.usecase.IndexDetailUseCase
 import com.pizza.psx.domain.usecase.IndexPriceUseCase
 import com.pizza.psx.domain.usecase.TickerUseCase
@@ -40,7 +41,8 @@ class PortfolioViewModel @Inject constructor(
     private val repo:PortfolioRepo,
     private val getTickerDetail: TickerUseCase,
     private val indexDetailUseCase: IndexDetailUseCase,
-    private val indexPrice: IndexPriceUseCase
+    private val indexPrice: IndexPriceUseCase,
+    private val cacheTickerUseCase: CacheTickerUseCase
 ):ViewModel(){
 
 
@@ -202,8 +204,43 @@ class PortfolioViewModel @Inject constructor(
 
             val allTickers = mutableListOf<Ticker>()
 
+            // get cache tickers
+            val kse_30_tickers = cacheTickerUseCase()
+
+            val cachedSymbols = mutableSetOf<String>()
+
+            if (kse_30_tickers is StockResult.Loading){
+                _uiState.value = _uiState.value.copy(isLoading = true)
+            }
+            if (kse_30_tickers is StockResult.Success) {
+                _uiState.value = _uiState.value.copy(isLoading = true)
+                symbols.forEach { symbol ->
+                    kse_30_tickers.data
+                        .firstOrNull { it.data.symbol == symbol.portfolio.symbol }
+                        ?.let { cachedTicker ->
+                            cachedTicker.data.stockCount =
+                                symbolToVolumeMap[cachedTicker.data.symbol] ?: 0
+                            symbolToSectorMap[cachedTicker.data.symbol]?.let { sector ->
+                                cachedTicker.data.sectorName = sector
+
+                            }
+                            allTickers.add(cachedTicker)
+                            cachedSymbols.add(symbol.portfolio.symbol)
+                        }
+                }
+
+                _uiState.value = _uiState.value.copy(
+                    listOfStocks = allTickers.toList(),
+                    isLoading = false
+                )
+            }
+
+            val uncachedSymbols = symbols.filter {
+                it.portfolio.symbol !in cachedSymbols
+            }
+
             try {
-                symbols.chunked(15).forEachIndexed { batchIndex, batch ->
+                uncachedSymbols.chunked(15).forEachIndexed { batchIndex, batch ->
                     val batchTickers = mutableListOf<Ticker>()
 
                     // Process each symbol sequentially within batch

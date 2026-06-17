@@ -138,3 +138,11 @@ class CurrencyExchangeUseCase@Inject constructor(
         return repo.getAllCurrencyExchange()
     }
 }
+
+class CacheTickerUseCase@Inject constructor(
+    private  val repo: StockRepo
+){
+    suspend operator fun invoke(): StockResult<List<Ticker>> {
+        return repo.cacheTickerList()
+    }
+}

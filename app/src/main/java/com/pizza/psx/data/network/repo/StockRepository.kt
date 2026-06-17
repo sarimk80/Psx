@@ -186,5 +186,14 @@ class StockRepository(
         }
     }
 
+    override suspend fun cacheTickerList(): StockResult<List<Ticker>> = withContext(dispatcher){
+        return@withContext try {
+            val result = stockApi.cacheTickerList("https://sarim-pix.hf.space/get_all_ticker")
+            StockResult.Success(result)
+        }catch (e: Exception){
+            StockResult.Error("Failed${e.toString()}")
+        }
+    }
+
 
 }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -42,6 +43,9 @@ import androidx.compose.material.icons.filled.SwapVert
  import androidx.compose.ui.text.input.KeyboardType
  import androidx.compose.material3.OutlinedTextFieldDefaults
  import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 
 
 private val regionFilters = listOf("All", "Asia", "Europe", "Americas", "Africa", "Middle East","Crypto","Metals","Oceania")
@@ -150,7 +154,7 @@ fun CurrencyChangeView(onBackClick: () -> Unit) {
             }
             if(showBottomSheet && uiState.currency != null) {
                 ModalBottomSheet(
-                    modifier = Modifier.fillMaxHeight(),
+                    modifier = Modifier.fillMaxWidth(),
                     sheetState = sheetState,
                     onDismissRequest = { showBottomSheet = false },
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -184,6 +188,9 @@ private fun ExchangeBottomSheet(
 
 
     val amountValue = amount.toDoubleOrNull() ?: 0.0
+
+    val keyboardController = LocalSoftwareKeyboardController.current
+
 
     val convertedAmount =
         if (fromCurrency != null && toCurrency != null) {
@@ -227,9 +234,9 @@ private fun ExchangeBottomSheet(
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp,vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         // Header
         Row(
@@ -239,7 +246,7 @@ private fun ExchangeBottomSheet(
         ) {
             Text(
                 text = "Exchange Currency",
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
             IconButton(onClick = onDismiss) {
@@ -254,13 +261,14 @@ private fun ExchangeBottomSheet(
         // From Currency
         Text(
             text = "From",
-            fontSize = 12.sp,
+            fontSize = 11.sp,
             fontWeight = FontWeight.SemiBold,
         )
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(52.dp)
                 .clickable {
                     showFromPicker = true
                 }
@@ -270,6 +278,7 @@ private fun ExchangeBottomSheet(
                 onValueChange = {},
                 readOnly = true,
                 enabled = false,
+                textStyle = TextStyle(fontSize = 11.sp),
                 interactionSource = remember { MutableInteractionSource() },
                 label = { Text("Select currency") },
                 colors = OutlinedTextFieldDefaults.colors(
@@ -298,14 +307,15 @@ private fun ExchangeBottomSheet(
         // Amount Input
         Text(
             text = "Amount",
-            fontSize = 12.sp,
+            fontSize = 11.sp,
             fontWeight = FontWeight.SemiBold,
         )
         OutlinedTextField(
             value = amount,
             onValueChange = { amount = it },
             label = { Text("Enter amount") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() }),
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
 
@@ -322,18 +332,18 @@ private fun ExchangeBottomSheet(
 
         // Swap Button
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            FloatingActionButton(
+            FilledIconButton(
                 onClick = {
                     val temp = fromCurrency
                     fromCurrency = toCurrency
                     toCurrency = temp
                 },
-                modifier = Modifier.size(48.dp),
+                modifier = Modifier.size(36.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.SwapVert,
-                    contentDescription = "Swap",
-                    modifier = Modifier.size(24.dp)
+                    Icons.Default.SwapVert,
+                    null,
+                    modifier = Modifier.size(18.dp)
                 )
             }
         }
@@ -341,12 +351,13 @@ private fun ExchangeBottomSheet(
         // To Currency
         Text(
             text = "To",
-            fontSize = 12.sp,
+            fontSize = 11.sp,
             fontWeight = FontWeight.SemiBold,
         )
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(52.dp)
                 .clickable {
                     showToPicker = true
                 }
@@ -354,7 +365,7 @@ private fun ExchangeBottomSheet(
             OutlinedTextField(
                 value = toCurrency?.currencyName ?: "",
                 onValueChange = {},
-
+                textStyle = TextStyle(fontSize = 11.sp),
                 readOnly = true,
                 enabled = false,
                 label = { Text("Select currency") },
@@ -383,8 +394,8 @@ private fun ExchangeBottomSheet(
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceBright)
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier.padding(11.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -408,8 +419,6 @@ private fun ExchangeBottomSheet(
             }
         }
 
-
-        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 

@@ -72,4 +72,7 @@ interface StockApi {
 
     @GET
     suspend fun getAllCurrencyExchange(@Url url: String): CurrencyExchangeModel
+
+    @GET
+    suspend fun cacheTickerList(@Url url: String) : List<Ticker>
 }
