@@ -40,10 +40,42 @@ data class TickerData (
     val year_1_change:Double,
     val ytd_change:Double,
     var stockCount: Int = 0,
-    var sectorName: String = ""
+    var sectorName: String = "",
+    var market_cap: Double,
+    var shares: Double,
+    var free_float: Double,
+    var free_float_share: Double,
+    var key_people:List<KeyPerson>,
+    /*
+    "market_cap": 30994285.66,
+    "shares": 908923333,
+    "free_float": 227230833,
+    "free_float_share": 25,
+    "key_people": [
+      {
+        "position": "CEO",
+        "person": "Abdul Qayoom"
+      },
+      {
+        "position": "Chairperson",
+        "person": "Ahsan Zafar Syed"
+      },
+      {
+        "position": "Company Secretary",
+        "person": "Saqib Rafique"
+      }
+    ]
+  },
+
+     */
 
 ): Parcelable
 
+//@Parcelize
+//data class KeyManagement(
+//    val position: String,
+//    val person: String,
+//): Parcelable
 
 object TickerNavType : NavType<Ticker>(isNullableAllowed = false) {
 

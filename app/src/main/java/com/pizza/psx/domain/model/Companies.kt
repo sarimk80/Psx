@@ -1,5 +1,8 @@
 package com.pizza.psx.domain.model
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+
 data class Companies(
     val success: Boolean,
     val data: CompaniesData,
@@ -28,7 +31,9 @@ data class FreeFloat (
     val numeric: Double
 )
 
+@Parcelize
+
 data class KeyPerson (
     val name: String,
     val position: String
-)
+): Parcelable

@@ -144,15 +144,12 @@ import com.patrykandpatrick.vico.core.common.shape.Shape
 import com.pizza.compose.baraRed
 import com.pizza.compose.green
 import com.pizza.compose.purpleColor
-import com.pizza.compose.surfaceContainerLight
 import com.pizza.compose.veryBerry
 import com.pizza.psx.domain.model.Announcement
+import com.pizza.psx.domain.model.CandleData
 import com.pizza.psx.domain.model.SymbolDetail
-import com.pizza.psx.domain.model.Ticker
-import com.pizza.psx.presentation.helpers.daysAgoTextToDate
-import com.pizza.psx.presentation.helpers.formatDate
+import com.pizza.psx.presentation.helpers.formatPsxTimestamp
 import com.pizza.psx.presentation.helpers.number_format
-import kotlin.math.ln
 import kotlin.math.min
 
 
@@ -315,7 +312,7 @@ fun CombinedTickerDetailContent(
     companyData: CompaniesData,
     fundamentalData: FundamentalData,
     dividendData: List<DividendData>,
-    kLineModel: List<KLineModelData>,
+    kLineModel: List<List<Double>>,
     symbolDetail: SymbolDetail
 ) {
     var selectedTab by remember { mutableStateOf(0) }
@@ -564,25 +561,26 @@ fun ChartTitle(title: String) {
 
 @Composable
 fun ChartView(
-    kLineModel: List<KLineModelData>,
+    kLineModel: List<List<Double>>,
     symbolDetail: SymbolDetail
 ) {
     if (kLineModel.isEmpty()) return
 
+    val candles = kLineModel.map { CandleData.fromRaw(it) }
     // Sort data chronologically
-    val sortedData = remember(kLineModel) {
-        kLineModel.sortedBy { it.timestamp }
+    val sortedData = remember(candles) {
+        candles.sortedBy { it.timestamp }
     }
 
     val xValues = remember(sortedData) { sortedData.indices.map { it.toFloat() } }
     val openValues = remember(sortedData) { sortedData.map { it.open.toFloat() } }
     val closeValues = remember(sortedData) { sortedData.map { it.close.toFloat() } }
-    val highValues = remember(sortedData) { sortedData.map { it.high.toFloat() } }
-    val lowValues = remember(sortedData) { sortedData.map { it.low.toFloat() } }
+//    val highValues = remember(sortedData) { sortedData.map { it.high.toFloat() } }
+//    val lowValues = remember(sortedData) { sortedData.map { it.low.toFloat() } }
     val volumeValues = remember(sortedData) { sortedData.map { it.volume.toFloat() } }
     val normalizedVolumeValues = remember(sortedData) {
-        val minPrice = sortedData.minOfOrNull { it.low }?.toFloat() ?: 0f
-        val maxPrice = sortedData.maxOfOrNull { it.high }?.toFloat() ?: 1f
+        val minPrice = sortedData.minOfOrNull { it.close }?.toFloat() ?: 0f
+        val maxPrice = sortedData.maxOfOrNull { it.open }?.toFloat() ?: 1f
         val priceRange = (maxPrice - minPrice).takeIf { it > 0f } ?: 1f
 
         val volumes = sortedData.map { it.volume.toFloat() }
@@ -603,7 +601,7 @@ fun ChartView(
         }
     }
 
-    val dateList = remember(sortedData) { sortedData.map { formatShortDate(it.timestamp) } }
+    val dateList = remember(sortedData) { sortedData.map { formatPsxTimestamp(it.timestamp) } }
 
     val modelProducerPrice = remember { CartesianChartModelProducer() }
     val lineProducer = remember { CartesianChartModelProducer() }
@@ -617,8 +615,8 @@ fun ChartView(
         val change = current.close - first.close
         val changePercent = (change / first.close) * 100
 
-        val highest = sortedData.maxOf { it.high }
-        val lowest = sortedData.minOf { it.low }
+        val highest = sortedData.maxOf { it.open }
+        val lowest = sortedData.minOf { it.close }
         val avgVolume = sortedData.map { it.volume }.average()
 
         Triple(change, changePercent, highest to lowest)
@@ -678,9 +676,7 @@ fun ChartView(
                     buildString {
                         append("$trend ")
                         append("C: ${String.format("%.2f", data.close)}- ")
-                        append(" H: ${formatVolume(data.high)}- ")
-                        append(" L: ${formatVolume(data.low)}- ")
-                        append(" O: ${formatVolume(data.open)}- ")
+                        append(" H: ${formatVolume(data.open)}- ")
                         append(" V: ${formatVolume(data.volume.toDouble())}- ")
                         append(" D: ${formatShortDate(data.timestamp)}")
                     }

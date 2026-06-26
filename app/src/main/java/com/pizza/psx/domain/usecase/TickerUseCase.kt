@@ -10,6 +10,7 @@ import com.pizza.psx.domain.model.IndexDetailModel
 import com.pizza.psx.domain.model.IndexPriceModel
 import com.pizza.psx.domain.model.KLineModel
 import com.pizza.psx.domain.model.MarketDividend
+import com.pizza.psx.domain.model.PsxOhlcModel
 import com.pizza.psx.domain.model.StockResult
 import com.pizza.psx.domain.model.SymbolDetail
 import com.pizza.psx.domain.model.SymbolsModel
@@ -74,8 +75,8 @@ class MarketDividendUseCase@Inject constructor(
 class KLineModelUseCase@Inject constructor(
     private  val repo: StockRepo
 ) {
-    suspend operator fun invoke(symbol: String,timeFrame:String): StockResult<KLineModel> {
-        return  repo.getKLineModel(symbol,timeFrame)
+    suspend operator fun invoke(symbol: String): StockResult<PsxOhlcModel> {
+        return  repo.getKLineModel(symbol)
     }
 
 }

@@ -4,10 +4,12 @@ import androidx.compose.ui.graphics.Color
 import com.pizza.psx.views.charts.ChartData
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
+import java.time.Instant
 import java.util.Date
 import java.util.Locale
 import kotlin.math.abs
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.random.Random
 
@@ -33,6 +35,13 @@ fun formatDate(timestamp: Long?): String {
     if (timestamp == null) return "-"
     val sdf = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
     return sdf.format(Date(timestamp))
+}
+
+fun formatPsxTimestamp(epochSeconds: Long): String {
+    val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy")
+    return Instant.ofEpochSecond(epochSeconds)
+        .atZone(ZoneId.of("Asia/Karachi"))
+        .format(formatter)
 }
 
  fun formatVolume(volume: Double): String {

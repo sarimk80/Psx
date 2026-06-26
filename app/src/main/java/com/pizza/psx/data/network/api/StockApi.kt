@@ -10,6 +10,7 @@ import com.pizza.psx.domain.model.IndexDetailModel
 import com.pizza.psx.domain.model.IndexPriceModel
 import com.pizza.psx.domain.model.KLineModel
 import com.pizza.psx.domain.model.MarketDividend
+import com.pizza.psx.domain.model.PsxOhlcModel
 import com.pizza.psx.domain.model.Root
 import com.pizza.psx.domain.model.Sector
 import com.pizza.psx.domain.model.SectorResponse
@@ -46,8 +47,8 @@ interface StockApi {
     @GET
     suspend fun getMarketData(@Url url: String):List<MarketDividend>
 
-    @GET("/api/klines/{symbol}/{timeframe}")
-    suspend fun getKLineModel(@Path("symbol") symbol:String, @Path("timeframe") timeframe:String):KLineModel
+    @GET
+    suspend fun getKLineModel(@Url url: String): PsxOhlcModel
 
     @GET
     suspend fun getIndexData(@Url url: String):List<IndexDetailModel>

@@ -9,6 +9,7 @@ import com.pizza.psx.domain.model.IndexDetailModel
 import com.pizza.psx.domain.model.IndexPriceModel
 import com.pizza.psx.domain.model.KLineModel
 import com.pizza.psx.domain.model.PortfolioModel
+import com.pizza.psx.domain.model.PsxOhlcModel
 import com.pizza.psx.domain.model.StockResult
 import com.pizza.psx.domain.model.Ticker
 import com.pizza.psx.domain.usecase.IndexDetailUseCase
@@ -81,7 +82,7 @@ class IndexDetailViewModel @Inject constructor(
             )
 
             try {
-                val priceDeferred = async { kLineModel(indexSymbol,"1d") }
+                val priceDeferred = async { kLineModel(indexSymbol,) }
                 val sectorDeferred = async { indexDetailUseCase(indexName) }
 
                 val priceResult = priceDeferred.await()
@@ -209,5 +210,5 @@ data class IndexChartList(
     val isLoading: Boolean = true,
     val error: String? = null,
     val listOfStocks:List<IndexDetailModel>?=null,
-    val indexPrice: KLineModel?= null
+    val indexPrice: PsxOhlcModel?= null
 )

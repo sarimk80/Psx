@@ -1,8 +1,10 @@
 package com.pizza.psx.domain.model
 
 import android.os.Bundle
+import android.os.Parcelable
 import androidx.navigation.NavType
 import com.google.gson.Gson
+import kotlinx.android.parcel.Parcelize
 
 data class EtfModel(
     val etfs: List<Etf>,

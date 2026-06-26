@@ -53,6 +53,7 @@ import com.pizza.psx.views.CurrencyChangeView
 import com.pizza.psx.views.EtfDetailView
 import com.pizza.psx.views.EtfView
 import com.pizza.psx.views.IndexDetailView
+import com.pizza.psx.views.MetalsView
 import com.pizza.psx.views.MoreView
 import com.pizza.psx.views.PortfolioListView
 import dagger.hilt.android.AndroidEntryPoint
@@ -157,6 +158,9 @@ fun AppNavHost(
                 },
                 onCurrencyExchange = {
                     navController.navigate("currency_change_view")
+                },
+                onMetalView = {
+                    navController.navigate("metals_view")
                 }
 
             )
@@ -338,6 +342,18 @@ fun AppNavHost(
                 },
 
             )
+        }
+
+        //Metals
+        composable(
+            route = "metals_view",
+        ){
+            MetalsView(
+                onBackClick = {
+                    navController.popBackStack()
+                },
+
+                )
         }
 
     }

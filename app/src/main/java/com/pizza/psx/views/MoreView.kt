@@ -44,6 +44,7 @@ fun MoreView(
     onComingSoonView:() -> Unit = {},
     onCircuitBreaker:() -> Unit = {},
     onCurrencyExchange:() -> Unit = {},
+    onMetalView:() -> Unit = {},
     ) {
     val viewModel: MoreViewModel = hiltViewModel()
 
@@ -164,7 +165,7 @@ fun MoreView(
                         icon = Icons.Outlined.SwitchLeft,
                         iconTint = purpleColor,
                         label = "Metals",
-                        onClick = onComingSoonView
+                        onClick = onMetalView
                     )
 
 

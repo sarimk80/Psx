@@ -119,6 +119,8 @@ import com.pizza.compose.baraRed
 import com.pizza.compose.financialGreen
 import com.pizza.compose.financialRed
 import com.pizza.compose.veryBerry
+import com.pizza.psx.domain.model.CandleData
+import com.pizza.psx.domain.model.PsxOhlcModel
 import com.pizza.psx.domain.model.Ticker
 import com.pizza.psx.presentation.helpers.number_format
 
@@ -208,7 +210,7 @@ fun EtfDetailView(etfSymbol: String,
 @Composable
 fun EtfDetailTab(
     etfSymbol: String,
-    kLineModel: KLineModel,
+    kLineModel: PsxOhlcModel,
     etf: Etf,
     companies: Companies,
     ticker: Ticker
@@ -782,20 +784,21 @@ private fun HoldingCard(
 
 
 @Composable
-fun EtfChartView(kLineModel: List<KLineModelData>,){
+fun EtfChartView(kLineModel: List<List<Double>>){
     if (kLineModel.isEmpty()) return
 
+    val candles = kLineModel.map { CandleData.fromRaw(it) }
     // Sort data chronologically
-    val sortedData = remember(kLineModel) {
-        kLineModel.sortedBy { it.timestamp }
+    val sortedData = remember(candles) {
+        candles.sortedBy { it.timestamp }
     }
 
     val xValues = remember(sortedData) { sortedData.indices.map { it.toFloat() } }
     val closeValues = remember(sortedData) { sortedData.map { it.close.toFloat() } }
     val dateList = remember(sortedData) { sortedData.map { formatShortDate(it.timestamp) } }
     val normalizedVolumeValues = remember(sortedData) {
-        val minPrice = sortedData.minOfOrNull { it.low }?.toFloat() ?: 0f
-        val maxPrice = sortedData.maxOfOrNull { it.high }?.toFloat() ?: 1f
+        val minPrice = sortedData.minOfOrNull { it.close }?.toFloat() ?: 0f
+        val maxPrice = sortedData.maxOfOrNull { it.open }?.toFloat() ?: 1f
         val priceRange = (maxPrice - minPrice).takeIf { it > 0f } ?: 1f
 
         val volumes = sortedData.map { it.volume.toFloat() }
@@ -851,8 +854,8 @@ fun EtfChartView(kLineModel: List<KLineModelData>,){
         val change = current.close - first.close
         val changePercent = (change / first.close) * 100
 
-        val highest = sortedData.maxOf { it.high }
-        val lowest = sortedData.minOf { it.low }
+        val highest = sortedData.maxOf { it.open }
+        val lowest = sortedData.minOf { it.close }
         val avgVolume = sortedData.map { it.volume }.average()
 
         Triple(change, changePercent, highest to lowest)
