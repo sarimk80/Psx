@@ -6,8 +6,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pizza.psx.domain.model.PortfolioModel
 import com.pizza.psx.domain.model.Sector
+import com.pizza.psx.domain.model.SectorResponse
 import com.pizza.psx.domain.model.StockResult
 import com.pizza.psx.domain.model.Ticker
+import com.pizza.psx.domain.usecase.GainersUseCase
 import com.pizza.psx.domain.usecase.SectorUseCase
 import com.pizza.psx.domain.usecase.TickerUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,6 +21,7 @@ import javax.inject.Inject
 class SectorViewModel @Inject constructor(
     private val getSector: SectorUseCase,
     private val getTickerDetail: TickerUseCase,
+    private val getAllSectors: GainersUseCase
     ) : ViewModel(){
     private val _uiState = mutableStateOf(SectorUiState())
     val uiState: State<SectorUiState> = _uiState
@@ -30,10 +33,10 @@ class SectorViewModel @Inject constructor(
     fun getSectorAll(){
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
-            when (val answer = getSector()){
+            when (val answer = getAllSectors()){
                 is StockResult.Success -> {
                     _uiState.value = _uiState.value.copy(
-                        stocks = answer.data,
+                        allSectors = answer.data,
                         isLoading = false,
                         error = null
                     )
@@ -145,9 +148,9 @@ class SectorViewModel @Inject constructor(
 
 
 data class SectorUiState(
-    val stocks: Sector? = null,
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val allSectors: SectorResponse? = null
 )
 
 data class SectorDetailUiState(

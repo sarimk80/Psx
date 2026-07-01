@@ -147,6 +147,7 @@ import com.pizza.compose.purpleColor
 import com.pizza.compose.veryBerry
 import com.pizza.psx.domain.model.Announcement
 import com.pizza.psx.domain.model.CandleData
+import com.pizza.psx.domain.model.DividendModel
 import com.pizza.psx.domain.model.SymbolDetail
 import com.pizza.psx.presentation.helpers.formatPsxTimestamp
 import com.pizza.psx.presentation.helpers.number_format
@@ -188,7 +189,7 @@ fun TickerDetailView(type: String, symbol: String, onBack: () -> Unit) {
                         tickerData = uiState.stocks!!.data,
                         companyData = uiState.company!!.data,
                         fundamentalData = uiState.fundamentals!!.data,
-                        dividendData = uiState.dividend!!.data,
+                        dividendData = uiState.dividend!!,
                         kLineModel = uiState.kLine!!.data,
                         symbolDetail = uiState.symbolDetail!!
                     )
@@ -311,7 +312,7 @@ fun CombinedTickerDetailContent(
     tickerData: TickerData,
     companyData: CompaniesData,
     fundamentalData: FundamentalData,
-    dividendData: List<DividendData>,
+    dividendData: List<DividendModel>,
     kLineModel: List<List<Double>>,
     symbolDetail: SymbolDetail
 ) {
@@ -1342,7 +1343,7 @@ fun KeyPeopleCard(companyData: CompaniesData) {
 @Composable
 private fun KeyPersonItem(person: KeyPerson) {
     Column(modifier = Modifier.padding(vertical = 4.dp)) {
-        Text(person.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+        Text(person.person, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
         Text(person.position, style = MaterialTheme.typography.bodySmall)
     }
 }
@@ -1830,7 +1831,7 @@ fun FinancialStatsCard(fundamentalData: FundamentalData) {
 }
 
 @Composable
-fun DividendsTab(dividendData: List<DividendData>, symbol: String) {
+fun DividendsTab(dividendData: List<DividendModel>, symbol: String) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -1874,6 +1875,10 @@ fun DividendsTab(dividendData: List<DividendData>, symbol: String) {
             items(dividendData) { dividend ->
                 DividendItem(dividend)
             }
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(60.dp))
         }
     }
 }
@@ -2009,7 +2014,7 @@ fun PerformanceMetricsCard(fundamentalData: FundamentalData) {
 }
 
 @Composable
-fun DividendItem(dividend: DividendData) {
+fun DividendItem(dividend: DividendModel) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -2025,13 +2030,13 @@ fun DividendItem(dividend: DividendData) {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Dividend - ${dividend.year}",
+                    text = "Dividend - ${dividend.period}",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "Ex-date: ${dividend.ex_date} • Payment: ${dividend.payment_date}",
+                    text = "Ex-date: ${dividend.book_closure_end} • Payment: ${dividend.book_closure_start}",
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -2039,13 +2044,13 @@ fun DividendItem(dividend: DividendData) {
 
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = "${dividend.amount}",
+                    text = "${dividend.percentage}",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold,
                     color = financialGreen
                 )
                 Text(
-                    text = "Per Share",
+                    text = "${dividend.type}",
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

@@ -1,6 +1,7 @@
 package com.pizza.psx.views
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,12 +27,15 @@ import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ContainedLoadingIndicator
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -41,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -49,6 +54,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pizza.psx.R
 import com.pizza.psx.domain.model.Datum
+import com.pizza.psx.domain.model.StockData
+import com.pizza.psx.domain.model.Ticker
+import com.pizza.psx.domain.model.TickerData
 import com.pizza.psx.presentation.viewModel.PortfolioViewModel
 import com.pizza.psx.presentation.helpers.formatVolume
 import com.pizza.psx.presentation.helpers.formatCurrency
@@ -57,7 +65,7 @@ import com.pizza.psx.presentation.viewModel.SectorViewModel
 @Composable
 fun SectorDetailView(
     sectorName: String,
-    sector: Datum,
+    stocks: List<StockData>,
     onTickerClick: (String, String) -> Unit = { _, _ -> },
     onBack: () -> Unit
 ) {
@@ -65,15 +73,11 @@ fun SectorDetailView(
     val uiState by viewModel.sectorDetailUiState
     val listState = rememberLazyListState()
 
-    LaunchedEffect(sector.symbols) {
-        viewModel.getSectorTicker(sector.symbols)
-    }
 
     Scaffold(
         topBar = { SectorTopBar(sectorName, onBack) },
 
     ) { padding ->
-        // Main content - LazyColumn with header as first item
         LazyColumn(
             state = listState,
             modifier = Modifier
@@ -87,59 +91,107 @@ fun SectorDetailView(
                 end = 16.dp
             )
         ) {
-            // Header item (non-scrollable part is now scrollable)
-            item {
-                SectorOverviewCard(sector)
-            }
+            items(
+                stocks,
+                key = { it.script_code.ifEmpty { it.script_name } }
+            ) { stock ->
 
-            // Loading state
-            if (uiState.isLoading) {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(100.dp),
-                        contentAlignment = Alignment.Center
+                val positive = stock.change.toDoubleOrNull()?.let { it >= 0 } ?: true
+                val changeColor = if (positive) Color(0xFF2E7D32) else Color(0xFFC62828)
+
+                ElevatedCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceBright,
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    ),
+                    onClick = {
+                        onTickerClick("REG", stock.script_name)
+                    }
+                ) {
+
+                    Column(
+                        modifier = Modifier.padding(16.dp)
                     ) {
-                        LoadingCard()
+
+                        // Top Row
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+
+                            Column(
+                                modifier = Modifier.weight(1f)
+                            ) {
+
+                                Text(
+                                    text = stock.script_name,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+
+                                Text(
+                                    text = stock.script_code,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            Column(
+                                horizontalAlignment = Alignment.End
+                            ) {
+
+                                Text(
+                                    text = stock.current,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold
+                                )
+
+                                Surface(
+                                    //color = changeColor.copy(alpha = .12f),
+                                    shape = RoundedCornerShape(50)
+                                ) {
+
+                                    Text(
+                                        modifier = Modifier.padding(
+                                            horizontal = 10.dp,
+                                            vertical = 4.dp
+                                        ),
+                                        text = stock.change,
+                                        color = changeColor,
+                                        fontWeight = FontWeight.Bold,
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
+                                }
+                            }
+                        }
+
+                        Spacer(Modifier.height(16.dp))
+
+                        HorizontalDivider()
+
+                        Spacer(Modifier.height(12.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+
+                            SectorStat("Open", stock.open)
+
+                            SectorStat("High", stock.high)
+
+                            SectorStat("Low", stock.low)
+
+                            SectorStat("Volume", stock.volume)
+                        }
                     }
                 }
             }
 
-            // Error state
-            uiState.error?.let { error ->
-                item {
-                    ErrorState(error)
-                }
-            }
-
-            // Empty state
-            if (!uiState.isLoading && uiState.listOfStocks.isNullOrEmpty()) {
-                item {
-                    EmptyState()
-                }
-            }
-
-            // Stocks list
-            if (!uiState.listOfStocks.isNullOrEmpty()) {
-                items(
-                    uiState.listOfStocks!!,
-                    key = { it.data.symbol }
-                ) { item ->
-                    CompactWatchlistItemCard(
-                        item = item,
-                        onRemove = {},
-                        onTickerClick = {
-                            onTickerClick("REG", item.data.symbol)
-                        },
-                        isHideVolume = false,
-                        isHideSector = false,
-                        onUpdateTicker = {}
-                    )
-                }
-            }
-
-            // Bottom padding for FAB
             item {
                 Spacer(modifier = Modifier.height(80.dp))
             }
@@ -148,6 +200,30 @@ fun SectorDetailView(
 
 }
 
+@Composable
+fun SectorStat(
+    title: String,
+    value: String
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(Modifier.height(2.dp))
+
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

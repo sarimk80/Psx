@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.pizza.psx.domain.model.Companies
 import com.pizza.psx.domain.model.CompaniesData
 import com.pizza.psx.domain.model.Dividend
+import com.pizza.psx.domain.model.DividendModel
 import com.pizza.psx.domain.model.FinancialStats
 import com.pizza.psx.domain.model.FreeFloat
 import com.pizza.psx.domain.model.FundamentalData
@@ -150,7 +151,7 @@ class TickerDetailViewModel@Inject constructor(
                                     ),
                                 ),
 
-                            businessDescription = "",
+                            businessDescription = tickerResponse.data.business_description,
                             keyPeople = tickerResponse.data.key_people,
                             error = ""
                         ),
@@ -175,14 +176,7 @@ class TickerDetailViewModel@Inject constructor(
                         ),
                         timestamp = System.currentTimeMillis()
                     ),
-                    dividend = Dividend(
-                        success = true,
-                        data = emptyList(),
-                        count = 0,
-                        symbol = tickerResponse.data.symbol,
-                        timestamp = System.currentTimeMillis(),
-                        cacheUpdated = System.currentTimeMillis().toString()
-                    ),
+                    dividend = tickerResponse.data.dividend,
                     kLine = resultKLine as PsxOhlcModel,
                     symbolDetail = resultSymbolOverview as SymbolDetail,
                     isLoading = false,
@@ -358,7 +352,7 @@ data class TickerDetailUiState(
     val company:Companies? = null,
     val fundamentals: Fundamentals?=null,
     val listOfTicker:List<Ticker>? = null,
-    val dividend: Dividend? = null,
+    val dividend: List<DividendModel>? = null,
     val marketDividend:List<MarketDividend>? = null,
     val symbolDetail: SymbolDetail? = null,
     val kLine: PsxOhlcModel? = null,

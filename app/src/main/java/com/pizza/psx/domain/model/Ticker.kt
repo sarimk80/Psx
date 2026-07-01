@@ -46,36 +46,25 @@ data class TickerData (
     var free_float: Double,
     var free_float_share: Double,
     var key_people:List<KeyPerson>,
-    /*
-    "market_cap": 30994285.66,
-    "shares": 908923333,
-    "free_float": 227230833,
-    "free_float_share": 25,
-    "key_people": [
-      {
-        "position": "CEO",
-        "person": "Abdul Qayoom"
-      },
-      {
-        "position": "Chairperson",
-        "person": "Ahsan Zafar Syed"
-      },
-      {
-        "position": "Company Secretary",
-        "person": "Saqib Rafique"
-      }
-    ]
-  },
-
-     */
+    var business_description: String,
+    var p_e_ratio: Double,
+    var dividend: List<DividendModel>,
 
 ): Parcelable
 
-//@Parcelize
-//data class KeyManagement(
-//    val position: String,
-//    val person: String,
-//): Parcelable
+@Parcelize
+data class DividendModel (
+
+    val announcement_date: String,//": "2026-04-28T16:05:00",
+    val period_end: String,//": "2026-03-31",
+    val period: String,//": "Third Quarter",
+    val percentage: Double,//": 80,
+    val installment: String,//": "Third",
+    val type: String,//": "Dividend",
+    val book_closure_start: String,//": "2026-05-12",
+    val book_closure_end: String,//": "2026-05-14"
+
+):Parcelable
 
 object TickerNavType : NavType<Ticker>(isNullableAllowed = false) {
 

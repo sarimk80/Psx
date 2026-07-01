@@ -34,6 +34,6 @@ data class FreeFloat (
 @Parcelize
 
 data class KeyPerson (
-    val name: String,
+    val person: String,
     val position: String
 ): Parcelable

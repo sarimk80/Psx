@@ -46,6 +46,7 @@ import com.pizza.psx.views.SectorView
 import com.google.gson.Gson
 import com.pizza.psx.domain.model.EtfModel
 import com.pizza.psx.domain.model.EtfNavType
+import com.pizza.psx.domain.model.StockDataListNavType
 import com.pizza.psx.domain.model.TickerNavType
 import com.pizza.psx.views.CircuitBreaker
 import com.pizza.psx.views.ComingSoonView
@@ -190,27 +191,30 @@ fun AppNavHost(
         }
 
         composable(
-            route = "sector_detail/{sectorName}/{datum}",
+            route = "sector_detail/{sectorName}/{stocks}",
             arguments = listOf(
                 navArgument("sectorName") {
                     type = NavType.StringType
                 },
-                navArgument("datum") {
-                    type = DatumNavType
+                navArgument("stocks") {
+                    type = StockDataListNavType
                 }
             )
         ) { backStackEntry ->
             val sectorName = backStackEntry.arguments?.getString("sectorName") ?: "REG"
-            val datum = backStackEntry.arguments?.getString("datum")?.let {
-                DatumNavType.parseValue(it)
-            }
+
+            val stocks = backStackEntry.arguments
+                ?.getString("stocks")
+                ?.let(StockDataListNavType::parseValue)
+                ?: emptyList()
+
             SectorDetailView(
                 sectorName = sectorName,
-                sector = datum!!,
                 onTickerClick = {type,symbol ->
                     navController.navigate("ticker_detail/$type/$symbol")
                 },
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                stocks = stocks
             )
         }
 
