@@ -374,7 +374,7 @@ fun CombinedTickerDetailContent(
             1 -> CompanyTab(companyData)
             2 -> FinancialsTab(fundamentalData,symbolDetail)
             3 -> DividendsTab(dividendData, companyData.symbol)
-            4 -> ChartView(kLineModel = kLineModel,symbolDetail = symbolDetail)
+            4 -> ChartView(kLineModel = kLineModel.take(250),symbolDetail = symbolDetail)
         }
     }
 }

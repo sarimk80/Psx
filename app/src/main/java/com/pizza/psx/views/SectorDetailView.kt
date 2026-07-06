@@ -151,7 +151,6 @@ fun SectorDetailView(
                                 )
 
                                 Surface(
-                                    //color = changeColor.copy(alpha = .12f),
                                     shape = RoundedCornerShape(50)
                                 ) {
 
