@@ -165,7 +165,7 @@ fun MoreView(
                         icon = Icons.Outlined.SwitchLeft,
                         iconTint = purpleColor,
                         label = "Metals",
-                        onClick = onComingSoonView
+                        onClick = onMetalView
                     )
 
 

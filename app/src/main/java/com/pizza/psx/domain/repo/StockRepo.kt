@@ -10,6 +10,7 @@ import com.pizza.psx.domain.model.IndexDetailModel
 import com.pizza.psx.domain.model.IndexPriceModel
 import com.pizza.psx.domain.model.KLineModel
 import com.pizza.psx.domain.model.MarketDividend
+import com.pizza.psx.domain.model.MetalsModel
 import com.pizza.psx.domain.model.PsxOhlcModel
 import com.pizza.psx.domain.model.Root
 import com.pizza.psx.domain.model.Sector
@@ -54,4 +55,6 @@ interface StockRepo {
     suspend fun getAllCurrencyExchange(): StockResult<CurrencyExchangeModel>
 
     suspend fun cacheTickerList(): StockResult<List<Ticker>>
+
+    suspend fun getAllMetals(metal:String): StockResult<List<MetalsModel>>
 }

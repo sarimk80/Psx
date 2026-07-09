@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.unit.dp
 import com.pizza.psx.R
 
@@ -22,6 +23,7 @@ import com.pizza.psx.R
 @Composable
 fun MetalsView(
     onBackClick: () -> Unit,
+    onClickMetal:(metal:String) -> Unit,
 ) {
 
     val metals = listOf(
@@ -92,7 +94,7 @@ fun MetalsView(
                         .fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceBright),
                     onClick = {
-                        // Navigate to details
+                        onClickMetal(metal.lowercase())
                     },
                 ) {
                     Row(

@@ -10,6 +10,7 @@ import com.pizza.psx.domain.model.IndexDetailModel
 import com.pizza.psx.domain.model.IndexPriceModel
 import com.pizza.psx.domain.model.KLineModel
 import com.pizza.psx.domain.model.MarketDividend
+import com.pizza.psx.domain.model.MetalsModel
 import com.pizza.psx.domain.model.PsxOhlcModel
 import com.pizza.psx.domain.model.StockResult
 import com.pizza.psx.domain.model.SymbolDetail
@@ -145,5 +146,13 @@ class CacheTickerUseCase@Inject constructor(
 ){
     suspend operator fun invoke(): StockResult<List<Ticker>> {
         return repo.cacheTickerList()
+    }
+}
+
+class MetalsUseCase@Inject constructor(
+    private  val repo: StockRepo
+){
+    suspend operator fun invoke(metal:String): StockResult<List<MetalsModel>> {
+        return repo.getAllMetals(metal)
     }
 }

@@ -54,6 +54,7 @@ import com.pizza.psx.views.CurrencyChangeView
 import com.pizza.psx.views.EtfDetailView
 import com.pizza.psx.views.EtfView
 import com.pizza.psx.views.IndexDetailView
+import com.pizza.psx.views.MetalDetailView
 import com.pizza.psx.views.MetalsView
 import com.pizza.psx.views.MoreView
 import com.pizza.psx.views.PortfolioListView
@@ -353,6 +354,33 @@ fun AppNavHost(
             route = "metals_view",
         ){
             MetalsView(
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onClickMetal = {metal ->
+                    navController.navigate("metals_detail_view/$metal")
+                }
+
+                )
+        }
+        //MetalDetailView
+
+        composable(
+            route = "metals_detail_view/{metal}",
+            arguments = listOf(
+                navArgument("metal") {
+                    type = NavType.StringType
+                    defaultValue = "gold" // Default market type
+                },
+
+
+                )
+        ){ backStackEntry ->
+
+            val metalSymbol = backStackEntry.arguments?.getString("metal") ?: "gold"
+
+            MetalDetailView(
+                metal = metalSymbol,
                 onBackClick = {
                     navController.popBackStack()
                 },
