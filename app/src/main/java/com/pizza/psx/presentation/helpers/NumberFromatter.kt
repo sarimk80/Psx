@@ -1,6 +1,9 @@
 package com.pizza.psx.presentation.helpers
 
+import androidx.compose.foundation.shape.GenericShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.pizza.psx.views.charts.ChartData
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
@@ -173,4 +176,30 @@ fun marketStatus(status:String):String = when(status) {
     "Post-Close Session" -> "Closed"
     "Order Matching" -> "Order Matching"
     else -> "Closed"
+}
+
+val StockFabShape = RoundedCornerShape(
+    topStart = 24.dp,
+    topEnd = 24.dp,
+    bottomStart = 12.dp,
+    bottomEnd = 12.dp
+)
+
+val HexagonShape = GenericShape { size, _ ->
+    moveTo(size.width * 0.25f, 0f)
+    lineTo(size.width * 0.75f, 0f)
+    lineTo(size.width, size.height * 0.5f)
+    lineTo(size.width * 0.75f, size.height)
+    lineTo(size.width * 0.25f, size.height)
+    lineTo(0f, size.height * 0.5f)
+    close()
+}
+
+val ShieldShape = GenericShape { size, _ ->
+    moveTo(size.width * 0.2f, 0f)
+    lineTo(size.width * 0.8f, 0f)
+    lineTo(size.width, size.height * 0.4f)
+    lineTo(size.width * 0.5f, size.height)
+    lineTo(0f, size.height * 0.4f)
+    close()
 }

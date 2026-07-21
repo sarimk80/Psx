@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -13,6 +14,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Search
@@ -209,7 +211,9 @@ fun SymbolList(
 @Composable
 fun SymbolListItem(
     symbol: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    isShowIcon: Boolean = false,
+    isTicker: Boolean = false
 ) {
     Card(
         onClick = onClick,
@@ -245,6 +249,15 @@ fun SymbolListItem(
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.padding(start = 16.dp)
             )
+            Spacer(modifier = Modifier.weight(1f))
+
+            if(isShowIcon){
+                Icon(
+                    imageVector = if(isTicker)  Icons.Default.CheckCircleOutline else Icons.Default.Close,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primaryContainer,
+                )
+            }
         }
     }
 }

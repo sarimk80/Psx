@@ -108,7 +108,7 @@ fun SectorDetailView(
                         contentColor = MaterialTheme.colorScheme.onSurface
                     ),
                     onClick = {
-                        onTickerClick("REG", stock.script_name)
+                        //onTickerClick("REG", stock.script_name)
                     }
                 ) {
 

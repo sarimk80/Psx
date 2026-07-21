@@ -257,30 +257,6 @@ class TickerDetailViewModel@Inject constructor(
        }
    }
 
-//    fun getCompanyDetailAll(type:String,symbol:String){
-//        viewModelScope.launch {
-//            _uiState.value = _uiState.value.copy(isLoading = true)
-//            when (val answer = getCompanyDetail(symbol)){
-//                is StockResult.Success -> {
-//                    _uiState.value = _uiState.value.copy(
-//                        company = answer.data,
-//                        isLoading = false,
-//                        error = null
-//                    )
-//                }
-//                is StockResult.Error -> {
-//                    _uiState.value = _uiState.value.copy(
-//                        isLoading = false,
-//                        error = answer.message
-//                    )
-//                }
-//                is  StockResult.Loading -> {
-//                    _uiState.value = _uiState.value.copy(isLoading = true)
-//                }
-//            }
-//        }
-//    }
-
     fun getMarketDividend() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isDividendLoading = true, error = null)

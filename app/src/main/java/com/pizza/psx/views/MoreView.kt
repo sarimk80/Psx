@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.automirrored.outlined.CompareArrows
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -27,6 +28,8 @@ import com.pizza.compose.financialGreen
 import com.pizza.compose.financialRed
 import com.pizza.compose.financialWarning
 import com.pizza.compose.green
+import com.pizza.compose.hotStone
+import com.pizza.compose.lavender
 import com.pizza.compose.purpleColor
 import com.pizza.compose.rust
 import com.pizza.compose.veryBerry
@@ -45,6 +48,7 @@ fun MoreView(
     onCircuitBreaker:() -> Unit = {},
     onCurrencyExchange:() -> Unit = {},
     onMetalView:() -> Unit = {},
+    onCompareStockView:() -> Unit = {}
     ) {
     val viewModel: MoreViewModel = hiltViewModel()
 
@@ -123,7 +127,7 @@ fun MoreView(
                     )
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                     )
 
                     SettingsRow(
@@ -134,7 +138,7 @@ fun MoreView(
                     )
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                     )
 
                     SettingsRow(
@@ -146,7 +150,7 @@ fun MoreView(
 
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                     )
 
                     SettingsRow(
@@ -158,7 +162,7 @@ fun MoreView(
 
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                     )
 
                     SettingsRow(
@@ -168,7 +172,17 @@ fun MoreView(
                         onClick = onMetalView
                     )
 
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    )
 
+                    SettingsRow(
+                        icon = Icons.AutoMirrored.Outlined.CompareArrows,
+                        iconTint = hotStone,
+                        label = "Compare Stocks",
+                        onClick = onComingSoonView
+                    )
 
 
 
@@ -185,7 +199,7 @@ fun MoreView(
                     )
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                     )
                     SettingsRow(
                         icon = Icons.Outlined.Translate,
@@ -195,7 +209,7 @@ fun MoreView(
                     )
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                     )
                     SettingsRow(
                         icon = Icons.Outlined.DeleteOutline,

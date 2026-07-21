@@ -50,6 +50,7 @@ import com.pizza.psx.domain.model.StockDataListNavType
 import com.pizza.psx.domain.model.TickerNavType
 import com.pizza.psx.views.CircuitBreaker
 import com.pizza.psx.views.ComingSoonView
+import com.pizza.psx.views.CompareStockView
 import com.pizza.psx.views.CurrencyChangeView
 import com.pizza.psx.views.EtfDetailView
 import com.pizza.psx.views.EtfView
@@ -163,6 +164,9 @@ fun AppNavHost(
                 },
                 onMetalView = {
                     navController.navigate("metals_view")
+                },
+                onCompareStockView = {
+                    navController.navigate("compare_stocks")
                 }
 
             )
@@ -386,6 +390,13 @@ fun AppNavHost(
                 },
 
                 )
+        }
+
+        // Compare Stocks
+        composable(
+            route = "compare_stocks",
+        ){
+            CompareStockView()
         }
 
     }

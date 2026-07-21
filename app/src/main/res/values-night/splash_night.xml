@@ -2,7 +2,7 @@
 <resources>
 
     <style name="Theme.Psx" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">#FF1A110F</item>
+        <item name="windowSplashScreenBackground">#001C3A</item>
         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_icon_night_round</item>
         <item name="windowSplashScreenAnimationDuration">400</item>
         <item name="android:statusBarColor">@android:color/transparent</item>

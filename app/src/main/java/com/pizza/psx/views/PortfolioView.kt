@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -64,6 +65,7 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -102,6 +104,9 @@ import com.pizza.compose.financialGreen
 import com.pizza.compose.financialRed
 import com.pizza.psx.domain.model.Ticker
 import com.pizza.psx.domain.model.Transaction
+import com.pizza.psx.presentation.helpers.HexagonShape
+import com.pizza.psx.presentation.helpers.ShieldShape
+import com.pizza.psx.presentation.helpers.StockFabShape
 import com.pizza.psx.presentation.helpers.generateColorFromSymbol
 import com.pizza.psx.presentation.helpers.generateColors
 import com.pizza.psx.presentation.helpers.getColorFromIndex
@@ -182,7 +187,7 @@ fun PortfolioView(
                 FloatingActionButton(
                     modifier = Modifier
                         .statusBarsPadding()
-                        .padding(bottom = 50.dp)
+                        .padding(bottom = 60.dp)
                         .navigationBarsPadding()
                         .navigationBarsPadding()
                         .navigationBarsPadding()
@@ -191,6 +196,7 @@ fun PortfolioView(
                         // Open bottom sheet
                         showBottomSheet = true
                     },
+                    shape = StockFabShape,
                 ) {
                     Icon(Icons.Default.Add, "Add stock")
                 }

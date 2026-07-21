@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -46,6 +47,7 @@ import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
+import com.pizza.psx.presentation.helpers.StockFabShape
 
 
 private val regionFilters = listOf("All", "Asia", "Europe", "Americas", "Africa", "Middle East","Crypto","Metals","Oceania")
@@ -97,7 +99,7 @@ fun CurrencyChangeView(onBackClick: () -> Unit) {
             FloatingActionButton(
                 modifier = Modifier
                     .statusBarsPadding()
-                    .padding(bottom = 50.dp)
+                    .padding(bottom = 60.dp)
                     .navigationBarsPadding()
                     .navigationBarsPadding()
                     .navigationBarsPadding()
@@ -106,6 +108,7 @@ fun CurrencyChangeView(onBackClick: () -> Unit) {
                     // Open bottom sheet
                     showBottomSheet = true
                 },
+                shape = StockFabShape,
             ) {
                 Icon(Icons.Default.CurrencyExchange, "Add stock")
             }
