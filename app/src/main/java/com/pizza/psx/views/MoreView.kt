@@ -181,7 +181,7 @@ fun MoreView(
                         icon = Icons.AutoMirrored.Outlined.CompareArrows,
                         iconTint = hotStone,
                         label = "Compare Stocks",
-                        onClick = onComingSoonView
+                        onClick = onCompareStockView
                     )
 
 
@@ -262,7 +262,7 @@ private fun SettingsGroup(
         )
         Surface(
             shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.surfaceBright,
+            color = MaterialTheme.colorScheme.onSecondary,
             tonalElevation = 1.dp,
             shadowElevation = 0.dp
         ) {
@@ -292,7 +292,7 @@ private fun SettingsRow(
             modifier = Modifier
                 .size(32.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(iconTint.copy(alpha = 0.12f)),
+                .background(iconTint.copy(alpha = 0.2f)),
             contentAlignment = Alignment.Center
         ) {
             Icon(

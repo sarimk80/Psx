@@ -396,7 +396,11 @@ fun AppNavHost(
         composable(
             route = "compare_stocks",
         ){
-            CompareStockView()
+            CompareStockView(
+                onBackClick = {
+                    navController.popBackStack()
+                },
+            )
         }
 
     }

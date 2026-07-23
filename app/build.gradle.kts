@@ -18,9 +18,9 @@ android {
     defaultConfig {
         applicationId = "com.pizza.psx"
         minSdk = 33
-        targetSdk = 35
-        versionCode = 38
-        versionName = "4.7"
+        targetSdk = 36
+        versionCode = 39
+        versionName = "4.8"
 
 
 

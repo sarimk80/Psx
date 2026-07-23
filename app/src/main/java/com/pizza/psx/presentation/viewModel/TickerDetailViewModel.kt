@@ -36,7 +36,6 @@ import javax.inject.Inject
 @HiltViewModel
 class TickerDetailViewModel@Inject constructor(
     private val getTickerDetail: TickerUseCase,
-    //private val getCompanyDetail:CompanyUseCase,
     private val getCompanyFundamental:CompanyFundamentalUseCase,
     private val getCompanyDividend: CompanyDividendUseCase,
     private val marketDividendUseCase: MarketDividendUseCase,
@@ -83,13 +82,6 @@ class TickerDetailViewModel@Inject constructor(
                     }
                 }
 
-//                val company = when(companyResult){
-//                    is StockResult.Success -> companyResult.data
-//                    is StockResult.Loading -> null
-//                    is StockResult.Error ->{
-//                        _uiState.value = _uiState.value.copy(error = companyResult.message)
-//                    }
-//                }
 
                 val fundamental = when(fundamentalResult){
                     is StockResult.Success -> fundamentalResult.data
