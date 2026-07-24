@@ -76,7 +76,7 @@ fun CompareStockView(
         skipPartiallyExpanded = true
     )
 
-    LaunchedEffect(Unit) { viewModel.getSymbolList() }
+    //LaunchedEffect(Unit) { viewModel.getSymbolList() }
 
     LaunchedEffect(showBottomSheet) {
         if (!showBottomSheet) searchQuery = ""
@@ -273,9 +273,6 @@ private fun EmptyStateView() {
             Card(
                 modifier = Modifier.size(200.dp),
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -731,10 +728,10 @@ private fun CompareTable(columns: List<CompareColumnData>) {
                     }
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp))
             }
 
-            Spacer(modifier = Modifier.height(72.dp))
+            Spacer(modifier = Modifier.height(76.dp))
         }
     }
 }

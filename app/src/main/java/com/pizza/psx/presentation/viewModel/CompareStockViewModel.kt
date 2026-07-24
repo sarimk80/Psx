@@ -1,5 +1,6 @@
 package com.pizza.psx.presentation.viewModel
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -36,7 +37,7 @@ class CompareStockViewModel@Inject constructor(
     val selectedTickers: State<List<String>> = _selectedTickers
 
     private val _tickerState = mutableStateOf<List<TickerSymbolDetail>>(emptyList())
-        val tickerUiState: State<List<TickerSymbolDetail>> = _tickerState
+    val tickerUiState: State<List<TickerSymbolDetail>> = _tickerState
 
 
 
@@ -58,6 +59,11 @@ class CompareStockViewModel@Inject constructor(
 
     fun removeFilterTicker(ticker: String){
         _selectedTickers.value = _selectedTickers.value - ticker
+        _tickerState.value = _tickerState.value.filterNot { it.ticker?.data?.symbol == ticker }
+    }
+
+    init {
+        getSymbolList()
     }
 
     fun getSymbolList(){
@@ -128,7 +134,7 @@ class CompareStockViewModel@Inject constructor(
                 }
             }
 
-            _tickerState.value = list
+            _tickerState.value = _tickerState.value + list
 
             _uiTickerState.value =
                 _uiTickerState.value.copy(
