@@ -13,6 +13,7 @@ import com.pizza.psx.domain.model.SymbolsModel
 import com.pizza.psx.domain.model.Ticker
 import com.pizza.psx.domain.usecase.CompanyDividendUseCase
 import com.pizza.psx.domain.usecase.CompanyFundamentalUseCase
+import com.pizza.psx.domain.usecase.GetAllSymbolsUseCase
 import com.pizza.psx.domain.usecase.KLineModelUseCase
 import com.pizza.psx.domain.usecase.MarketDividendUseCase
 import com.pizza.psx.domain.usecase.SymbolDetailUseCase
@@ -27,7 +28,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CompareStockViewModel@Inject constructor(
-    private val symbolListUseCase: SymbolListUseCase,
+    private val symbolListUseCase: GetAllSymbolsUseCase,
     private val getTickerDetail: TickerUseCase,
     private val getSymbolDetailUseCase: SymbolDetailUseCase,
 )
@@ -149,8 +150,8 @@ class CompareStockViewModel@Inject constructor(
 
 
 data class CompareStockSearchUiState(
-    val symbolList: SymbolsModel? = null,
-    val searchedSymbol:SymbolsModel? = null,
+    val symbolList: List<String>? = null,
+    val searchedSymbol:List<String>? = null,
     val isLoading: Boolean = false,
     val error: String? = null
 )

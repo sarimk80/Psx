@@ -45,7 +45,7 @@ fun DonutChartWithLegend(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
-            modifier = modifier.size(size = 200.dp),
+            modifier = modifier.size(size = 250.dp),
             contentAlignment = Alignment.Center
         ) {
             // Chart

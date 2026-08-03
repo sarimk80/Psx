@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pizza.psx.domain.model.StockResult
 import com.pizza.psx.domain.model.SymbolsModel
+import com.pizza.psx.domain.usecase.GetAllSymbolsUseCase
 import com.pizza.psx.domain.usecase.SymbolListUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -14,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val symbolListUseCase: SymbolListUseCase
+    private val symbolListUseCase: GetAllSymbolsUseCase
 ): ViewModel() {
 
     private val _uiState = mutableStateOf(SearchUiState())
@@ -57,8 +58,8 @@ class SearchViewModel @Inject constructor(
 }
 
 data class SearchUiState(
-    val symbolList: SymbolsModel? = null,
-    val searchedSymbol:SymbolsModel? = null,
+    val symbolList: List<String>? = null,
+    val searchedSymbol:List<String>? = null,
     val isLoading: Boolean = false,
     val error: String? = null
 )

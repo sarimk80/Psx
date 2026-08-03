@@ -22,6 +22,7 @@ import com.pizza.psx.domain.usecase.AllIndicesUseCase
 import com.pizza.psx.domain.usecase.CompanyDividendUseCase
 import com.pizza.psx.domain.usecase.CompanyFundamentalUseCase
 import com.pizza.psx.domain.usecase.CompanyUseCase
+import com.pizza.psx.domain.usecase.GetAllIndexTickerUseCase
 import com.pizza.psx.domain.usecase.KLineModelUseCase
 import com.pizza.psx.domain.usecase.MarketDividendUseCase
 import com.pizza.psx.domain.usecase.SymbolDetailUseCase
@@ -42,7 +43,6 @@ class TickerDetailViewModel@Inject constructor(
     private val getKLineModelUseCase: KLineModelUseCase,
     private val getSymbolDetailUseCase: SymbolDetailUseCase,
     private val getAllIndicesUseCase: AllIndicesUseCase
-
 ): ViewModel() {
 
     private val _uiState = mutableStateOf(TickerDetailUiState())

@@ -84,9 +84,9 @@ fun CompareStockView(
 
     val filteredSymbols by remember(searchQuery, uiState.symbolList) {
         derivedStateOf {
-            val all = uiState.symbolList?.data.orEmpty()
+            val all = uiState.symbolList?.orEmpty()
             if (searchQuery.isBlank()) all
-            else all.filter { it.contains(searchQuery, ignoreCase = true) }
+            else all!!.filter { it.contains(searchQuery, ignoreCase = true) }
         }
     }
 
@@ -246,7 +246,7 @@ fun CompareStockView(
                         },
                         onClearSearch = { searchQuery = "" },
                         isLoading = uiState.symbolList == null,
-                        filteredSymbols = filteredSymbols,
+                        filteredSymbols = filteredSymbols!!,
                         selectedTickers = selectedTickers,
                         onSymbolClick = { symbol ->
                             viewModel.addRemoveTicker(symbol)

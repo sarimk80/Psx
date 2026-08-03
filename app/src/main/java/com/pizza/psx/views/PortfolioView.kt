@@ -895,7 +895,7 @@ fun AddStockBottomSheetContent(
 
             searchUiState.symbolList != null -> {
                 PortfolioSymbolList(
-                    symbols = searchUiState.symbolList.data,
+                    symbols = searchUiState.symbolList,
                     searchQuery = query,
                     modifier = Modifier.weight(1f),
                     onTickerClick = onTickerClick,

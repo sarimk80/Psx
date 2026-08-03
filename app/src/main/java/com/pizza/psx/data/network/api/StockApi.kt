@@ -8,6 +8,7 @@ import com.pizza.psx.domain.model.EtfModel
 import com.pizza.psx.domain.model.Fundamentals
 import com.pizza.psx.domain.model.IndexDetailModel
 import com.pizza.psx.domain.model.IndexPriceModel
+import com.pizza.psx.domain.model.IndexTicker
 import com.pizza.psx.domain.model.KLineModel
 import com.pizza.psx.domain.model.MarketDividend
 import com.pizza.psx.domain.model.MetalsModel
@@ -80,4 +81,12 @@ interface StockApi {
 
     @GET
     suspend fun getMetals(@Url url: String):List<MetalsModel>
+
+    @GET
+    suspend fun getAllSymbols(@Url url: String): List<String>
+
+    //IndexTicker
+    @GET
+    suspend fun getTickersSymbols(@Url url: String): List<IndexTicker>
+
 }

@@ -10,6 +10,7 @@ import com.pizza.psx.domain.model.EtfModel
 import com.pizza.psx.domain.model.Fundamentals
 import com.pizza.psx.domain.model.IndexDetailModel
 import com.pizza.psx.domain.model.IndexPriceModel
+import com.pizza.psx.domain.model.IndexTicker
 import com.pizza.psx.domain.model.KLineModel
 import com.pizza.psx.domain.model.MarketDividend
 import com.pizza.psx.domain.model.MetalsModel
@@ -200,6 +201,24 @@ class StockRepository(
     override suspend fun getAllMetals(metal:String): StockResult<List<MetalsModel>> = withContext(dispatcher) {
         return@withContext try {
             val result = stockApi.getMetals("https://sarim-pix.hf.space/${metal}_price")
+            StockResult.Success(result)
+        }catch (e: Exception){
+            StockResult.Error("Failed${e.toString()}")
+        }
+    }
+
+    override suspend fun getAllSymbols(): StockResult<List<String>> = withContext(dispatcher){
+        return@withContext try {
+            val result = stockApi.getAllSymbols("https://sarim-pix.hf.space/get_all_symbols")
+            StockResult.Success(result)
+        }catch (e: Exception){
+            StockResult.Error("Failed${e.toString()}")
+        }
+    }
+
+    override suspend fun getIndexTicker(indexName: String): StockResult<List<IndexTicker>> =withContext(dispatcher){
+        return@withContext try {
+            val result = stockApi.getTickersSymbols("https://sarim-pix.hf.space/get_all_index?indexName=${indexName}")
             StockResult.Success(result)
         }catch (e: Exception){
             StockResult.Error("Failed${e.toString()}")

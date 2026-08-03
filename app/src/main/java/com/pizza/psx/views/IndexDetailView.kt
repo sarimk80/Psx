@@ -30,6 +30,8 @@ import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.PieChart
@@ -121,6 +123,7 @@ import com.pizza.psx.domain.model.CandleData
 import com.pizza.psx.domain.model.IndexData
 import com.pizza.psx.domain.model.IndexDetailModel
 import com.pizza.psx.domain.model.IndexPriceModel
+import com.pizza.psx.domain.model.IndexTicker
 import com.pizza.psx.domain.model.KLineModel
 import com.pizza.psx.domain.model.PsxOhlcModel
 import com.pizza.psx.domain.model.SectorName
@@ -134,12 +137,14 @@ import com.pizza.psx.presentation.helpers.number_format
 import com.pizza.psx.presentation.helpers.stringToIndexString
 import com.pizza.psx.presentation.viewModel.IndexDetailUiState
 import com.pizza.psx.presentation.viewModel.IndexDetailViewModel
+import com.pizza.psx.presentation.viewModel.IndexSymbolUiState
 import com.pizza.psx.presentation.viewModel.PortfolioUiState
 import com.pizza.psx.presentation.viewModel.PortfolioViewModel
 import com.pizza.psx.views.charts.ChartData
 import com.pizza.psx.views.charts.DonutChartWithLegend
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -150,7 +155,7 @@ fun IndexDetailView(
     viewModel: IndexDetailViewModel = hiltViewModel(),
     ticker: Ticker
 ) {
-    val uiState by viewModel.uiState
+    val uiState by viewModel.indexSymbolState
     val indexUiState by viewModel.indexUiState
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -173,7 +178,7 @@ fun IndexDetailView(
             )
 
             if (result == SnackbarResult.ActionPerformed) {
-                viewModel.getIndexDetail(indexName = stringToIndexString(indexSymbol))
+                viewModel.getIndexSymbols(indexName = indexSymbol)
             }
         }
     }
@@ -216,7 +221,7 @@ fun IndexDetailView(
                     .padding(paddingValues)
             ) {
                 when {
-                  uiState.isLoading && uiState.listOfStocks.isNullOrEmpty() -> {
+                  uiState.isLoading || indexUiState.isLoading -> {
                         FullScreenLoading()
                     }
 
@@ -224,23 +229,23 @@ fun IndexDetailView(
                         ErrorStateIndex(
                             error = uiState.error!!,
                             onRetry = {
-                                viewModel.getIndexDetail(indexName = stringToIndexString(indexSymbol))
+                                viewModel.getIndexSymbols(indexName = indexSymbol)
                             }
                         )
                     }
 
-                    !uiState.listOfStocks.isNullOrEmpty() -> {
+                    !uiState.listOfStocks.isNullOrEmpty()  && indexUiState.indexPrice != null-> {
                         ContentLoadedState(
                             uiState = uiState,
                             listState = listState,
                             onTickerClick = onTickerClick,
                             displayIndexName = displayIndexName,
-                            chartStocks = indexUiState.listOfStocks!!,
+                            chartStocks = uiState.listOfStocks!!,
                             indexPriceHistory = indexUiState.indexPrice!!,
                             onRefresh = {
                                 isRefreshing = true
                                 coroutineScope.launch {
-                                    viewModel.getIndexDetail(indexName = stringToIndexString(indexSymbol))
+                                    viewModel.getIndexSymbols(indexName = indexSymbol)
                                     delay(1000) // Minimum loading time for better UX
                                     isRefreshing = false
                                 }
@@ -253,7 +258,7 @@ fun IndexDetailView(
                     else -> {
                         EmptyState(
                             onRefresh = {
-                                viewModel.getIndexDetail(indexName = stringToIndexString(indexSymbol))
+                                viewModel.getIndexSymbols(indexName = indexSymbol)
                             }
                         )
                     }
@@ -369,11 +374,11 @@ private fun EmptyState(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ContentLoadedState(
-    uiState: IndexDetailUiState,
+    uiState: IndexSymbolUiState,
     listState: LazyListState,
     onTickerClick: (String) -> Unit,
     displayIndexName: String,
-    chartStocks: List<IndexDetailModel>,
+   chartStocks: List<IndexTicker>,
     onRefresh: () -> Unit,
     indexPriceHistory: PsxOhlcModel,
     isRefreshing: Boolean,
@@ -547,16 +552,7 @@ private fun ContentLoadedState(
 
         // Stocks list
         items(uiState.listOfStocks ?: emptyList()) { item ->
-            CompactWatchlistItemCard(
-                isHideVolume = false,
-                item = item,
-                onRemove = {  }, // Remove functionality not needed for index view
-                onTickerClick = { onTickerClick(item.data.symbol) },
-                onUpdateTicker = {},
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-            )
+            StockListItem(item,onClick = { onTickerClick(item.symbol) })
         }
 
         // Bottom spacer
@@ -1205,23 +1201,17 @@ private fun LineChart(data: PsxOhlcModel){
 }
 @Composable
 private fun IndexChartSection(
-    stocks: List<IndexDetailModel>
+    stocks: List<IndexTicker>
 ) {
 
-    val sectorCount = remember(stocks) {
-        stocks.groupBy { it.sector }
-            .map { (sectorName, tickers) ->
-                SectorName(sectorName, tickers.size)
-            }
-    }
 
-    val chartData = remember(sectorCount) {
-        sectorCount.mapIndexed { index, sector ->
+    val chartData = remember(stocks) {
+        stocks.mapIndexed { index, sector ->
             ChartData(
-                label = sector.sectorName.ifEmpty { "Unknown" },
-                value = sector.sectorCount.toFloat(),
+                label = sector.symbol.ifEmpty { "Unknown" },
+                value = sector.idx_weight.toFloat(),
                 color = getColorFromIndex(index),
-                price = sectorCount.size.toFloat()
+                price = sector.current.replace(",","").toFloat()
             )
         }
     }
@@ -1261,7 +1251,8 @@ fun IndexOverviewCards(
 ) {
 
     Row(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -1392,4 +1383,120 @@ fun IndexSmallCard(
             }
         }
     }
+}
+
+@Composable
+fun StockListItem(
+    item: IndexTicker,
+    onClick: (IndexTicker) -> Unit = {}
+) {
+    val ldcpValue = item.ldcp.replace(",", "").toDoubleOrNull() ?: 0.0
+    val changePercent = if (ldcpValue != 0.0) (item.change / ldcpValue) * 100 else 0.0
+    val isPositive = item.change >= 0
+    val changeColor = if (isPositive) financialGreen else financialRed
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 4.dp),
+        shape = RoundedCornerShape(14.dp),
+//        colors = CardDefaults.cardColors(
+//            containerColor = MaterialTheme.colorScheme.surface
+//        ),
+        //elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        onClick = { onClick(item) }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Left: symbol + name
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = item.symbol,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = item.name,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(4.dp))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    MetaChip(label = "Vol", value = item.volume)
+                    //MetaChip(label = "Wt", value = "${formatDecimal(item.idx_weight)}%")
+                    MetaChip(label = "MCap", value = formatCap(item.marketCap))
+                }
+            }
+
+            Spacer(Modifier.width(8.dp))
+
+            // Right: price + change
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = item.current,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .background(
+                            color = changeColor.copy(alpha = 0.12f),
+                            shape = RoundedCornerShape(6.dp)
+                        )
+                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                ) {
+                    Icon(
+                        imageVector = if (isPositive) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                        contentDescription = null,
+                        tint = changeColor,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Text(
+                        text = "${formatDecimal(item.change)} (${formatDecimal(changePercent)}%)",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = changeColor,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+                Text(
+                    text = "LDCP ${item.ldcp}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MetaChip(label: String, value: String) {
+    Text(
+        text = "$label $value",
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+}
+
+private fun formatDecimal(value: Double): String =
+    String.format(Locale.US, "%.2f", value)
+
+private fun formatCap(value: Double): String = when {
+    value >= 100_000 -> String.format(Locale.US, "%.1fB", value / 100_000)
+    value >= 1_000 -> String.format(Locale.US, "%.1fCr", value / 1_000)
+    else -> String.format(Locale.US, "%.0fM", value)
 }

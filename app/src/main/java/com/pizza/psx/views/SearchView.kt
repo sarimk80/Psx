@@ -104,7 +104,7 @@ fun SearchView(
                     onRetry = { viewModel.getSymbolList() }
                 )
                 uiState.symbolList !=null -> SymbolList(
-                    symbols = uiState.symbolList!!.data,
+                    symbols = uiState.symbolList!!,
                     searchQuery = searchQuery,
                     modifier = Modifier.weight(1f),
                     onTickerClick = onTickerClick
