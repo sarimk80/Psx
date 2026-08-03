@@ -1,202 +1,151 @@
-# 📈 PSX – Pakistan Stock Exchange App
+📈 PSX – Pakistan Stock Exchange
 
-A modern Android application delivering **real-time market data from the Pakistan Stock Exchange**, detailed company insights, smart portfolio tracking, and an elegant Material 3 user experience.
+A modern Android application for tracking the Pakistan Stock Exchange (PSX) with real-time market data, portfolio management, and insightful analytics.
 
-Built for investors who want speed, clarity, and powerful analytics — all in one place.
+📲 Download
+
+Get it on Google Play
+
+✨ Features
+
+📊 Market
+
+Live PSX indices (KSE-100, KSE-30, All Share)
+
+Real-time price updates
+
+Market summary and sector performance
+
+Interactive charts
+
+🏢 Companies
+
+Company profiles
+
+EPS, P/E, Market Cap
+
+Dividends & corporate actions
+
+Historical and intraday charts
+
+💼 Portfolio
+
+Portfolio tracking
+
+Profit & Loss
+
+Watchlists
+
+Price alerts
+
+🎨 UI
+
+Material 3
 
----
+Dark/Light theme
 
-## Play Store
+Offline cache
 
-[Download the app on Google Play](https://play.google.com/store/apps/details?id=com.pizza.psx)
+Jetpack Compose
 
+📱 Screenshots
 
-## 🚀 Features
+<p align="center">
+<img src="https://github.com/user-attachments/assets/f5ee349b-2745-4681-ad3d-b46b316f4c10" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/ee5b7482-5be0-4f79-a9cd-0d2144c7bd40" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/0db954c7-7664-45f1-846f-b38b358cbf5a" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/3d058d50-f7b2-45b1-a720-719b4637d4e5" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/f954d5d6-fe66-449c-8802-5b04349447c8" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/15122c7b-3afd-4b56-8d25-fcb256980260" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/6a9b5eee-dbc1-48ce-9676-b9a1a82065c8" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/4a99512f-5db6-4a4d-9f39-8ba03aa3e909" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/73232716-8d29-42d3-96dd-fb32ae27dbf4" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/97ea1777-e119-4aa1-8021-31565b82522b" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/6a1d3348-b038-4c76-84a3-822d7a9b5393" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/901583f0-fe55-4347-8c13-58c061ad8a4b" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/16f747c4-129a-4f27-b2b0-a701dc24c189" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/437d1c0f-9d0e-4e04-8f4a-c4c8f75e1c9d" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/50151a25-3ac4-4681-aec4-c22cb62798d4" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/453bd46a-ec77-4242-b4c7-5dcacec2b851" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/4c039387-3cf8-46e6-9d51-f71a29380fb5" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/d6d4da1f-1018-4f9c-9c06-6cc54d7f9c0a" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/b6dd283e-48d3-4613-98eb-61e1ffe2fd9d" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/1ba804b9-050e-4433-ab53-4388b053b659" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/8f7565ec-d72d-4919-9b8d-b57e10e37b8f" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/f9c38b0f-1c73-413c-aec3-06e7cb62f6a7" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/25f68c05-a7b8-4784-ba41-221ace43cf20" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/ffc6c4a7-22e5-4bac-9210-e7272f4043bc" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/ed727b7e-5e1f-4372-9820-f1883b8b5d2c" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/1dc4399e-477f-48c4-81aa-9560321fe2e5" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/448557f9-571f-435f-808b-d7ea45727a82" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/dead76f2-f10b-48e8-8853-e0df5eec6211" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/0047ee4d-3a4b-4150-b51f-d6727cd18b2d" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/c6ed8ffa-c917-423b-b53b-c2446265c6cd" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/493ca92e-ca28-4ddf-885d-8f88c6d073d5" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/b1f7f84c-f166-40eb-9089-1cb2c4242c22" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/c55abc4b-4fdf-4c48-a90f-b4e6906d07c0" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/a960dc4f-292b-47fe-a3ae-e68b4c5d544e" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/01add271-36c8-43be-9b06-e5478620329d" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/27202738-013f-40be-a05b-5e8185c6b698" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/874ec774-091a-4f80-8932-d60246781b07" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/3b4f711a-2d9b-49c0-a2c8-53db639cb121" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/30ebbf3d-45e8-4eb6-9918-a39877efb660" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/c9fda76a-144b-4fd8-a323-90eff19981e2" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/858ef3ca-0bff-40ea-9ecf-5f7e16076273" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/edd23b44-4bee-4d3b-b24a-02b79dea5440" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/43e95ae1-bb55-4064-961b-39a0d15c6476" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/25dac87c-d3d5-4b05-b27c-64164f6a9331" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/fd116c8e-c611-4391-9224-2ba49167b344" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/09d9e584-eabb-4e24-aa04-6d26ae8e4738" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/44b2a28c-07f7-48ae-a254-f04473be2c62" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/d11cfb2f-9c29-47ca-b22c-73da8de3aedf" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/80fe9015-8f34-44a0-8727-fb962716818b" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/5045c971-60cf-4bc4-9585-f4d07d5f73cc" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/0083c5d5-a1bb-429f-afc9-f207ced2b4f9" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/d95441da-e61a-4e41-ac6f-1c071f968248" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/1e3dc340-2a59-4b8a-b64a-874a0c2bdc51" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/6fb70e9c-b136-40e7-9362-41c2cd59c51d" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/2250787a-bed6-4bdf-9986-ba2532a81689" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/df49d8a2-985d-4a86-95ef-4ffa8fa0726b" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/70585fc9-387d-4017-a522-b79cfe8ec323" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/1ebbd443-0caf-47ce-9d39-10b949473e15" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/41072bf7-c42a-4f00-8f81-2356d566bd6f" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/77194fe1-e940-40f8-bf8a-ec61580baa82" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/1c4657a9-939c-4d97-919b-de184878bc15" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/4cc08448-faee-445d-9f70-b347c28424e8" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/5d2cecc9-3384-4e5d-89fd-b93c9dc27e50" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/5aff1819-a847-4ee6-9953-306e311e82e9" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/0e465dd2-6cf4-4734-b46d-ddf47c28db66" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/31358ac3-6f78-4d74-a654-a32aabc9d316" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/d18296a7-65ad-44ff-b192-802b4bdc74aa" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/8a0178e9-df85-4bee-91d0-6aa554731213" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/41d01032-ef1b-48da-83b8-c5aa7fe2923a" width="240" alt="Screenshot" />
+<img src="https://github.com/user-attachments/assets/b239dfd5-f313-4ce1-b94c-a9956e749910" width="240" alt="Screenshot" />
+</p>
 
-### 📊 Market Overview
-- Live PSX indices (KSE-100, KSE-30, All Share)
-- Real-time price updates with % change
-- Market summary (high, low, volume)
-- Sector-wise performance breakdown
-- Interactive distribution charts
+🏗️ Architecture
 
-### 🔎 Company Intelligence
-- Detailed company profiles
-- EPS, P/E ratio, market cap
-- Dividend & corporate action tracking
-- Intraday & historical charts
-- Volume & liquidity insights
+Clean Architecture
 
-### 💼 Portfolio & Watchlist
-- Real-time portfolio tracking
-- Profit & Loss calculation
-- Smart watchlist management
-- Sector allocation visualization
-- Custom price alerts
+MVVM
 
-### 🎨 User Experience
-- Material 3 UI (Dark / Light theme)
-- Clean & intuitive navigation
-- Offline cached data support
-- Push notifications for market updates
-- Smooth animations & Compose UI
+🛠️ Tech Stack
 
----
+Kotlin
 
-# 📱 Screenshots
+Jetpack Compose
 
----
+Material 3
 
-## 📑 More Screens
+Coroutines + Flow
 
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/acd70274-9af1-4d31-a665-d4d4664bfbef" width="250"/>
-  <img src="https://github.com/user-attachments/assets/2dd38af9-5442-4ae6-aaa8-7070b0139656" width="250"/>
-  <img src="https://github.com/user-attachments/assets/e6c1c845-6698-40f7-bd92-683efc3b2841" width="250"/>
-  <img src="https://github.com/user-attachments/assets/301c9d62-ed97-4a42-b05e-7d937a37810b" width="250"/>
-  <img src="https://github.com/user-attachments/assets/c0a13045-588b-479a-9dcd-7532924045f6" width="250"/>
-</div>
+Retrofit
 
-## 📊 Advanced Views
+Room
 
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/08025685-df1f-4714-9885-41fcb8f52e7a" width="250"/>
-  <img src="https://github.com/user-attachments/assets/a0d6e872-e256-435e-8e80-5db86c4f6c22" width="250"/>
-  <img src="https://github.com/user-attachments/assets/54e896fc-4711-4771-9af5-7701574427a6" width="250"/>
-  <img src="https://github.com/user-attachments/assets/23aedb73-8e27-4ee4-a21e-f4d657a6f807" width="250"/>
-</div>
+Hilt
 
-## 🏢 Company Financials & Analysis
+📦 Setup
 
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/fc544fa5-17c6-4faa-a157-9fbb9e4d5b0b" width="250"/>
-  <img src="https://github.com/user-attachments/assets/d2db37b6-36c3-4076-bbe1-33d49ccc2905" width="250"/>
-  <img src="https://github.com/user-attachments/assets/5c76a553-4479-400c-8059-624df9f2a176" width="250"/>
-  <img src="https://github.com/user-attachments/assets/af0ab38d-67d1-4e94-9cdd-267a7fd50ac4" width="250"/>
-</div>
-
-## 📊 Indices & Sector Distribution
-
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/22858437-7720-46a8-a8d0-c98a018cac22" width="250"/>
-  <img src="https://github.com/user-attachments/assets/fdc147b3-559d-4d31-b253-b0a1c617c4cb" width="250"/>
-  <img src="https://github.com/user-attachments/assets/9ba8c52d-9738-48e4-ac95-0d775c45a948" width="250"/>
-  <img src="https://github.com/user-attachments/assets/0cd9a746-fb66-4366-8ec2-8692a75c7bdb" width="250"/>
-</div>
-
-## 🏠 Home & Market Overview
-
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/13a6ed86-7ae0-4b21-8f97-d32bc1fbbcad" width="250"/>
-  <img src="https://github.com/user-attachments/assets/0cb55da4-ecd7-4421-9375-2c72582ce0c0" width="250"/>
-  <img src="https://github.com/user-attachments/assets/922ea4f7-1de1-46a2-a68d-b09b1ae850dd" width="250"/>
-  <img src="https://github.com/user-attachments/assets/b2b580b7-7f90-4acd-a174-ae750db3db12" width="250"/>
-</div>
-
----
-
-
-
----
-
-## 📈 Stock Details & Charts
-
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/93f9fccc-2c85-45c2-9c0b-7e5eeb697cf7" width="250"/>
-  <img src="https://github.com/user-attachments/assets/a0aaba90-a9a9-4bd2-a870-1c0ff691dee9" width="250"/>
-  <img src="https://github.com/user-attachments/assets/a38f06df-1d32-4611-a674-d42b1dacffbf" width="250"/>
-  <img src="https://github.com/user-attachments/assets/21949f5d-7522-4bd7-8dc2-f16deb7ab6a0" width="250"/>
-</div>
-
----
-
-
-
----
-
-## 💼 Portfolio & Watchlist
-
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/f6147e52-f23e-4d59-bd85-db91d5201ae6" width="250"/>
-  <img src="https://github.com/user-attachments/assets/9fbd993b-964a-430e-8253-86b3540f864c" width="250"/>
-  <img src="https://github.com/user-attachments/assets/7ba86e2e-93fa-42ab-802c-7263a57856ef" width="250"/>
-  <img src="https://github.com/user-attachments/assets/e1235cd1-fb46-43d5-bacf-cddd504a9427" width="250"/>
-</div>
-
----
-
-## 🔔 News & Alerts
-
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/71873f28-1a7d-45fa-baef-4e767637bf45" width="250"/>
-  <img src="https://github.com/user-attachments/assets/5b06805d-0510-4a03-8fe8-858e907a0550" width="250"/>
-  <img src="https://github.com/user-attachments/assets/4356a02d-8eb0-4977-bcb7-7e1f7cc630f2" width="250"/>
-  <img src="https://github.com/user-attachments/assets/116e577d-e299-4994-8a6c-5086024b843e" width="250"/>
-</div>
-
----
-
-
-
----
-
-
-
----
-
-# 🏗️ Architecture
-
-**Clean Architecture + MVVM**
-
-### Benefits
-- Clear separation of concerns
-- Scalable structure
-- Highly testable
-- Industry-standard best practices
-
----
-
-# 🛠️ Tech Stack
-
-### Language
-- Kotlin
-
-### UI
-- Jetpack Compose  
-- Material 3  
-
-### Architecture
-- MVVM  
-- Clean Architecture  
-
-### Async & State
-- Coroutines  
-- Flow / StateFlow  
-
-### Networking
-- Retrofit  
-- REST APIs  
-
-### Local Storage
-- Room Database  
-
-### Dependency Injection
-- Hilt  
-
----
-
-# 📦 Installation & Setup
-
-## Prerequisites
-- Android Studio Hedgehog or later  
-- JDK 17+  
-- Android SDK 34  
-- Git  
-
----
-
-## Clone the Repository
-
-```bash
 git clone https://github.com/your-username/psx-app.git
 cd psx-app
