@@ -58,9 +58,15 @@ class MetalViewModel@Inject constructor(
 
                 val usdCurrency = currencyData.response.firstOrNull { it.currencyName == "USD" }
 
+                val PKR_PER_USD = usdCurrency?.currency ?: 1.0
+                val OUNCE_TO_TOLA = 2.6666667
+
                 val updatedMetals = metalData.map {
+                    val pricePerOzPKR = it.max_price.toDouble() * PKR_PER_USD
+                    val pricePerTolaPKR = pricePerOzPKR / OUNCE_TO_TOLA
+
                     it.copy(
-                        max_price = (it.max_price.toDouble() * usdCurrency!!.currency).toString()
+                        max_price = String.format("%.2f", pricePerTolaPKR)
                     )
                 }
 

@@ -1,7 +1,9 @@
 package com.pizza.psx.presentation.viewModel
 
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -19,6 +21,7 @@ import com.pizza.psx.domain.usecase.IndexPriceUseCase
 import com.pizza.psx.domain.usecase.KLineModelUseCase
 import com.pizza.psx.domain.usecase.TickerUseCase
 import com.pizza.psx.presentation.helpers.stringToIndexString
+import com.pizza.psx.views.FilterOption
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -40,10 +43,13 @@ class IndexDetailViewModel @Inject constructor(
 
     private val _indexSymbolUiState = mutableStateOf(IndexSymbolUiState())
 
+
+
     //val uiState: State<IndexDetailUiState> = _uiState
     val indexUiState: State<IndexChartList> = _indexUiState
 
     val indexSymbolState: State<IndexSymbolUiState> = _indexSymbolUiState
+
 
    private val indexSymbol: String = checkNotNull(savedStateHandle["indexSymbol"])
 
@@ -126,6 +132,37 @@ class IndexDetailViewModel @Inject constructor(
         }
     }
 
+
+    fun filterTicker(
+        listOfStocks: List<IndexTicker>,
+        filterOption: FilterOption
+    ) {
+        val sortedList = when (filterOption) {
+            FilterOption.HIGH ->
+                listOfStocks.sortedByDescending { it.current.toFloatOrNull() ?: 0f }
+
+            FilterOption.LOW ->
+                listOfStocks.sortedBy { it.current.toFloatOrNull() ?: 0f }
+
+            FilterOption.CURRENT ->
+                listOfStocks.sortedBy { it.current.toFloatOrNull() ?: 0f }
+
+            FilterOption.INDEX_WEIGHT ->
+                listOfStocks.sortedByDescending { it.idx_weight }
+
+            FilterOption.VOLUME ->
+                listOfStocks.sortedByDescending {
+                    it.volume.replace(",", "").toFloatOrNull() ?: 0f
+                }
+        }
+
+        _indexSymbolUiState.value = _indexSymbolUiState.value.copy(
+            listOfStocks = sortedList,
+            isLoading = false,
+            filterOption = filterOption
+        )
+    }
+
 }
 
 data class IndexDetailUiState(
@@ -144,5 +181,6 @@ data class IndexChartList(
 data class IndexSymbolUiState(
     val isLoading: Boolean = true,
     val error: String? = null,
-    val listOfStocks:List<IndexTicker>?=null
+    val listOfStocks:List<IndexTicker>?=null,
+    val filterOption: FilterOption = FilterOption.CURRENT
 )

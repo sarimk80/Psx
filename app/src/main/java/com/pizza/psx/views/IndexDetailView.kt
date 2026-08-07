@@ -2,16 +2,17 @@ package com.pizza.psx.views
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -25,26 +26,23 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.RadioButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ShowChart
-import androidx.compose.material.icons.automirrored.filled.TrendingDown
-import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
-import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.PieChart
-import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.material.icons.filled.TrendingDown
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.twotone.FilterAlt
 import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -54,19 +52,22 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -123,26 +124,18 @@ import com.pizza.compose.financialWarning
 import com.pizza.compose.veryBerry
 import com.pizza.psx.R
 import com.pizza.psx.domain.model.CandleData
-import com.pizza.psx.domain.model.IndexData
-import com.pizza.psx.domain.model.IndexDetailModel
-import com.pizza.psx.domain.model.IndexPriceModel
 import com.pizza.psx.domain.model.IndexTicker
-import com.pizza.psx.domain.model.KLineModel
 import com.pizza.psx.domain.model.PsxOhlcModel
-import com.pizza.psx.domain.model.SectorName
 import com.pizza.psx.domain.model.Ticker
 import com.pizza.psx.presentation.helpers.formatDate
 import com.pizza.psx.presentation.helpers.formatShortDate
-import com.pizza.psx.presentation.helpers.formatTimestamp
 import com.pizza.psx.presentation.helpers.formatVolume
 import com.pizza.psx.presentation.helpers.getColorFromIndex
 import com.pizza.psx.presentation.helpers.number_format
-import com.pizza.psx.presentation.helpers.stringToIndexString
-import com.pizza.psx.presentation.viewModel.IndexDetailUiState
+
 import com.pizza.psx.presentation.viewModel.IndexDetailViewModel
 import com.pizza.psx.presentation.viewModel.IndexSymbolUiState
-import com.pizza.psx.presentation.viewModel.PortfolioUiState
-import com.pizza.psx.presentation.viewModel.PortfolioViewModel
+
 import com.pizza.psx.views.charts.ChartData
 import com.pizza.psx.views.charts.DonutChartWithLegend
 import kotlinx.coroutines.delay
@@ -253,8 +246,11 @@ fun IndexDetailView(
                                     isRefreshing = false
                                 }
                             },
-                            isRefreshing = isRefreshing,
-                            ticker = ticker
+                            filterOption = uiState.filterOption,
+                            ticker = ticker,
+                            onApply = {filter ->
+                                viewModel.filterTicker(uiState.listOfStocks ?: emptyList(),filter)
+                            }
                         )
                     }
 
@@ -381,16 +377,21 @@ private fun ContentLoadedState(
     listState: LazyListState,
     onTickerClick: (String) -> Unit,
     displayIndexName: String,
-   chartStocks: List<IndexTicker>,
+    chartStocks: List<IndexTicker>,
     onRefresh: () -> Unit,
     indexPriceHistory: PsxOhlcModel,
-    isRefreshing: Boolean,
-    ticker: Ticker
+    filterOption: FilterOption,
+    ticker: Ticker,
+    onApply: (FilterOption) -> Unit
 ) {
 
     var showChartBottomSheet by remember { mutableStateOf(false) }
     var showSectorBottomSheet by remember { mutableStateOf(false) }
     var showDetailBottomSheet by remember { mutableStateOf(false) }
+
+    var showFilterBottomSheet by remember { mutableStateOf(false) }
+
+    var radioSelected by remember { mutableStateOf(false) }
 
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
@@ -505,6 +506,15 @@ private fun ContentLoadedState(
         }
     }
 
+    if (showFilterBottomSheet){
+        FilterBottomSheet(
+            sheetState = sheetState,
+            onDismiss = { showFilterBottomSheet = false },
+            onApply = onApply,
+            filterOption = filterOption
+        )
+    }
+
     LazyColumn(
         state = listState,
         modifier = Modifier.fillMaxSize()
@@ -539,23 +549,65 @@ private fun ContentLoadedState(
 
         // Stocks list header
         item {
-            Column(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Constituent Stocks",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(modifier = Modifier.height(16.dp))
+
+
+                Column {
+                    when(filterOption){
+                        FilterOption.HIGH -> Text(
+                            text = "High Stocks",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        FilterOption.LOW -> Text(
+                            text = "Low Stocks",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        FilterOption.CURRENT -> Text(
+                            text = "Constituent Stocks",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        FilterOption.INDEX_WEIGHT -> Text(
+                            text = "Index weight",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        FilterOption.VOLUME -> Text(
+                            text = "Volume",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+
+
+
+                }
+
+
+                Button(onClick = {
+                    showFilterBottomSheet = true
+                }) {
+                    Icon(Icons.TwoTone.FilterAlt, contentDescription = "" )
+                    Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                    Text("Filter",style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Normal)
+                }
             }
+
+
         }
 
         // Stocks list
         items(uiState.listOfStocks ?: emptyList()) { item ->
-            StockListItem(item,onClick = { onTickerClick(item.symbol) })
+            StockListItem(item,onClick = { onTickerClick(item.symbol) },filterOption)
         }
 
         // Bottom spacer
@@ -565,6 +617,127 @@ private fun ContentLoadedState(
     }
 
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FilterBottomSheet(
+    sheetState: SheetState,
+    onDismiss: () -> Unit,
+    onApply: (FilterOption) -> Unit,
+    filterOption: FilterOption
+) {
+
+    // Dedicated states for each filter group
+    var selectedVolume by remember { mutableStateOf(filterOption) }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+        dragHandle = { BottomSheetDefaults.DragHandle() }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 8.dp)
+        ) {
+            // Title
+            Text(
+                text = "Filters",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = 16.dp),
+                fontWeight = FontWeight.Bold
+            )
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(
+                    selected = selectedVolume == FilterOption.CURRENT,
+                    onClick = { selectedVolume = FilterOption.CURRENT },
+                    colors = RadioButtonDefaults.colors(
+                        selectedColor = MaterialTheme.colorScheme.primary,
+                    )
+                )
+                Text("Current",fontWeight = FontWeight.SemiBold, modifier = Modifier.clickable { selectedVolume = FilterOption.CURRENT })
+            }
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(
+                    selected = selectedVolume == FilterOption.HIGH,
+                    onClick = { selectedVolume = FilterOption.HIGH },
+                    colors = RadioButtonDefaults.colors(
+                        selectedColor = MaterialTheme.colorScheme.primary,
+                    )
+                )
+                Text("High", fontWeight = FontWeight.SemiBold, modifier = Modifier.clickable { selectedVolume = FilterOption.HIGH })
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(
+                    selected = selectedVolume == FilterOption.LOW,
+                    onClick = { selectedVolume = FilterOption.LOW },
+                    colors = RadioButtonDefaults.colors(
+                        selectedColor = MaterialTheme.colorScheme.primary,
+                    )
+                )
+                Text("Low",fontWeight = FontWeight.SemiBold, modifier = Modifier.clickable { selectedVolume = FilterOption.LOW })
+            }
+
+
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(
+                    selected = selectedVolume == FilterOption.INDEX_WEIGHT,
+                    onClick = { selectedVolume = FilterOption.INDEX_WEIGHT },
+                    colors = RadioButtonDefaults.colors(
+                        selectedColor = MaterialTheme.colorScheme.primary,
+                    )
+                )
+                Text("Index weight",fontWeight = FontWeight.SemiBold, modifier = Modifier.clickable { selectedVolume = FilterOption.INDEX_WEIGHT })
+            }
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(
+                    selected = selectedVolume == FilterOption.VOLUME,
+                    onClick = { selectedVolume = FilterOption.VOLUME },
+                    colors = RadioButtonDefaults.colors(
+                        selectedColor = MaterialTheme.colorScheme.primary,
+                    )
+                )
+                Text("Volume",fontWeight = FontWeight.SemiBold, modifier = Modifier.clickable { selectedVolume = FilterOption.VOLUME })
+            }
+
+
+
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // --- Action Buttons ---
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(onClick = {
+                    // Reset to defaults
+                    selectedVolume = FilterOption.CURRENT
+
+                }) {
+                    Text("Reset")
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Button(onClick = {
+                    onApply(selectedVolume)
+                    onDismiss()
+                }) {
+                    Text("Apply")
+                }
+            }
+
+            // Bottom inset for navigation bar
+            Spacer(modifier = Modifier.navigationBarsPadding().height(16.dp))
+        }
+    }
+}
+
+enum class FilterOption { HIGH, LOW, CURRENT, INDEX_WEIGHT , VOLUME }
 
 @Composable
 fun TickerDetails(
@@ -1393,7 +1566,8 @@ fun IndexSmallCard(
 @Composable
 fun StockListItem(
     item: IndexTicker,
-    onClick: (IndexTicker) -> Unit = {}
+    onClick: (IndexTicker) -> Unit = {},
+    filterOption: FilterOption
 ) {
     val ldcpValue = item.ldcp.replace(",", "").toDoubleOrNull() ?: 0.0
     val changePercent = if (ldcpValue != 0.0) (item.change / ldcpValue) * 100 else 0.0
@@ -1466,11 +1640,35 @@ fun StockListItem(
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                Text(
-                    text = item.current,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
+                when(filterOption){
+                    FilterOption.HIGH -> Text(
+                        text = item.current,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    FilterOption.LOW -> Text(
+                        text = item.current,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    FilterOption.CURRENT -> Text(
+                        text = item.current,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    FilterOption.INDEX_WEIGHT -> Text(
+                        text = "${item.idx_weight} %",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    FilterOption.VOLUME -> Text(
+                        text = "Vol: ${item.volume}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+
+
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
