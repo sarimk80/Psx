@@ -43,6 +43,7 @@ import androidx.compose.material.icons.filled.Money
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.StarBorder
+import androidx.compose.material.icons.twotone.FilterAlt
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
@@ -82,7 +83,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
@@ -92,6 +92,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pizza.psx.domain.model.PortfolioModel
 import com.pizza.psx.presentation.viewModel.PortfolioViewModel
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -180,6 +181,17 @@ fun PortfolioView(
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold)
                         },
+                actions = {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        Icon(Icons.TwoTone.FilterAlt, contentDescription = "" )
+                        Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                        Text("Filter",style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Normal)
+                    }
+                }
 
             )
         },

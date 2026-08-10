@@ -124,8 +124,10 @@ import com.pizza.compose.financialWarning
 import com.pizza.compose.veryBerry
 import com.pizza.psx.R
 import com.pizza.psx.domain.model.CandleData
+import com.pizza.psx.domain.model.IndexDetailModel
 import com.pizza.psx.domain.model.IndexTicker
 import com.pizza.psx.domain.model.PsxOhlcModel
+import com.pizza.psx.domain.model.SectorName
 import com.pizza.psx.domain.model.Ticker
 import com.pizza.psx.presentation.helpers.formatDate
 import com.pizza.psx.presentation.helpers.formatShortDate
@@ -236,7 +238,7 @@ fun IndexDetailView(
                             listState = listState,
                             onTickerClick = onTickerClick,
                             displayIndexName = displayIndexName,
-                            chartStocks = uiState.listOfStocks!!,
+                            chartStocks = indexUiState.listOfStocks!!,
                             indexPriceHistory = indexUiState.indexPrice!!,
                             onRefresh = {
                                 isRefreshing = true
@@ -377,7 +379,7 @@ private fun ContentLoadedState(
     listState: LazyListState,
     onTickerClick: (String) -> Unit,
     displayIndexName: String,
-    chartStocks: List<IndexTicker>,
+    chartStocks: List<IndexDetailModel>,
     onRefresh: () -> Unit,
     indexPriceHistory: PsxOhlcModel,
     filterOption: FilterOption,
@@ -1377,17 +1379,24 @@ private fun LineChart(data: PsxOhlcModel){
 }
 @Composable
 private fun IndexChartSection(
-    stocks: List<IndexTicker>
+    stocks: List<IndexDetailModel>
 ) {
 
+    val sectorCount = remember(stocks) {
+        stocks.groupBy { it.sector }
+            .map { (sectorName, tickers) ->
+                SectorName(sectorName, tickers.size)
+            }
+    }
 
-    val chartData = remember(stocks) {
-        stocks.mapIndexed { index, sector ->
+
+    val chartData = remember(sectorCount) {
+        sectorCount.mapIndexed { index, sector ->
             ChartData(
-                label = sector.symbol.ifEmpty { "Unknown" },
-                value = sector.idx_weight.toFloat(),
+                label = sector.sectorName.ifEmpty { "" },
+                value = sector.sectorCount.toFloat(),
                 color = getColorFromIndex(index),
-                price = sector.current.replace(",","").toFloat()
+                price = sectorCount.size.toFloat()
             )
         }
     }
