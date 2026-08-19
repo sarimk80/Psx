@@ -587,6 +587,11 @@ private fun ContentLoadedState(
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold
                         )
+                        FilterOption.MARKETCAP -> Text(
+                            text = "Market Capital",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
 
 
@@ -609,7 +614,7 @@ private fun ContentLoadedState(
 
         // Stocks list
         items(uiState.listOfStocks ?: emptyList()) { item ->
-            StockListItem(item,onClick = { onTickerClick(item.symbol) },filterOption)
+            StockListItem(item,onClick = { onTickerClick(item.symbol.replace("XD","") )},filterOption)
         }
 
         // Bottom spacer
@@ -707,6 +712,17 @@ fun FilterBottomSheet(
                 Text("Volume",fontWeight = FontWeight.SemiBold, modifier = Modifier.clickable { selectedVolume = FilterOption.VOLUME })
             }
 
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(
+                    selected = selectedVolume == FilterOption.MARKETCAP,
+                    onClick = { selectedVolume = FilterOption.MARKETCAP },
+                    colors = RadioButtonDefaults.colors(
+                        selectedColor = MaterialTheme.colorScheme.primary,
+                    )
+                )
+                Text("Market Cap",fontWeight = FontWeight.SemiBold, modifier = Modifier.clickable { selectedVolume = FilterOption.MARKETCAP })
+            }
+
 
 
 
@@ -739,7 +755,7 @@ fun FilterBottomSheet(
     }
 }
 
-enum class FilterOption { HIGH, LOW, CURRENT, INDEX_WEIGHT , VOLUME }
+enum class FilterOption { HIGH, LOW, CURRENT, INDEX_WEIGHT , VOLUME, MARKETCAP }
 
 @Composable
 fun TickerDetails(
@@ -1672,6 +1688,11 @@ fun StockListItem(
                     )
                     FilterOption.VOLUME -> Text(
                         text = "Vol: ${item.volume}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    FilterOption.MARKETCAP -> Text(
+                        text = "Market Cap: ${item.marketCap}",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )

@@ -11,6 +11,7 @@ import com.pizza.psx.domain.model.IndexPriceModel
 import com.pizza.psx.domain.model.IndexTicker
 import com.pizza.psx.domain.model.KLineModel
 import com.pizza.psx.domain.model.MarketDividend
+import com.pizza.psx.domain.model.MetalList
 import com.pizza.psx.domain.model.MetalsModel
 import com.pizza.psx.domain.model.PsxOhlcModel
 import com.pizza.psx.domain.model.Root
@@ -62,4 +63,8 @@ interface StockRepo {
     suspend fun getAllSymbols() : StockResult<List<String>>
 
     suspend fun getIndexTicker(indexName: String): StockResult<List<IndexTicker>>
+
+    suspend fun getMetalList(): StockResult<MetalList>
+
+    suspend fun getMetalListDetail(metalSymbol: String): StockResult<List<MetalsModel>>
 }

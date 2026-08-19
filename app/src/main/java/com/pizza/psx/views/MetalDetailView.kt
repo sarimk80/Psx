@@ -67,6 +67,7 @@ import com.pizza.compose.financialGreen
 import com.pizza.compose.financialRed
 import com.pizza.psx.R
 import com.pizza.psx.domain.model.MetalsModel
+import com.pizza.psx.presentation.helpers.metalSymbolToString
 import com.pizza.psx.presentation.viewModel.MetalViewModel
 import java.util.Locale
 
@@ -81,9 +82,9 @@ private val MONTH_ABBR = arrayOf(
 )
 
 fun MetalsModel.toPricePointOrNull(): PricePoint? {
-    val price = max_price.toDoubleOrNull() ?: return null
-    val dateKey = day.take(10) // "yyyy-MM-dd"
-    return PricePoint(dateKey = dateKey, price = price)
+    val price = high?.toDoubleOrNull() ?: return null
+    val dateKey = date?.take(10) // "yyyy-MM-dd"
+    return PricePoint(dateKey = dateKey?:"", price = price)
 }
 
 fun String.toShortLabel(): String {
@@ -125,7 +126,7 @@ fun MetalDetailView(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = metal.uppercase(), fontWeight = FontWeight.SemiBold) },
+                title = { Text(text = metalSymbolToString(metal), fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
@@ -307,7 +308,7 @@ fun MetalPriceHeader(
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Text(
-                text = "$metalName · as of $asOfLabel",
+                text = "${metalSymbolToString(metalName)} · as of $asOfLabel",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

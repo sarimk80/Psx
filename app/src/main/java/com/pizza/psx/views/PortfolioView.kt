@@ -105,8 +105,6 @@ import com.pizza.compose.financialGreen
 import com.pizza.compose.financialRed
 import com.pizza.psx.domain.model.Ticker
 import com.pizza.psx.domain.model.Transaction
-import com.pizza.psx.presentation.helpers.HexagonShape
-import com.pizza.psx.presentation.helpers.ShieldShape
 import com.pizza.psx.presentation.helpers.StockFabShape
 import com.pizza.psx.presentation.helpers.generateColorFromSymbol
 import com.pizza.psx.presentation.helpers.generateColors
@@ -146,6 +144,7 @@ fun PortfolioView(
     var showOptionSheet by remember { mutableStateOf(false) }
     var clickedTickerPrice by remember { mutableStateOf(0.0) }
     var isFromVolumeUpdate by remember { mutableStateOf(false) }
+    var showFilterSheet by remember { mutableStateOf(false) }
 
     var selectedSymbol by remember { mutableStateOf("") }
     var stockCount by remember { mutableStateOf("1") }
@@ -181,17 +180,20 @@ fun PortfolioView(
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold)
                         },
-                actions = {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ){
-                        Icon(Icons.TwoTone.FilterAlt, contentDescription = "" )
-                        Spacer(modifier = Modifier.padding(horizontal = 4.dp))
-                        Text("Filter",style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Normal)
-                    }
-                }
+//                actions = {
+//                    Row(
+//                        modifier = Modifier.clickable{
+//                            showFilterSheet = false
+//                        },
+//                        horizontalArrangement = Arrangement.Center,
+//                        verticalAlignment = Alignment.CenterVertically
+//                    ){
+//                        Icon(Icons.TwoTone.FilterAlt, contentDescription = "" )
+//                        Spacer(modifier = Modifier.padding(horizontal = 2.dp))
+//                        Text("Filter",style = MaterialTheme.typography.labelSmall,
+//                            fontWeight = FontWeight.Normal)
+//                    }
+//                }
 
             )
         },
@@ -306,6 +308,8 @@ fun PortfolioView(
                     )
                 }
             }
+
+            if(showFilterSheet){}
 
             when{
                 uiState.isLoading -> LoadingState()

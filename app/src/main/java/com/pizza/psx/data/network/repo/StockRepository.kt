@@ -13,6 +13,7 @@ import com.pizza.psx.domain.model.IndexPriceModel
 import com.pizza.psx.domain.model.IndexTicker
 import com.pizza.psx.domain.model.KLineModel
 import com.pizza.psx.domain.model.MarketDividend
+import com.pizza.psx.domain.model.MetalList
 import com.pizza.psx.domain.model.MetalsModel
 import com.pizza.psx.domain.model.PsxOhlcModel
 import com.pizza.psx.domain.model.Root
@@ -225,5 +226,21 @@ class StockRepository(
         }
     }
 
+    override suspend fun getMetalList(): StockResult<MetalList> = withContext(dispatcher) {
+        return@withContext try {
+            val result = stockApi.getMetalList("https://sarim-pix.hf.space/get_all_commodity")
+            StockResult.Success(result)
+        }catch (e: Exception){
+            StockResult.Error("Failed${e.toString()}")
+        }
+    }
 
+    override suspend fun getMetalListDetail(metalSymbol: String): StockResult<List<MetalsModel>> = withContext(dispatcher){
+        return@withContext try {
+            val result = stockApi.getMetalListDetail("https://sarim-pix.hf.space/get_single_commodity/${metalSymbol}")
+            StockResult.Success(result)
+        }catch (e: Exception){
+            StockResult.Error("Failed${e.toString()}")
+        }
+    }
 }

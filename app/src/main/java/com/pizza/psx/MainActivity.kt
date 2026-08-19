@@ -10,6 +10,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Foundation
+import androidx.compose.material.icons.rounded.Cases
 import androidx.compose.material.icons.rounded.Factory
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Menu
@@ -75,7 +77,7 @@ enum class Destination(
     val contentDescription: String
 ){
     Home("home","Home", Icons.Rounded.Home,"Home"),
-    Portfolio("portfolio","Holdings",Icons.Rounded.Wallet,"Portfolio"),
+    Portfolio("portfolio","Holdings",Icons.Rounded.Cases,"Portfolio"),
     HotStocks("hot stocks","Movers",Icons.Rounded.StackedBarChart,"Hot stocks"),
     Sectors("sector","Industries",Icons.Rounded.Factory,"Sectors"),
     More("More","More",Icons.Rounded.Menu,"More");

@@ -185,21 +185,31 @@ val StockFabShape = RoundedCornerShape(
     bottomEnd = 12.dp
 )
 
-val HexagonShape = GenericShape { size, _ ->
-    moveTo(size.width * 0.25f, 0f)
-    lineTo(size.width * 0.75f, 0f)
-    lineTo(size.width, size.height * 0.5f)
-    lineTo(size.width * 0.75f, size.height)
-    lineTo(size.width * 0.25f, size.height)
-    lineTo(0f, size.height * 0.5f)
-    close()
-}
+fun metalSymbolToString(metal: String): String = when(metal){
+    "GC=F" -> "Gold"
+    "SI=F" -> "Silver"
+    "PL=F" -> "Platinum"
+    "PA=F" -> "Palladium"
+    "CL=F" -> "WTI Crude Oil"
+    "BZ=F" -> "Brent Crude Oil"
+    "NG=F" -> "Natural Gas"
+    "RB=F" -> "Gasoline"
+    "HO=F" -> "Heating Oil"
+    "HG=F" -> "Copper"
+    "ZC=F" -> "Corn"
+    "ZW=F" -> "Wheat"
+    "ZS=F" -> "Soybeans"
+    "ZO=F" -> "Oats"
+    "ZR=F" -> "Rough Rice"
+    "KC=F" -> "Coffee"
+    "SB=F" -> "Sugar"
+    "CC=F" -> "Cocoa"
+    "CT=F" -> "Cotton"
+    "LBS=F" -> "Lumber"
+    "OJ=F" -> "Orange Juice"
+    "LE=F" -> "Live Cattle"
+    "GF=F" -> "Feeder Cattle"
+    "HE=F" -> "Lean Hogs"
 
-val ShieldShape = GenericShape { size, _ ->
-    moveTo(size.width * 0.2f, 0f)
-    lineTo(size.width * 0.8f, 0f)
-    lineTo(size.width, size.height * 0.4f)
-    lineTo(size.width * 0.5f, size.height)
-    lineTo(0f, size.height * 0.4f)
-    close()
+    else -> "Gold"
 }

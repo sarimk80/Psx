@@ -7,7 +7,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.automirrored.outlined.Assignment
 import androidx.compose.material.icons.automirrored.outlined.CompareArrows
+import androidx.compose.material.icons.automirrored.outlined.ShowChart
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -23,17 +25,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.pizza.compose.baraRed
+import com.pizza.compose.StockGreen
 import com.pizza.compose.financialGreen
 import com.pizza.compose.financialRed
 import com.pizza.compose.financialWarning
 import com.pizza.compose.green
 import com.pizza.compose.hotStone
-import com.pizza.compose.lavender
+import com.pizza.compose.orange
 import com.pizza.compose.purpleColor
 import com.pizza.compose.rust
+import com.pizza.compose.teal
 import com.pizza.compose.veryBerry
 import com.pizza.compose.veryBlue
+import com.pizza.compose.yellow
 import com.pizza.psx.BuildConfig
 import com.pizza.psx.presentation.viewModel.MoreViewModel
 
@@ -166,9 +170,9 @@ fun MoreView(
                     )
 
                     SettingsRow(
-                        icon = Icons.Outlined.SwitchLeft,
+                        icon = Icons.Outlined.Inventory2,
                         iconTint = purpleColor,
-                        label = "Metals",
+                        label = "Commodity",
                         onClick = onMetalView
                     )
 
@@ -182,6 +186,54 @@ fun MoreView(
                         iconTint = hotStone,
                         label = "Compare Stocks",
                         onClick = onCompareStockView
+                    )
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    )
+
+                    SettingsRow(
+                        icon = Icons.Outlined.Assessment,
+                        iconTint = teal,
+                        label = "ROI Calculator",
+                        onClick = onComingSoonView
+                    )
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    )
+
+                    SettingsRow(
+                        icon = Icons.Outlined.MonetizationOn,
+                        iconTint = yellow,
+                        label = "DCF Calculator",
+                        onClick = onComingSoonView
+                    )
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    )
+
+                    SettingsRow(
+                        icon = Icons.AutoMirrored.Outlined.ShowChart,
+                        iconTint = orange,
+                        label = "Project FCF Calculator",
+                        onClick = onComingSoonView
+                    )
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    )
+
+                    SettingsRow(
+                        icon = Icons.Outlined.AccountBalance,
+                        iconTint = StockGreen,
+                        label = "Peter Lynch Value",
+                        onClick = onComingSoonView
                     )
 
 
@@ -241,6 +293,10 @@ fun MoreView(
                         textAlign = TextAlign.Center
                     )
                 }
+            }
+
+            item{
+                Spacer(modifier = Modifier.padding(vertical = 30.dp))
             }
         }
     }

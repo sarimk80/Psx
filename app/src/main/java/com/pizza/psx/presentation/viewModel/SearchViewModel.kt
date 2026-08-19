@@ -32,8 +32,9 @@ class SearchViewModel @Inject constructor(
 
                 when(val result = symbolListUseCase()){
                     is StockResult.Success -> {
+                        val filterResult = result.data.map { it.replace("XD","") }
                         _uiState.value = _uiState.value.copy(
-                            symbolList = result.data,
+                            symbolList = filterResult,
                             isLoading = false,
                             error = null
                         )

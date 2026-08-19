@@ -114,3 +114,11 @@ var lavender = Color(0xFFD980FA)
 
 var hotStone = Color(0xFFaaa69d)
 
+var teal = Color(0xFF249D8F)
+
+var yellow = Color(0xFFE9C46A)
+
+var orange = Color(0xFFE76F51)
+
+var StockGreen = Color(0xFFA5D6A7)
+

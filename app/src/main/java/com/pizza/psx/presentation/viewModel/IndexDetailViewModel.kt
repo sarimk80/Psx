@@ -145,7 +145,7 @@ class IndexDetailViewModel @Inject constructor(
                 listOfStocks.sortedBy { it.current.toFloatOrNull() ?: 0f }
 
             FilterOption.CURRENT ->
-                listOfStocks.sortedBy { it.current.toFloatOrNull() ?: 0f }
+                listOfStocks.sortedBy { it.symbol.lowercase() }
 
             FilterOption.INDEX_WEIGHT ->
                 listOfStocks.sortedByDescending { it.idx_weight }
@@ -154,6 +154,9 @@ class IndexDetailViewModel @Inject constructor(
                 listOfStocks.sortedByDescending {
                     it.volume.replace(",", "").toFloatOrNull() ?: 0f
                 }
+
+            FilterOption.MARKETCAP ->
+                listOfStocks.sortedByDescending { it.marketCap }
         }
 
         _indexSymbolUiState.value = _indexSymbolUiState.value.copy(
