@@ -33,6 +33,9 @@ class MetalViewModel@Inject constructor(
     private val _uiMetalState = mutableStateOf(MetalListUiState())
     val uiMetalState: State<MetalListUiState> = _uiMetalState
 
+    private val _uiUnitState = mutableStateOf(UnitUiState())
+    val uiUnitState: State<UnitUiState> = _uiUnitState
+
     fun getMetalList(){
 
         viewModelScope.launch {
@@ -114,8 +117,57 @@ class MetalViewModel@Inject constructor(
         }
     }
 
+    fun changeGoldPrice(
+        price: Double,
+        unit: Units,
+        karat: Karat
+    ) {
+        val unitPrice = when (unit) {
+            Units.Ounce -> price
+            Units.Gram -> price / 31.1034768
+            Units.Tola -> price / 2.6666667
+            Units.Kilo -> price * 32.1507466
+            Units.Ratti -> price / 256.0
+            Units.Masha -> price / 32.0
+        }
+
+        val karatPrice = when (karat) {
+            Karat.K_24 -> unitPrice
+            Karat.K_22 -> unitPrice * 22 / 24
+            Karat.k_21 -> unitPrice * 21 / 24
+            Karat.K_18 -> unitPrice * 18 / 24
+        }
+
+        _uiUnitState.value = _uiUnitState.value.copy(
+            price = karatPrice,
+            unit = unit,
+            karat = karat
+        )
+    }
+
+    fun resetValue(price: Double){
+        _uiUnitState.value = _uiUnitState.value.copy(price = price)
+    }
+
 }
 
+
+enum class Units {
+    Ounce,
+    Gram,
+    Tola,
+    Kilo,
+    Ratti,
+    Masha
+}
+
+
+enum class Karat {
+    K_24,
+    K_22,
+    k_21,
+    K_18
+}
 
 data class MetalUiState(
     val isLoading: Boolean = false,
@@ -127,4 +179,10 @@ data class MetalListUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val metalList: MetalList? = null,
+)
+
+data class UnitUiState(
+    val price: Double? = null,
+    val unit: Units? = null,
+    val karat: Karat? = null,
 )

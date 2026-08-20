@@ -7,12 +7,15 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,22 +28,35 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ChangeHistory
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.TrendingDown
 import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.twotone.Dataset
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ContainedLoadingIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -61,6 +77,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pizza.compose.financialGreen
@@ -68,7 +85,10 @@ import com.pizza.compose.financialRed
 import com.pizza.psx.R
 import com.pizza.psx.domain.model.MetalsModel
 import com.pizza.psx.presentation.helpers.metalSymbolToString
+import com.pizza.psx.presentation.helpers.number_format
+import com.pizza.psx.presentation.viewModel.Karat
 import com.pizza.psx.presentation.viewModel.MetalViewModel
+import com.pizza.psx.presentation.viewModel.Units
 import java.util.Locale
 
 // ---------------------------------------------------------------------------------------------
@@ -120,8 +140,17 @@ fun MetalDetailView(
 ) {
     val viewModel: MetalViewModel = hiltViewModel()
     val uiState = viewModel.uiState.value
+    val changeUnitState = viewModel.uiUnitState.value
 
     LaunchedEffect(Unit) { viewModel.getMetal(metal) }
+
+    var changeUnitSheet by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
+    var selectedUnit by remember { mutableStateOf(Units.entries.first()) }
+
+    var karatExpanded by remember { mutableStateOf(false) }
+    var selectedKarat by remember { mutableStateOf(Karat.entries.first()) }
+
 
     Scaffold(
         topBar = {
@@ -134,6 +163,18 @@ fun MetalDetailView(
                             contentDescription = stringResource(R.string.back)
                         )
                     }
+                },
+                actions = {
+                    if((metal == "GC=F" || metal == "SI=F" || metal == "PL=F" || metal == "PA=F")){
+                        IconButton(onClick = { changeUnitSheet = true }) {
+                            Icon(
+                                imageVector = Icons.TwoTone.Dataset,
+                                contentDescription = stringResource(R.string.back)
+                            )
+                        }
+                    }
+
+
                 }
             )
         }
@@ -144,6 +185,7 @@ fun MetalDetailView(
                 .fillMaxSize()
         ) {
             when {
+
                 uiState.isLoading && uiState.metals == null -> MetalLoadingState()
                 uiState.error != null -> MetalErrorState(
                     error = uiState.error,
@@ -151,6 +193,130 @@ fun MetalDetailView(
                 )
                 uiState.metals != null -> MetalDetailContent(metalName = metal, metals = uiState.metals)
                 else -> MetalLoadingState()
+            }
+
+            if (changeUnitSheet) {
+                ModalBottomSheet(
+                    onDismissRequest = { changeUnitSheet = false },
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    dragHandle = { BottomSheetDefaults.DragHandle() }
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp)
+                            .padding(bottom = 24.dp), // safe-area breathing room
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+
+                        // Header
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                "Conversion",
+                                fontWeight = FontWeight.SemiBold,
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                            IconButton(onClick = { changeUnitSheet = false }) {
+                                Icon(Icons.Default.Close, contentDescription = "Close")
+                            }
+                        }
+
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            color = MaterialTheme.colorScheme.primaryContainer
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 20.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = number_format(
+                                        changeUnitState.price
+                                            ?: uiState.metals?.last()?.high?.toDouble()
+                                            ?: 0.0
+                                    ) ?: "",
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                                Text(
+                                    text = "per ${changeUnitState.unit?.name ?: "Ounce"}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+
+                        // Unit selection — chips beat a dropdown for a short fixed list:
+                        // every option visible, one tap to switch, no menu to open/close
+                        Text(
+                            "Unit",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Units.entries.forEach { unit ->
+                                FilterChip(
+                                    selected = unit == selectedUnit,
+                                    onClick = {
+                                        selectedUnit = unit
+                                        viewModel.changeGoldPrice(
+                                            uiState.metals?.last()?.high?.toDouble() ?: 0.0,
+                                            selectedUnit,
+                                            selectedKarat
+                                        )
+                                    },
+                                    label = { Text(unit.name) },
+                                    leadingIcon = if (unit == selectedUnit) {
+                                        { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp)) }
+                                    } else null
+                                )
+                            }
+                        }
+
+                        // Karat selection — only for gold, same chip treatment for consistency
+                        if (metal == "GC=F") {
+                            Text(
+                                "Karat",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            FlowRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Karat.entries.forEach { karat ->
+                                    FilterChip(
+                                        selected = karat == selectedKarat,
+                                        onClick = {
+                                            selectedKarat = karat
+                                            viewModel.changeGoldPrice(
+                                                uiState.metals?.last()?.high?.toDouble() ?: 0.0,
+                                                selectedUnit,
+                                                selectedKarat
+                                            )
+                                        },
+                                        label = { Text(karat.name) },
+                                        leadingIcon = if (karat == selectedKarat) {
+                                            { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp)) }
+                                        } else null
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
