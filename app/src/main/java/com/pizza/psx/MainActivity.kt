@@ -7,6 +7,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -103,7 +107,7 @@ fun AppNavHost(
 
     NavHost(
         navController,
-        startDestination = startDestination.route
+        startDestination = startDestination.route,
     ){
         composable(Destination.Home.route){
             Home(
@@ -184,7 +188,18 @@ fun AppNavHost(
                 navArgument("symbol") {
                     type = NavType.StringType
                 }
-            )
+            ),
+            enterTransition = {
+                fadeIn(tween(250)) +
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Left,
+                            tween(300)
+                        )
+            },
+
+            exitTransition = {
+                fadeOut(tween(200))
+            }
         ){ backStackEntry ->
             val type = backStackEntry.arguments?.getString("type") ?: "REG"
             val symbol = backStackEntry.arguments?.getString("symbol") ?: ""
@@ -206,7 +221,18 @@ fun AppNavHost(
                 navArgument("stocks") {
                     type = StockDataListNavType
                 }
-            )
+            ),
+            enterTransition = {
+                fadeIn(tween(250)) +
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Left,
+                            tween(300)
+                        )
+            },
+
+            exitTransition = {
+                fadeOut(tween(200))
+            }
         ) { backStackEntry ->
             val sectorName = backStackEntry.arguments?.getString("sectorName") ?: "REG"
 
@@ -236,7 +262,18 @@ fun AppNavHost(
                     type = TickerNavType
                 },
 
-            )
+            ),
+            enterTransition = {
+                fadeIn(tween(250)) +
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Left,
+                            tween(300)
+                        )
+            },
+
+            exitTransition = {
+                fadeOut(tween(200))
+            }
         ){backStackEntry ->
             val indexSymbol = backStackEntry.arguments?.getString("indexSymbol") ?: "KSE100"
             val ticker = backStackEntry.arguments?.getString("ticker")?.let {
@@ -260,7 +297,18 @@ fun AppNavHost(
                     defaultValue = "DCR" // Default market type
                 }
 
-            )
+            ),
+            enterTransition = {
+                fadeIn(tween(250)) +
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Left,
+                            tween(300)
+                        )
+            },
+
+            exitTransition = {
+                fadeOut(tween(200))
+            }
         ){backStackEntry ->
             val my_symbol = backStackEntry.arguments?.getString("symbol") ?: "DCR"
             PortfolioListView(
@@ -271,6 +319,17 @@ fun AppNavHost(
 
         composable(
             route = "search_view",
+            enterTransition = {
+                fadeIn(tween(250)) +
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Left,
+                            tween(300)
+                        )
+            },
+
+            exitTransition = {
+                fadeOut(tween(200))
+            }
         ){
             SearchView(
                 onTickerClick = {type,symbol ->
@@ -287,6 +346,17 @@ fun AppNavHost(
 
         composable(
             route = "etf_view",
+            enterTransition = {
+                fadeIn(tween(250)) +
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Left,
+                            tween(300)
+                        )
+            },
+
+            exitTransition = {
+                fadeOut(tween(200))
+            }
         ){
             EtfView(
                 onBackClick = { navController.popBackStack() },
@@ -306,7 +376,18 @@ fun AppNavHost(
                 },
 
 
-            )
+            ),
+            enterTransition = {
+                fadeIn(tween(250)) +
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Left,
+                            tween(300)
+                        )
+            },
+
+            exitTransition = {
+                fadeOut(tween(200))
+            }
         ){ backStackEntry ->
             val my_symbol = backStackEntry.arguments?.getString("symbol") ?: "MIIETF"
 
@@ -321,6 +402,17 @@ fun AppNavHost(
 
         composable(
             route = "coming_soon_view",
+            enterTransition = {
+                fadeIn(tween(250)) +
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Left,
+                            tween(300)
+                        )
+            },
+
+            exitTransition = {
+                fadeOut(tween(200))
+            }
         ){
             ComingSoonView(
                 onBackClick = {
@@ -331,6 +423,17 @@ fun AppNavHost(
 
         composable(
             route = "circuit_breaker_view",
+            enterTransition = {
+                fadeIn(tween(250)) +
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Left,
+                            tween(300)
+                        )
+            },
+
+            exitTransition = {
+                fadeOut(tween(200))
+            }
         ){
             CircuitBreaker(
                 onBackClick = {
@@ -346,6 +449,17 @@ fun AppNavHost(
 
         composable(
             route = "currency_change_view",
+            enterTransition = {
+                fadeIn(tween(250)) +
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Left,
+                            tween(300)
+                        )
+            },
+
+            exitTransition = {
+                fadeOut(tween(200))
+            }
         ){
             CurrencyChangeView(
                 onBackClick = {
@@ -358,6 +472,17 @@ fun AppNavHost(
         //Metals
         composable(
             route = "metals_view",
+            enterTransition = {
+                fadeIn(tween(250)) +
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Left,
+                            tween(300)
+                        )
+            },
+
+            exitTransition = {
+                fadeOut(tween(200))
+            }
         ){
             MetalsView(
                 onBackClick = {
@@ -380,7 +505,18 @@ fun AppNavHost(
                 },
 
 
-                )
+                ),
+            enterTransition = {
+                fadeIn(tween(250)) +
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Left,
+                            tween(300)
+                        )
+            },
+
+            exitTransition = {
+                fadeOut(tween(200))
+            }
         ){ backStackEntry ->
 
             val metalSymbol = backStackEntry.arguments?.getString("metal") ?: "gold"
@@ -397,6 +533,17 @@ fun AppNavHost(
         // Compare Stocks
         composable(
             route = "compare_stocks",
+            enterTransition = {
+                fadeIn(tween(250)) +
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Left,
+                            tween(300)
+                        )
+            },
+
+            exitTransition = {
+                fadeOut(tween(200))
+            }
         ){
             CompareStockView(
                 onBackClick = {

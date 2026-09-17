@@ -216,7 +216,7 @@ fun MetalDetailView(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                "Conversion",
+                                "Change Unit",
                                 fontWeight = FontWeight.SemiBold,
                                 style = MaterialTheme.typography.titleLarge
                             )
@@ -248,7 +248,8 @@ fun MetalDetailView(
                                     color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                                 Text(
-                                    text = "per ${changeUnitState.unit?.name ?: "Ounce"}",
+                                    //Price per ${changeUnitState.unit?.name ?: "Ounce"}
+                                    text = "Price per ${changeUnitState.unit?.name ?: "Ounce"}",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                                 )
@@ -258,7 +259,7 @@ fun MetalDetailView(
                         // Unit selection — chips beat a dropdown for a short fixed list:
                         // every option visible, one tap to switch, no menu to open/close
                         Text(
-                            "Unit",
+                            "Weight Unit",
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -288,7 +289,7 @@ fun MetalDetailView(
                         // Karat selection — only for gold, same chip treatment for consistency
                         if (metal == "GC=F") {
                             Text(
-                                "Karat",
+                                "Purity",
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
